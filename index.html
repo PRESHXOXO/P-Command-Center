@@ -206,7 +206,9 @@ const FONT_VARS = {
 };
 
 function applyFont(option) {
-  document.querySelectorAll('.theme-font-option').forEach(o => o.classList.remove('active'));
+  document.querySelectorAll('h1,h2,.nav-brand,.pg-header h1,.auth-title,.rev-num,.shc-title,.vision-title,.para-stat-num,.home-leftover-big').forEach(el => {
+  el.style.fontFamily = vars.display;
+});
   option.classList.add('active');
 
   const font = option.dataset.font;
