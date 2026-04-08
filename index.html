@@ -706,6 +706,7 @@ const _origOnAuthChange = _supabase.auth.onAuthStateChange;
   --teal-mid:    #0D9488;
   --teal-light:  #14B8A6;
   --teal-border: rgba(10,114,102,0.18);
+  --teal-rgb:    10,114,102;
   --bg:          #F7F3EE;
   --nav-bg:      rgba(247,243,238,0.9);
   --surface:     rgba(252,249,245,0.84);
@@ -746,20 +747,26 @@ const _origOnAuthChange = _supabase.auth.onAuthStateChange;
   --bg:          #0C1017;
   --nav-bg:      rgba(10,14,22,0.94);
   --surface:     rgba(255,255,255,0.04);
-  --surface2:    rgba(255,255,255,0.06);
+  --surface2:    rgba(255,255,255,0.07);
   --ink:         rgba(255,255,255,0.90);
   --ink-mid:     rgba(255,255,255,0.70);
   --charcoal:    rgba(255,255,255,0.62);
   --muted:       rgba(255,255,255,0.36);
   --input-bg:    rgba(255,255,255,0.05);
-  --pill-bg:     rgba(var(--teal-rgb),0.10);
-  --tint:        rgba(var(--teal-rgb),0.08);
-  --tint-hover:  rgba(var(--teal-rgb),0.16);
-  --teal-border: rgba(var(--teal-rgb),0.24);
+  --pill-bg:     rgba(10,114,102,0.14);
+  --tint:        rgba(10,114,102,0.10);
+  --tint-hover:  rgba(10,114,102,0.18);
+  --teal-border: rgba(10,114,102,0.28);
+  --marble-grad: linear-gradient(148deg,#0C1017 0%,#111822 30%,#0f1520 60%,#0C1017 100%);
+  --shadow:      0 4px 28px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.04) inset;
+  --shadow-lg:   0 8px 40px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.04) inset;
+  --shadow-sm:   0 1px 12px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  --overlay-bg:  rgba(10,14,22,0.85);
+  --modal-bg:    rgba(15,20,30,0.98);
   --shadow:      0 4px 28px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.03) inset;
   --shadow-lg:   0 12px 50px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.04) inset;
   --shadow-sm:   0 2px 16px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03) inset;
-  --orb-1:       rgba(var(--teal-rgb),0.18);
+  --orb-1:       rgba(10,114,102,0.18);
   --orb-2:       rgba(45,212,191,0.13);
   --orb-3:       rgba(13,148,136,0.11);
   --bbl-border:  rgba(45,212,191,0.12);
@@ -4211,7 +4218,8 @@ function applyTheme(t) {
 
   localStorage.setItem('cc-theme', t);
 
-  // Re-apply saved accent theme after mode switch
+  // Only re-apply accent colors (teal), NOT background vars
+  // Background vars are handled by [data-theme="dark"] CSS — don't override them
   const saved = loadThemeFromStorage();
   const themeToUse = saved ? { ...DEFAULT_THEME, ...saved } : DEFAULT_THEME;
 
@@ -4221,11 +4229,15 @@ function applyTheme(t) {
     themeToUse.tealLight || themeToUse.teal
   );
 
-  // Re-apply custom background selection too
-  if (themeToUse.bg && BG_VARS[themeToUse.bg]) {
+  // Only apply custom BG_VARS in light mode — dark mode uses CSS [data-theme] vars
+  if (t !== 'dark' && themeToUse.bg && BG_VARS[themeToUse.bg]) {
     Object.entries(BG_VARS[themeToUse.bg]).forEach(([k, v]) => {
       document.documentElement.style.setProperty(k, v);
     });
+  } else if (t === 'dark') {
+    // Clear any inline bg overrides so CSS dark mode vars take effect
+    const bgKeys = ['--bg','--surface','--surface2','--input-bg','--ink','--ink-mid','--charcoal','--muted','--nav-bg','--marble-grad'];
+    bgKeys.forEach(k => document.documentElement.style.removeProperty(k));
   }
 }
 
@@ -6502,6 +6514,9 @@ if (document.readyState !== 'loading') {
   <button class="mobile-nav-btn" onclick="openThemePanel();closeMobileNav()" style="color:var(--teal);">
     <span class="mnb-icon">⚙</span> Customize Theme
   </button>
+  <button class="mobile-nav-btn" data-page="community" onclick="mobileNavGo('community',this)">
+    <span class="mnb-icon">🌸</span> Community
+  </button>
   <button class="mobile-nav-btn" id="mobile-logout-btn" onclick="logout()" style="display:none;color:#C0392B;">
     <span class="mnb-icon">↩</span> Log Out
   </button>
@@ -6672,6 +6687,131 @@ if (document.readyState !== 'loading') {
     <button class="theme-save-btn" onclick="saveTheme()">Save Theme ✦</button>
   </div>
 
+</div>
+
+
+<!-- ════════════════════════════════
+     COMMUNITY HUB
+════════════════════════════════ -->
+<div class="page" id="page-community">
+  <div class="pg-header">
+    <div>
+      <div class="eyebrow">The Inner Circle</div>
+      <h1>Community</h1>
+    </div>
+    <div style="text-align:right;padding-bottom:.35rem;">
+      <div class="sub">Business in the front. Sisterhood in the back.</div>
+    </div>
+  </div>
+
+  <div class="community-layout">
+
+    <!-- LEFT SIDEBAR -->
+    <div class="comm-sidebar">
+      <div class="comm-profile-card">
+        <div class="comm-avatar" id="comm-avatar">P</div>
+        <div class="comm-profile-name" id="comm-profile-name">Precious</div>
+        <div class="comm-profile-handle" id="comm-profile-handle">@precious</div>
+        <div class="comm-stats">
+          <div class="comm-stat"><div class="comm-stat-n" id="comm-posts-count">0</div><div class="comm-stat-l">Posts</div></div>
+          <div class="comm-stat"><div class="comm-stat-n">1</div><div class="comm-stat-l">Pod</div></div>
+          <div class="comm-stat"><div class="comm-stat-n" id="comm-streak">1</div><div class="comm-stat-l">Day streak</div></div>
+        </div>
+      </div>
+      <div class="comm-nav">
+        <div class="comm-nav-item active" onclick="switchCommView('feed',this)"><span class="comm-nav-icon">📋</span> Feed</div>
+        <div class="comm-nav-item" onclick="switchCommView('pods',this)"><span class="comm-nav-icon">🤝</span> My Pod</div>
+        <div class="comm-nav-item" onclick="switchCommView('challenges',this)"><span class="comm-nav-icon">⚡</span> Challenges</div>
+        <div class="comm-nav-item" onclick="switchCommView('wins',this)"><span class="comm-nav-icon">🏆</span> Win Wall</div>
+        <div class="comm-nav-item" onclick="switchCommView('messages',this)"><span class="comm-nav-icon">💬</span> Messages</div>
+      </div>
+    </div>
+
+    <!-- MAIN FEED -->
+    <div class="comm-main" id="comm-main">
+      <div class="comm-composer">
+        <div class="comm-composer-top">
+          <div class="comm-composer-avatar" id="comm-composer-av">P</div>
+          <textarea class="comm-composer-input" id="comm-compose-text"
+            placeholder="Share a win, set a goal, ask for support... This is your space. 👑"
+            maxlength="500" oninput="updateCharCount(this)"></textarea>
+        </div>
+        <div class="comm-post-types" id="comm-post-types">
+          <button class="comm-type-btn selected" data-type="update" onclick="selectPostType(this)">📢 Update</button>
+          <button class="comm-type-btn" data-type="win" onclick="selectPostType(this)">🏆 Win</button>
+          <button class="comm-type-btn" data-type="goal" onclick="selectPostType(this)">🎯 Goal</button>
+          <button class="comm-type-btn" data-type="support" onclick="selectPostType(this)">🌸 Support</button>
+          <button class="comm-type-btn" data-type="question" onclick="selectPostType(this)">💭 Question</button>
+        </div>
+        <div class="comm-composer-footer">
+          <span class="comm-char-count" id="comm-char-count">0 / 500</span>
+          <button class="comm-post-btn" onclick="submitPost()">Post ✦</button>
+        </div>
+      </div>
+      <div class="comm-feed-tabs">
+        <button class="comm-feed-tab active" onclick="filterFeed('all',this)">✦ All</button>
+        <button class="comm-feed-tab" onclick="filterFeed('win',this)">🏆 Wins</button>
+        <button class="comm-feed-tab" onclick="filterFeed('goal',this)">🎯 Goals</button>
+        <button class="comm-feed-tab" onclick="filterFeed('support',this)">🌸 Support</button>
+        <button class="comm-feed-tab" onclick="filterFeed('question',this)">💭 Questions</button>
+      </div>
+      <div id="comm-feed"></div>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="comm-right">
+      <div class="comm-challenge-card">
+        <div class="comm-challenge-label">🔥 Active Challenge</div>
+        <div class="comm-challenge-title">30-Day Income Sprint</div>
+        <div class="comm-challenge-desc">Track at least one income-generating action every day for 30 days. Log it in your Streams tab.</div>
+        <div class="comm-challenge-progress"><div class="comm-challenge-fill" id="challenge-fill"></div></div>
+        <div class="comm-challenge-meta">
+          <span id="challenge-day">Day 1 of 30</span>
+          <span id="challenge-members">1 member joined</span>
+        </div>
+        <button class="comm-join-btn" id="challenge-join-btn" onclick="joinChallenge()">Join Challenge →</button>
+      </div>
+      <div class="comm-pods-card">
+        <div class="comm-pods-label">🤝 Accountability Pods</div>
+        <div class="comm-pod" onclick="openDM('CEO Squad','👑')"><span class="comm-pod-emoji">👑</span><span class="comm-pod-name">CEO Squad</span><span class="comm-pod-count">You + 3</span><button class="comm-pod-join">Open</button></div>
+        <div class="comm-pod" onclick="joinPod('Creative Builders')"><span class="comm-pod-emoji">✦</span><span class="comm-pod-name">Creative Builders</span><span class="comm-pod-count">5 members</span><button class="comm-pod-join">Join</button></div>
+        <div class="comm-pod" onclick="joinPod('Paralegal Prep')"><span class="comm-pod-emoji">⚖️</span><span class="comm-pod-name">Paralegal Prep</span><span class="comm-pod-count">2 members</span><button class="comm-pod-join">Join</button></div>
+        <div class="comm-pod" onclick="joinPod('Side Hustle Stack')"><span class="comm-pod-emoji">💰</span><span class="comm-pod-name">Side Hustle Stack</span><span class="comm-pod-count">8 members</span><button class="comm-pod-join">Join</button></div>
+      </div>
+      <div class="comm-online-card">
+        <div class="comm-online-label"><div class="online-dot"></div> Online Now</div>
+        <div class="comm-member" onclick="openDM('Bella P','👑')">
+          <div class="comm-member-av" style="background:linear-gradient(135deg,#0A7266,#14B8A6);">B</div>
+          <span class="comm-member-name">Bella P</span><span class="comm-member-status">In Streams</span>
+        </div>
+        <div class="comm-member" onclick="openDM('Shila','🌸')">
+          <div class="comm-member-av" style="background:linear-gradient(135deg,#BE185D,#F472B6);">S</div>
+          <span class="comm-member-name">Shila</span><span class="comm-member-status">Dashboard</span>
+        </div>
+        <div class="comm-member" onclick="openDM('Tay','💫')">
+          <div class="comm-member-av" style="background:linear-gradient(135deg,#7C3AED,#A78BFA);">T</div>
+          <span class="comm-member-name">Tay</span><span class="comm-member-status">Life Board</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DM PANEL -->
+<div class="comm-dm-panel" id="comm-dm-panel">
+  <div class="comm-dm-head">
+    <div id="dm-avatar" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--teal-light));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:.65rem;color:#fff;flex-shrink:0;">P</div>
+    <span class="comm-dm-name" id="dm-name">CEO Squad</span>
+    <button class="comm-dm-close" onclick="closeDM()">✕</button>
+  </div>
+  <div class="comm-dm-messages" id="dm-messages">
+    <div class="comm-dm-msg theirs">Hey! How's the sprint going? 💪</div>
+    <div class="comm-dm-msg mine">Locked in today — already did my outreach! 🔥</div>
+  </div>
+  <div class="comm-dm-input-row">
+    <input class="comm-dm-input" id="dm-input" placeholder="Send a message..." />
+    <button class="comm-dm-send" onclick="sendDM()">→</button>
+  </div>
 </div>
 
 </body>
