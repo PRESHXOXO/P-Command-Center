@@ -1499,124 +1499,35 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 }
 
 
-/* ════════════════════════════════════════
-   ANIME STYLE LAYER — flat, bold, expressive
-════════════════════════════════════════ */
+/* Static background only */
+.marble-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
 
-/* ── Floating anime characters ── */
+.marble-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--page-texture, var(--marble-grad));
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: background .35s ease;
+}
+
+.marble-bg svg,
+.m-orb,
+.mo1,
+.mo2,
+.mo3,
+.bbl,
 .anime-char {
-  position: fixed;
-  pointer-events: none;
-  z-index: 5;
-  animation: animeFloat ease-in-out infinite;
+  display: none !important;
 }
-@keyframes animeFloat {
-  0%,100% { transform: translateY(0px) rotate(var(--ar,0deg)); }
-  50%      { transform: translateY(-14px) rotate(var(--ar,0deg)); }
-}
-
-/* Star burst pop */
-@keyframes starPop {
-  0%   { transform: scale(0) rotate(0deg); opacity:0; }
-  60%  { transform: scale(1.25) rotate(20deg); opacity:1; }
-  100% { transform: scale(1) rotate(15deg); opacity:1; }
-}
-
-/* Speed lines sweep */
-@keyframes speedLine {
-  0%   { transform: translateX(-120%) skewX(-15deg); opacity:0; }
-  30%  { opacity: 0.7; }
-  100% { transform: translateX(120%) skewX(-15deg); opacity:0; }
-}
-
-/* Sparkle twinkle */
-@keyframes twinkle {
-  0%,100% { transform: scale(1) rotate(0deg);   opacity:.8; }
-  25%      { transform: scale(1.4) rotate(15deg); opacity:1; }
-  75%      { transform: scale(0.7) rotate(-10deg);opacity:.5; }
-}
-
-/* Bounce in */
-@keyframes bounceIn {
-  0%   { transform: scale(0.3) translateY(30px); opacity:0; }
-  60%  { transform: scale(1.1) translateY(-8px); opacity:1; }
-  80%  { transform: scale(0.95) translateY(2px); }
-  100% { transform: scale(1) translateY(0); opacity:1; }
-}
-
-/* Shake exclamation */
-@keyframes exclaim {
-  0%,100% { transform: translateX(0) rotate(0deg); }
-  20%      { transform: translateX(-4px) rotate(-3deg); }
-  40%      { transform: translateX(4px) rotate(3deg); }
-  60%      { transform: translateX(-3px) rotate(-2deg); }
-  80%      { transform: translateX(3px) rotate(2deg); }
-}
-
-/* Wobble for timer running */
-@keyframes timerWobble {
-  0%,100% { transform: rotate(-1deg) scale(1); }
-  50%      { transform: rotate(1deg) scale(1.01); }
-}
-
-/* Slide up reveal */
-@keyframes slideUpReveal {
-  from { transform: translateY(40px); opacity:0; }
-  to   { transform: translateY(0); opacity:1; }
-}
-
-/* Manga speed lines overlay */
-.speed-line {
-  position: fixed;
-  top: 0; left: -100%;
-  width: 40%; height: 100vh;
-  background: linear-gradient(90deg, transparent, rgba(10,114,102,0.06), transparent);
-  pointer-events: none;
-  z-index: 2;
-  animation: speedLine 4s ease-in-out infinite;
-}
-.speed-line:nth-child(2) { animation-delay: 1.4s; width:25%; background: linear-gradient(90deg,transparent,rgba(45,212,191,0.05),transparent); }
-.speed-line:nth-child(3) { animation-delay: 2.8s; width:15%; background: linear-gradient(90deg,transparent,rgba(10,114,102,0.04),transparent); }
-
-/* Floating anime sparkles (fixed position) */
-.anime-sparkle {
-  position: fixed;
-  pointer-events: none;
-  z-index: 4;
-  animation: twinkle ease-in-out infinite;
-  font-style: normal;
-  line-height: 1;
-}
-
-/* Card anime accent — bold outline pulse on hover */
-.g:hover .anime-card-accent { opacity: 1; }
-.anime-card-accent {
-  position: absolute;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .3s;
-  z-index: 10;
-}
-
-/* Anime corner pop — exclamation / star on card hover */
-.card-anime-pop {
-  position: absolute;
-  top: 8px; right: 10px;
-  pointer-events: none;
-  z-index: 20;
-  opacity: 0;
-  transition: opacity .2s;
-  font-size: .65rem;
-  font-weight: 900;
-  letter-spacing: .05em;
-  color: var(--teal);
-  font-family: 'DM Sans', sans-serif;
-}
-.g:hover .card-anime-pop {
-  opacity: 1;
-  animation: exclaim .4s ease;
-}
-
 /* ── FOCUS WORD anime underline ── */
 .focus-word {
   position: relative;
