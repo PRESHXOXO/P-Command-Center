@@ -860,6 +860,20 @@ function sendDM() {
   inp.value = '';
 }
 
+function getCurrentUserName() {
+  try {
+    const s = JSON.parse(localStorage.getItem('pcc-auth-session'));
+    return s?.firstName || 'You';
+  } catch(e) { return 'You'; }
+}
+
+// Safe showToast — uses Block 2's version when available
+function showToast(msg) {
+  if (window._showToast) { window._showToast(msg); return; }
+  // Fallback: try again shortly (block 2 may not have run yet)
+  setTimeout(() => { if (window._showToast) window._showToast(msg); }, 100);
+}
+
 function updateCommProfile() {
   const name = getCurrentUserName();
   const init = name.charAt(0).toUpperCase();
@@ -868,19 +882,7 @@ function updateCommProfile() {
   const ph = document.getElementById('comm-profile-handle'); if(ph) ph.textContent='@'+name.toLowerCase().replace(/\s+/g,'');
 }
 
-// Hook into showPage
-const _origShowPageForComm = window.showPage;
-window.showPage = function(id, btn) {
-  _origShowPageForComm && _origShowPageForComm(id, btn);
-  if (id === 'community') {
-    loadCommPosts();
-    renderFeed();
-    loadChallengeState();
-    updateCommProfile();
-    // Reset nav items
-    document.querySelectorAll('.comm-nav-item').forEach((el,i) => el.classList.toggle('active', i===0));
-  }
-};
+// Community init handled in showPage (block 2)
 
 // Enter key for DM
 document.addEventListener('keydown', e => {
@@ -3824,12 +3826,131 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
     <div class="m-sec" style="margin-top:1.2rem;">
       <div class="m-sec-label" style="display:flex;align-items:center;justify-content:space-between;">
         <span>My Notes for This Role</span>
-        <span style="font-size:.38rem;color:var(--teal);letter-spacing:.1em;">Auto-saved</span>
+
+<!-- ════════════════════════════════
+     COMMUNITY HUB
+════════════════════════════════ -->
+<div class="page" id="page-community">
+  <div class="pg-header">
+    <div>
+      <div class="eyebrow">The Inner Circle</div>
+      <h1>Community</h1>
+    </div>
+    <div style="text-align:right;padding-bottom:.35rem;">
+      <div class="sub">Business in the front. Sisterhood in the back.</div>
+    </div>
+  </div>
+
+  <div class="community-layout">
+
+    <!-- LEFT SIDEBAR -->
+    <div class="comm-sidebar">
+      <div class="comm-profile-card">
+        <div class="comm-avatar" id="comm-avatar">P</div>
+        <div class="comm-profile-name" id="comm-profile-name">Precious</div>
+        <div class="comm-profile-handle" id="comm-profile-handle">@precious</div>
+        <div class="comm-stats">
+          <div class="comm-stat"><div class="comm-stat-n" id="comm-posts-count">0</div><div class="comm-stat-l">Posts</div></div>
+          <div class="comm-stat"><div class="comm-stat-n">1</div><div class="comm-stat-l">Pod</div></div>
+          <div class="comm-stat"><div class="comm-stat-n" id="comm-streak">1</div><div class="comm-stat-l">Day streak</div></div>
+        </div>
       </div>
-      <textarea id="m-notes" class="m-notes-input" placeholder="Add your private notes, action items, or thoughts for this role..."></textarea>
+      <div class="comm-nav">
+        <div class="comm-nav-item active" onclick="switchCommView('feed',this)"><span class="comm-nav-icon">📋</span> Feed</div>
+        <div class="comm-nav-item" onclick="switchCommView('pods',this)"><span class="comm-nav-icon">🤝</span> My Pod</div>
+        <div class="comm-nav-item" onclick="switchCommView('challenges',this)"><span class="comm-nav-icon">⚡</span> Challenges</div>
+        <div class="comm-nav-item" onclick="switchCommView('wins',this)"><span class="comm-nav-icon">🏆</span> Win Wall</div>
+        <div class="comm-nav-item" onclick="switchCommView('messages',this)"><span class="comm-nav-icon">💬</span> Messages</div>
+      </div>
+    </div>
+
+    <!-- MAIN FEED -->
+    <div class="comm-main" id="comm-main">
+      <div class="comm-composer">
+        <div class="comm-composer-top">
+          <div class="comm-composer-avatar" id="comm-composer-av">P</div>
+          <textarea class="comm-composer-input" id="comm-compose-text"
+            placeholder="Share a win, set a goal, ask for support... This is your space. 👑"
+            maxlength="500" oninput="updateCharCount(this)"></textarea>
+        </div>
+        <div class="comm-post-types" id="comm-post-types">
+          <button class="comm-type-btn selected" data-type="update" onclick="selectPostType(this)">📢 Update</button>
+          <button class="comm-type-btn" data-type="win" onclick="selectPostType(this)">🏆 Win</button>
+          <button class="comm-type-btn" data-type="goal" onclick="selectPostType(this)">🎯 Goal</button>
+          <button class="comm-type-btn" data-type="support" onclick="selectPostType(this)">🌸 Support</button>
+          <button class="comm-type-btn" data-type="question" onclick="selectPostType(this)">💭 Question</button>
+        </div>
+        <div class="comm-composer-footer">
+          <span class="comm-char-count" id="comm-char-count">0 / 500</span>
+          <button class="comm-post-btn" onclick="submitPost()">Post ✦</button>
+        </div>
+      </div>
+      <div class="comm-feed-tabs">
+        <button class="comm-feed-tab active" onclick="filterFeed('all',this)">✦ All</button>
+        <button class="comm-feed-tab" onclick="filterFeed('win',this)">🏆 Wins</button>
+        <button class="comm-feed-tab" onclick="filterFeed('goal',this)">🎯 Goals</button>
+        <button class="comm-feed-tab" onclick="filterFeed('support',this)">🌸 Support</button>
+        <button class="comm-feed-tab" onclick="filterFeed('question',this)">💭 Questions</button>
+      </div>
+      <div id="comm-feed"></div>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="comm-right">
+      <div class="comm-challenge-card">
+        <div class="comm-challenge-label">🔥 Active Challenge</div>
+        <div class="comm-challenge-title">30-Day Income Sprint</div>
+        <div class="comm-challenge-desc">Track at least one income-generating action every day for 30 days. Log it in your Streams tab.</div>
+        <div class="comm-challenge-progress"><div class="comm-challenge-fill" id="challenge-fill"></div></div>
+        <div class="comm-challenge-meta">
+          <span id="challenge-day">Day 1 of 30</span>
+          <span id="challenge-members">1 member joined</span>
+        </div>
+        <button class="comm-join-btn" id="challenge-join-btn" onclick="joinChallenge()">Join Challenge →</button>
+      </div>
+      <div class="comm-pods-card">
+        <div class="comm-pods-label">🤝 Accountability Pods</div>
+        <div class="comm-pod" onclick="openDM('CEO Squad','👑')"><span class="comm-pod-emoji">👑</span><span class="comm-pod-name">CEO Squad</span><span class="comm-pod-count">You + 3</span><button class="comm-pod-join">Open</button></div>
+        <div class="comm-pod" onclick="joinPod('Creative Builders')"><span class="comm-pod-emoji">✦</span><span class="comm-pod-name">Creative Builders</span><span class="comm-pod-count">5 members</span><button class="comm-pod-join">Join</button></div>
+        <div class="comm-pod" onclick="joinPod('Paralegal Prep')"><span class="comm-pod-emoji">⚖️</span><span class="comm-pod-name">Paralegal Prep</span><span class="comm-pod-count">2 members</span><button class="comm-pod-join">Join</button></div>
+        <div class="comm-pod" onclick="joinPod('Side Hustle Stack')"><span class="comm-pod-emoji">💰</span><span class="comm-pod-name">Side Hustle Stack</span><span class="comm-pod-count">8 members</span><button class="comm-pod-join">Join</button></div>
+      </div>
+      <div class="comm-online-card">
+        <div class="comm-online-label"><div class="online-dot"></div> Online Now</div>
+        <div class="comm-member" onclick="openDM('Bella P','👑')">
+          <div class="comm-member-av" style="background:linear-gradient(135deg,#0A7266,#14B8A6);">B</div>
+          <span class="comm-member-name">Bella P</span><span class="comm-member-status">In Streams</span>
+        </div>
+        <div class="comm-member" onclick="openDM('Shila','🌸')">
+          <div class="comm-member-av" style="background:linear-gradient(135deg,#BE185D,#F472B6);">S</div>
+          <span class="comm-member-name">Shila</span><span class="comm-member-status">Dashboard</span>
+        </div>
+        <div class="comm-member" onclick="openDM('Tay','💫')">
+          <div class="comm-member-av" style="background:linear-gradient(135deg,#7C3AED,#A78BFA);">T</div>
+          <span class="comm-member-name">Tay</span><span class="comm-member-status">Life Board</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- DM PANEL -->
+<div class="comm-dm-panel" id="comm-dm-panel">
+  <div class="comm-dm-head">
+    <div id="dm-avatar" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--teal-light));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:.65rem;color:#fff;flex-shrink:0;">P</div>
+    <span class="comm-dm-name" id="dm-name">CEO Squad</span>
+    <button class="comm-dm-close" onclick="closeDM()">✕</button>
+  </div>
+  <div class="comm-dm-messages" id="dm-messages">
+    <div class="comm-dm-msg theirs">Hey! How's the sprint going? 💪</div>
+    <div class="comm-dm-msg mine">Locked in today — already did my outreach! 🔥</div>
+  </div>
+  <div class="comm-dm-input-row">
+    <input class="comm-dm-input" id="dm-input" placeholder="Send a message..." />
+    <button class="comm-dm-send" onclick="sendDM()">→</button>
+  </div>
+</div>
+
 
 <script>
 // ══════════════════════════════════════
@@ -3894,10 +4015,20 @@ function getWeekStart() {
 function showPage(id, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('on'));
-  document.getElementById('page-' + id).classList.add('active');
-  btn.classList.add('on');
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  if (btn) btn.classList.add('on');
   if (id === 'life-board') renderBoard();
   if (id === 'vision') animateVision();
+  if (id === 'community') {
+    setTimeout(() => {
+      if (typeof loadCommPosts === 'function') loadCommPosts();
+      if (typeof renderFeed === 'function') renderFeed();
+      if (typeof loadChallengeState === 'function') loadChallengeState();
+      if (typeof updateCommProfile === 'function') updateCommProfile();
+      document.querySelectorAll('.comm-nav-item').forEach((el,i) => el.classList.toggle('active', i===0));
+    }, 50);
+  }
 }
 
 // Live date in nav
@@ -4507,6 +4638,13 @@ document.addEventListener('keydown', e => {
 });
 
 // ═══ INIT ═══
+// Pre-load community data so it's ready when tab is clicked
+setTimeout(() => {
+  if (typeof loadCommPosts === 'function') {
+    loadCommPosts();
+    updateCommProfile();
+  }
+}, 600);
 updateAllMonthLabels();
 renderGoals();
 renderBoard();
@@ -5088,7 +5226,7 @@ function clearAuthError() {
 }
 
 // ── Toast ──
-function showToast(msg) {
+window._showToast = function showToast(msg) {
   const t = document.getElementById('auth-toast');
   t.textContent = msg;
   t.classList.add('show');
@@ -5547,9 +5685,7 @@ function escapeHtmlAttr(str) {
 document.addEventListener('DOMContentLoaded', renderCustomHubs);
 if (document.readyState !== 'loading') {
   setTimeout(renderCustomHubs, 200);
-}
-
-</script>
+}</script>
 
 
 <!-- ════════ STREAMS PAGE ════════ -->
@@ -6822,8 +6958,7 @@ if (document.readyState !== 'loading') {
   <button class="mobile-nav-btn" onclick="openThemePanel();closeMobileNav()" style="color:var(--teal);">
     <span class="mnb-icon">⚙</span> Customize Theme
   </button>
-  <button class="mobile-nav-btn" data-page="community" onclick="mobileNavGo('community',this)">
-    <span class="mnb-icon">🌸</span> Community
+  <button class="mobile-nav-btn" data-page="community" onclick="mobileNavGo('community',this)">Community<span class="mnb-icon">🌸</span> Community
   </button>
   <button class="mobile-nav-btn" id="mobile-logout-btn" onclick="logout()" style="display:none;color:#C0392B;">
     <span class="mnb-icon">↩</span> Log Out
@@ -6996,133 +7131,9 @@ if (document.readyState !== 'loading') {
   </div>
 
 </div>
-
-
-<!-- ════════════════════════════════
-     COMMUNITY HUB
-════════════════════════════════ -->
-<div class="page" id="page-community">
-  <div class="pg-header">
-    <div>
-      <div class="eyebrow">The Inner Circle</div>
-      <h1>Community</h1>
-    </div>
-    <div style="text-align:right;padding-bottom:.35rem;">
-      <div class="sub">Business in the front. Sisterhood in the back.</div>
-    </div>
-  </div>
-
-  <div class="community-layout">
-
-    <!-- LEFT SIDEBAR -->
-    <div class="comm-sidebar">
-      <div class="comm-profile-card">
-        <div class="comm-avatar" id="comm-avatar">P</div>
-        <div class="comm-profile-name" id="comm-profile-name">Precious</div>
-        <div class="comm-profile-handle" id="comm-profile-handle">@precious</div>
-        <div class="comm-stats">
-          <div class="comm-stat"><div class="comm-stat-n" id="comm-posts-count">0</div><div class="comm-stat-l">Posts</div></div>
-          <div class="comm-stat"><div class="comm-stat-n">1</div><div class="comm-stat-l">Pod</div></div>
-          <div class="comm-stat"><div class="comm-stat-n" id="comm-streak">1</div><div class="comm-stat-l">Day streak</div></div>
-        </div>
-      </div>
-      <div class="comm-nav">
-        <div class="comm-nav-item active" onclick="switchCommView('feed',this)"><span class="comm-nav-icon">📋</span> Feed</div>
-        <div class="comm-nav-item" onclick="switchCommView('pods',this)"><span class="comm-nav-icon">🤝</span> My Pod</div>
-        <div class="comm-nav-item" onclick="switchCommView('challenges',this)"><span class="comm-nav-icon">⚡</span> Challenges</div>
-        <div class="comm-nav-item" onclick="switchCommView('wins',this)"><span class="comm-nav-icon">🏆</span> Win Wall</div>
-        <div class="comm-nav-item" onclick="switchCommView('messages',this)"><span class="comm-nav-icon">💬</span> Messages</div>
-      </div>
-    </div>
-
-    <!-- MAIN FEED -->
-    <div class="comm-main" id="comm-main">
-      <div class="comm-composer">
-        <div class="comm-composer-top">
-          <div class="comm-composer-avatar" id="comm-composer-av">P</div>
-          <textarea class="comm-composer-input" id="comm-compose-text"
-            placeholder="Share a win, set a goal, ask for support... This is your space. 👑"
-            maxlength="500" oninput="updateCharCount(this)"></textarea>
-        </div>
-        <div class="comm-post-types" id="comm-post-types">
-          <button class="comm-type-btn selected" data-type="update" onclick="selectPostType(this)">📢 Update</button>
-          <button class="comm-type-btn" data-type="win" onclick="selectPostType(this)">🏆 Win</button>
-          <button class="comm-type-btn" data-type="goal" onclick="selectPostType(this)">🎯 Goal</button>
-          <button class="comm-type-btn" data-type="support" onclick="selectPostType(this)">🌸 Support</button>
-          <button class="comm-type-btn" data-type="question" onclick="selectPostType(this)">💭 Question</button>
-        </div>
-        <div class="comm-composer-footer">
-          <span class="comm-char-count" id="comm-char-count">0 / 500</span>
-          <button class="comm-post-btn" onclick="submitPost()">Post ✦</button>
-        </div>
-      </div>
-      <div class="comm-feed-tabs">
-        <button class="comm-feed-tab active" onclick="filterFeed('all',this)">✦ All</button>
-        <button class="comm-feed-tab" onclick="filterFeed('win',this)">🏆 Wins</button>
-        <button class="comm-feed-tab" onclick="filterFeed('goal',this)">🎯 Goals</button>
-        <button class="comm-feed-tab" onclick="filterFeed('support',this)">🌸 Support</button>
-        <button class="comm-feed-tab" onclick="filterFeed('question',this)">💭 Questions</button>
-      </div>
-      <div id="comm-feed"></div>
-    </div>
-
-    <!-- RIGHT SIDEBAR -->
-    <div class="comm-right">
-      <div class="comm-challenge-card">
-        <div class="comm-challenge-label">🔥 Active Challenge</div>
-        <div class="comm-challenge-title">30-Day Income Sprint</div>
-        <div class="comm-challenge-desc">Track at least one income-generating action every day for 30 days. Log it in your Streams tab.</div>
-        <div class="comm-challenge-progress"><div class="comm-challenge-fill" id="challenge-fill"></div></div>
-        <div class="comm-challenge-meta">
-          <span id="challenge-day">Day 1 of 30</span>
-          <span id="challenge-members">1 member joined</span>
-        </div>
-        <button class="comm-join-btn" id="challenge-join-btn" onclick="joinChallenge()">Join Challenge →</button>
-      </div>
-      <div class="comm-pods-card">
-        <div class="comm-pods-label">🤝 Accountability Pods</div>
-        <div class="comm-pod" onclick="openDM('CEO Squad','👑')"><span class="comm-pod-emoji">👑</span><span class="comm-pod-name">CEO Squad</span><span class="comm-pod-count">You + 3</span><button class="comm-pod-join">Open</button></div>
-        <div class="comm-pod" onclick="joinPod('Creative Builders')"><span class="comm-pod-emoji">✦</span><span class="comm-pod-name">Creative Builders</span><span class="comm-pod-count">5 members</span><button class="comm-pod-join">Join</button></div>
-        <div class="comm-pod" onclick="joinPod('Paralegal Prep')"><span class="comm-pod-emoji">⚖️</span><span class="comm-pod-name">Paralegal Prep</span><span class="comm-pod-count">2 members</span><button class="comm-pod-join">Join</button></div>
-        <div class="comm-pod" onclick="joinPod('Side Hustle Stack')"><span class="comm-pod-emoji">💰</span><span class="comm-pod-name">Side Hustle Stack</span><span class="comm-pod-count">8 members</span><button class="comm-pod-join">Join</button></div>
-      </div>
-      <div class="comm-online-card">
-        <div class="comm-online-label"><div class="online-dot"></div> Online Now</div>
-        <div class="comm-member" onclick="openDM('Bella P','👑')">
-          <div class="comm-member-av" style="background:linear-gradient(135deg,#0A7266,#14B8A6);">B</div>
-          <span class="comm-member-name">Bella P</span><span class="comm-member-status">In Streams</span>
-        </div>
-        <div class="comm-member" onclick="openDM('Shila','🌸')">
-          <div class="comm-member-av" style="background:linear-gradient(135deg,#BE185D,#F472B6);">S</div>
-          <span class="comm-member-name">Shila</span><span class="comm-member-status">Dashboard</span>
-        </div>
-        <div class="comm-member" onclick="openDM('Tay','💫')">
-          <div class="comm-member-av" style="background:linear-gradient(135deg,#7C3AED,#A78BFA);">T</div>
-          <span class="comm-member-name">Tay</span><span class="comm-member-status">Life Board</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- DM PANEL -->
-<div class="comm-dm-panel" id="comm-dm-panel">
-  <div class="comm-dm-head">
-    <div id="dm-avatar" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--teal-light));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:.65rem;color:#fff;flex-shrink:0;">P</div>
-    <span class="comm-dm-name" id="dm-name">CEO Squad</span>
-    <button class="comm-dm-close" onclick="closeDM()">✕</button>
-  </div>
-  <div class="comm-dm-messages" id="dm-messages">
-    <div class="comm-dm-msg theirs">Hey! How's the sprint going? 💪</div>
-    <div class="comm-dm-msg mine">Locked in today — already did my outreach! 🔥</div>
-  </div>
-  <div class="comm-dm-input-row">
-    <input class="comm-dm-input" id="dm-input" placeholder="Send a message..." />
-    <button class="comm-dm-send" onclick="sendDM()">→</button>
-  </div>
-</div>
-
+</script>
 </body>
+
 </html>
 
 <style id="motion-kill">
