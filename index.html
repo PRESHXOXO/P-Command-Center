@@ -6,6 +6,14 @@
 <title>P's Command Center</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// Supabase client (also defined in main script — needed here for sync patches)
+const SUPABASE_URL = 'https://ausgchpdxghtmrdzymmy.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1c2djaHBkeGdodG1yZHp5bW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1OTUwMDIsImV4cCI6MjA5MTE3MTAwMn0.8zXw7A4Xf4v7gi1UAhWaW1VvPpYJ3mJa3MTgVWAa3sw';
+// Use existing client if already defined, otherwise create it
+if (typeof _supabase === 'undefined') {
+  var _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+}
+
 /* ════════════════════════════════════
    THEME EDITOR
    ════════════════════════════════════ */
@@ -14,12 +22,12 @@ const THEME_KEY = 'pcc-user-theme';
 // Default theme
 const DEFAULT_THEME = {
   name: "P's Command Center",
-  teal: "#6F5C4E",
-  tealMid: "#8A7464",
-  tealLight: "#B8A08F",
-  tealBorder: "rgba(111,92,78,0.18)",
-  bg: "paper-ivory",
-  font: "elegant",
+  teal: '#0A7266',
+  tealMid: '#0D9488',
+  tealLight: '#14B8A6',
+  tealBorder: 'rgba(10,114,102,0.18)',
+  bg: 'marble',
+  font: 'elegant',
 };
 
 let currentTheme = { ...DEFAULT_THEME };
@@ -124,7 +132,7 @@ function setColorVars(teal, mid, light) {
 
 // ── Apply background ──
 const BG_VARS = {
-  'paper-ivory': {
+  'marble': {
     '--bg': '#F6F1E8',
     '--surface': 'rgba(255,250,244,0.78)',
     '--surface2': 'rgba(255,252,248,0.88)',
@@ -228,6 +236,29 @@ const FONT_VARS = {
 
 function applyFont(option) {
   document.querySelectorAll('.theme-font-option').forEach(o => o.classList.remove('active'));
+  option.classList.add('active');
+
+  const font = option.dataset.font;
+  currentTheme.font = font;
+
+  const vars = FONT_VARS[font];
+  if (!vars) return;
+
+  const r = document.documentElement;
+  r.style.setProperty('--font-display', vars.display);
+  r.style.setProperty('--font-ui', vars.ui);
+
+  if (FONT_LINKS[font] && !document.querySelector(`link[href="${FONT_LINKS[font]}"]`)) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = FONT_LINKS[font];
+    document.head.appendChild(link);
+  }
+
+  document.querySelectorAll('h1,h2,.nav-brand,.pg-header h1,.auth-title,.rev-num,.shc-title,.vision-title,.para-stat-num,.home-leftover-big').forEach(el => {
+    el.style.fontFamily = vars.display;
+  });
+});
   option.classList.add('active');
 
   const font = option.dataset.font;
@@ -621,6 +652,7 @@ window.enterApp = function(firstName) {
 };
 
 // Also load on auth state change (returning user)
+const _origOnAuthChange = _supabase.auth.onAuthStateChange;
 // Already set up above — loadAllUserData called when SIGNED_IN
 
 </script>
@@ -629,10 +661,9 @@ window.enterApp = function(firstName) {
 /* ── LIGHT MODE (default) ── */
 :root {
   --teal:        #0A7266;
-  --teal-mid:    #0A7266;
-  --teal-light:  #0D9488;
-  --teal-rgb: 10, 114, 102;
-  --teal-border: rgba(111,92,78,0.18);
+  --teal-mid:    #0D9488;
+  --teal-light:  #14B8A6;
+  --teal-border: rgba(10,114,102,0.18);
   --bg:          #F7F3EE;
   --nav-bg:      rgba(247,243,238,0.9);
   --surface:     rgba(252,249,245,0.84);
@@ -4637,7 +4668,9 @@ document.addEventListener('keydown', e => {
 // ════════════════════════════════════
 const SUPABASE_URL = 'https://ausgchpdxghtmrdzymmy.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1c2djaHBkeGdodG1yZHp5bW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1OTUwMDIsImV4cCI6MjA5MTE3MTAwMn0.8zXw7A4Xf4v7gi1UAhWaW1VvPpYJ3mJa3MTgVWAa3sw';
-const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+if (typeof _supabase === 'undefined') {
+  var _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+}
 
 // ════════════════════════════════════
 // AUTH SYSTEM — Login / Signup / Demo
