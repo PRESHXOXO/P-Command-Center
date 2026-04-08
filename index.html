@@ -7840,29 +7840,30 @@ if (document.readyState !== 'loading') {
   }
 
   function bindThemeControls() {
+    // Theme open button
     document.querySelectorAll('.nav-settings-btn').forEach(btn => {
       if (btn.dataset.themeBound === 'true') return;
       btn.dataset.themeBound = 'true';
-      btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (typeof openThemePanel === 'function') openThemePanel();
+      btn.addEventListener('click', function() {
+        openThemePanel();
       });
     });
 
+    // Theme close button
     document.querySelectorAll('.theme-close-btn').forEach(btn => {
       if (btn.dataset.themeBound === 'true') return;
       btn.dataset.themeBound = 'true';
-      btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (typeof closeThemePanel === 'function') closeThemePanel();
+      btn.addEventListener('click', function() {
+        closeThemePanel();
       });
     });
 
+    // Theme overlay click-outside
     const overlay = document.getElementById('theme-overlay');
     if (overlay && overlay.dataset.themeBound !== 'true') {
       overlay.dataset.themeBound = 'true';
       overlay.addEventListener('click', function() {
-        if (typeof closeThemePanel === 'function') closeThemePanel();
+        closeThemePanel();
       });
     }
 
@@ -8050,7 +8051,109 @@ if (document.readyState !== 'loading') {
     }
   }
 
+  // ── Community page: event delegation so all buttons work regardless of inline-onclick support ──
+  function bindCommunityPage() {
+    const page = document.getElementById('page-community');
+    if (!page || page.dataset.commBound === 'true') return;
+    page.dataset.commBound = 'true';
+
+    const COMM_VIEWS = ['feed', 'pods', 'challenges', 'wins', 'messages'];
+
+    page.addEventListener('click', function(e) {
+      // Sidebar nav items
+      const navItem = e.target.closest('.comm-nav-item');
+      if (navItem) {
+        const allNavItems = Array.from(document.querySelectorAll('.comm-nav-item'));
+        const idx = allNavItems.indexOf(navItem);
+        switchCommView(COMM_VIEWS[idx] || 'feed', navItem);
+        return;
+      }
+
+      // Edit profile
+      if (e.target.closest('.comm-edit-profile-btn')) {
+        openEditProfile();
+        return;
+      }
+
+      // Create pod
+      if (e.target.closest('.comm-create-btn:not(.comm-create-btn-secondary)')) {
+        openCreatePod();
+        return;
+      }
+
+      // Create challenge
+      if (e.target.closest('.comm-create-btn-secondary')) {
+        openCreateChallenge();
+        return;
+      }
+
+      // Post type selector
+      const typeBtn = e.target.closest('.comm-type-btn');
+      if (typeBtn) {
+        selectPostType(typeBtn);
+        return;
+      }
+
+      // Submit post
+      if (e.target.closest('.comm-post-btn')) {
+        submitPost();
+        return;
+      }
+
+      // Feed filter tabs
+      const feedTab = e.target.closest('.comm-feed-tab');
+      if (feedTab) {
+        const FEED_TYPES = ['all', 'win', 'goal', 'support', 'question'];
+        const allTabs = Array.from(document.querySelectorAll('.comm-feed-tab'));
+        const tidx = allTabs.indexOf(feedTab);
+        filterFeed(FEED_TYPES[tidx] || 'all', feedTab);
+        return;
+      }
+
+      // Join challenge
+      if (e.target.closest('#challenge-join-btn')) {
+        joinChallenge();
+        return;
+      }
+
+      // Pod cards
+      const pod = e.target.closest('.comm-pod');
+      if (pod) {
+        const podName  = pod.querySelector('.comm-pod-name')  ? pod.querySelector('.comm-pod-name').textContent.trim()  : '';
+        const podEmoji = pod.querySelector('.comm-pod-emoji') ? pod.querySelector('.comm-pod-emoji').textContent.trim() : '';
+        const joinBtn  = pod.querySelector('.comm-pod-join');
+        if (joinBtn && joinBtn.textContent.trim() === 'Open') {
+          openDM(podName, podEmoji);
+        } else {
+          joinPod(podName);
+        }
+        return;
+      }
+
+      // Online members
+      const member = e.target.closest('.comm-member');
+      if (member) {
+        const mName  = member.querySelector('.comm-member-name') ? member.querySelector('.comm-member-name').textContent.trim() : '';
+        const mAvEl  = member.querySelector('.comm-member-av');
+        const mEmoji = mAvEl ? mAvEl.textContent.trim() : '';
+        openDM(mName, mEmoji);
+        return;
+      }
+    });
+  }
+
+  function initBindings() {
+    bindTopNavTabs();
+    bindThemeControls();
+    bindCommunityPage();
+  }
+
   if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(initBindings, 50);
+    });
+  } else {
+    setTimeout(initBindings, 50);
     document.addEventListener('DOMContentLoaded', () => setTimeout(function() {
       bindTopNavTabs();
       bindThemeControls();
