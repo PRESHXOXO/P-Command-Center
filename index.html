@@ -646,53 +646,6 @@ function saveCustomHubs(hubs) {
   localStorage.setItem(CUSTOM_HUBS_KEY, JSON.stringify(hubs));
 }
 
-function addHub() {
-  const name = prompt('Name your new hub:');
-  if (!name || !name.trim()) return;
-
-  const cleanName = name.trim();
-  const pageId = slugifyHubName(cleanName);
-  const hubs = loadCustomHubs();
-
-  if (hubs.some(h => h.id === pageId) || document.getElementById('page-' + pageId)) {
-    alert('That hub already exists. Try a different name.');
-    return;
-  }
-
-  const hub = {
-    id: pageId,
-    title: cleanName,
-    content: ''
-  };
-
-  hubs.push(hub);
-  saveCustomHubs(hubs);
-  createHubTabAndPage(hub);
-  saveTabOrder();
-
-  const tab = document.querySelector(`.nav-tab[data-page="${pageId}"]`);
-  if (tab) showPage(pageId, tab);
-}
-
-function createHubTabAndPage(hub) {
-  const tabsBar = document.getElementById('nav-tabs');
-  if (!tabsBar) return;
-
-  if (!tabsBar.querySelector(`.nav-tab[data-page="${hub.id}"]`)) {
-    const tab = document.createElement('button');
-    tab.className = 'nav-tab';
-    tab.setAttribute('draggable', 'true');
-    tab.dataset.page = hub.id;
-    tab.textContent = hub.title;
-
-    const addBtn = tabsBar.querySelector('.nav-tab-add');
-    if (addBtn) {
-      tabsBar.insertBefore(tab, addBtn);
-    } else {
-      tabsBar.appendChild(tab);
-    }
-  }
-
   if (!document.getElementById('page-' + hub.id)) {
     const page = document.createElement('div');
     page.className = 'page';
@@ -815,7 +768,52 @@ document.addEventListener('DOMContentLoaded', renderCustomHubs);
 if (document.readyState !== 'loading') {
   setTimeout(renderCustomHubs, 200);
 }
-</script>
+   function addHub() {
+  const name = prompt('Name your new hub:');
+  if (!name || !name.trim()) return;
+
+  const cleanName = name.trim();
+  const pageId = slugifyHubName(cleanName);
+  const hubs = loadCustomHubs();
+
+  if (hubs.some(h => h.id === pageId) || document.getElementById('page-' + pageId)) {
+    alert('That hub already exists. Try a different name.');
+    return;
+  }
+
+  const hub = {
+    id: pageId,
+    title: cleanName,
+    content: ''
+  };
+
+  hubs.push(hub);
+  saveCustomHubs(hubs);
+  createHubTabAndPage(hub);
+  saveTabOrder();
+
+  const tab = document.querySelector(`.nav-tab[data-page="${pageId}"]`);
+  if (tab) showPage(pageId, tab);
+}
+
+function createHubTabAndPage(hub) {
+  const tabsBar = document.getElementById('nav-tabs');
+  if (!tabsBar) return;
+
+  if (!tabsBar.querySelector(`.nav-tab[data-page="${hub.id}"]`)) {
+    const tab = document.createElement('button');
+    tab.className = 'nav-tab';
+    tab.setAttribute('draggable', 'true');
+    tab.dataset.page = hub.id;
+    tab.textContent = hub.title;
+
+    const addBtn = tabsBar.querySelector('.nav-tab-add');
+    if (addBtn) {
+      tabsBar.insertBefore(tab, addBtn);
+    } else {
+      tabsBar.appendChild(tab);
+    }
+  }
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
