@@ -4,7 +4,354 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>P's Command Center</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ════════════════════════════════════
+   THEME EDITOR
+   ════════════════════════════════════ */
+const THEME_KEY = 'pcc-user-theme';
+
+// Default theme
+const DEFAULT_THEME = {
+  name:       "P's Command Center",
+  teal:       '#0A7266',
+  tealMid:    '#0D9488',
+  tealLight:  '#14B8A6',
+  tealBorder: 'rgba(10,114,102,0.18)',
+  bg:         'marble',
+  font:       'elegant',
+};
+
+let currentTheme = { ...DEFAULT_THEME };
+
+// ── Open / Close ──
+function openThemePanel() {
+  const panel = document.getElementById('theme-panel');
+  const overlay = document.getElementById('theme-overlay');
+  if (!panel || !overlay) {
+    console.warn('Theme panel elements not found.');
+    return;
+  }
+
+  panel.classList.add('open');
+  overlay.classList.add('open');
+
+  const saved = loadThemeFromStorage();
+  if (saved) populatePanel(saved);
+}
+
+function closeThemePanel() {
+  const panel = document.getElementById('theme-panel');
+  const overlay = document.getElementById('theme-overlay');
+  if (!panel || !overlay) return;
+
+  panel.classList.remove('open');
+  overlay.classList.remove('open');
+}
+
+// ── Apply color ──
+function applyColor(swatch) {
+  document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
+  swatch.classList.add('active');
+
+  const t = swatch.dataset.teal;
+  const m = swatch.dataset.mid;
+  const l = swatch.dataset.light;
+
+  setColorVars(t, m, l);
+  currentTheme.teal = t;
+  currentTheme.tealMid = m;
+  currentTheme.tealLight = l;
+
+  const picker = document.getElementById('theme-custom-picker');
+  const hex = document.getElementById('theme-custom-hex');
+  if (picker) picker.value = t;
+  if (hex) hex.value = t.toUpperCase();
+}
+
+function applyCustomColor(hex) {
+  document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
+
+  const hexInput = document.getElementById('theme-custom-hex');
+  if (hexInput) hexInput.value = hex.toUpperCase();
+
+  const mid = lightenHex(hex, 15);
+  const light = lightenHex(hex, 35);
+
+  setColorVars(hex, mid, light);
+  currentTheme.teal = hex;
+  currentTheme.tealMid = mid;
+  currentTheme.tealLight = light;
+}
+
+function applyHexInput(val) {
+  if (!/^#[0-9A-Fa-f]{6}$/.test(val)) return;
+
+  const picker = document.getElementById('theme-custom-picker');
+  if (picker) picker.value = val;
+
+  applyCustomColor(val);
+}
+
+function setColorVars(teal, mid, light) {
+  const r = document.documentElement;
+  r.style.setProperty('--teal', teal);
+  r.style.setProperty('--teal-mid', mid);
+  r.style.setProperty('--teal-light', light);
+  r.style.setProperty('--teal-border', hexToRgba(teal, 0.18));
+  r.style.setProperty('--pill-bg', hexToRgba(light, 0.38));
+  r.style.setProperty('--tint', hexToRgba(light, 0.20));
+  r.style.setProperty('--tint-hover', hexToRgba(light, 0.45));
+  r.style.setProperty('--orb-1', hexToRgba(teal, 0.08));
+}
+
+// ── Apply background ──
+const BG_VARS = {
+  marble: {
+    '--bg': '#F7F3EE',
+    '--surface': 'rgba(252,249,245,0.84)',
+    '--surface2': 'rgba(255,253,250,0.92)',
+    '--input-bg': 'rgba(255,253,250,0.6)',
+    '--ink': '#2C2420',
+    '--ink-mid': '#3D3530',
+    '--charcoal': '#3C3C3C',
+    '--marble-grad': 'linear-gradient(145deg,#F7F3EE 0%,#EEF8F5 50%,#F7F3EE 100%)',
+  },
+  dark: {
+    '--bg': '#0F1117',
+    '--surface': 'rgba(22,26,38,0.9)',
+    '--surface2': 'rgba(28,33,48,0.95)',
+    '--input-bg': 'rgba(22,26,38,0.7)',
+    '--ink': '#F0EDE8',
+    '--ink-mid': '#D4CFC8',
+    '--charcoal': '#A09890',
+    '--marble-grad': 'linear-gradient(145deg,#0F1117 0%,#1a1f2e 50%,#0F1117 100%)',
+  },
+  sage: {
+    '--bg': '#F0F4F0',
+    '--surface': 'rgba(240,248,240,0.84)',
+    '--surface2': 'rgba(245,252,245,0.92)',
+    '--input-bg': 'rgba(245,252,245,0.6)',
+    '--ink': '#1E2B1E',
+    '--ink-mid': '#2E3F2E',
+    '--charcoal': '#3A4A3A',
+    '--marble-grad': 'linear-gradient(145deg,#F0F4F0 0%,#E8F0E8 50%,#F0F4F0 100%)',
+  },
+  blush: {
+    '--bg': '#FDF4F4',
+    '--surface': 'rgba(253,244,244,0.84)',
+    '--surface2': 'rgba(255,248,248,0.92)',
+    '--input-bg': 'rgba(255,248,248,0.6)',
+    '--ink': '#2C1820',
+    '--ink-mid': '#3D2830',
+    '--charcoal': '#4A3040',
+    '--marble-grad': 'linear-gradient(145deg,#FDF4F4 0%,#FDE8F0 50%,#FDF4F4 100%)',
+  },
+  linen: {
+    '--bg': '#FAF7F2',
+    '--surface': 'rgba(250,247,242,0.84)',
+    '--surface2': 'rgba(255,252,248,0.92)',
+    '--input-bg': 'rgba(255,252,248,0.6)',
+    '--ink': '#2A2218',
+    '--ink-mid': '#3A3228',
+    '--charcoal': '#484038',
+    '--marble-grad': 'linear-gradient(145deg,#FAF7F2 0%,#F5EFE6 50%,#FAF7F2 100%)',
+  },
+  slate: {
+    '--bg': '#1E2028',
+    '--surface': 'rgba(30,32,44,0.9)',
+    '--surface2': 'rgba(38,40,56,0.95)',
+    '--input-bg': 'rgba(30,32,44,0.7)',
+    '--ink': '#E8E6F0',
+    '--ink-mid': '#C8C6D8',
+    '--charcoal': '#A0A0B8',
+    '--marble-grad': 'linear-gradient(145deg,#1E2028 0%,#252836 50%,#1E2028 100%)',
+  },
+};
+
+function applyBackground(card) {
+  document.querySelectorAll('.theme-bg-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+
+  const bg = card.dataset.bg;
+  currentTheme.bg = bg;
+
+  const vars = BG_VARS[bg];
+  if (!vars) return;
+
+  const r = document.documentElement;
+  Object.entries(vars).forEach(([k, v]) => r.style.setProperty(k, v));
+}
+
+// ── Apply font ──
+const FONT_LINKS = {
+  elegant: null,
+  modern: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap',
+  classic: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Lato:wght@300;400&display=swap',
+  minimal: null,
+};
+
+const FONT_VARS = {
+  elegant: { display: "'Cormorant Garamond', serif", ui: "'DM Sans', sans-serif" },
+  modern:  { display: "'Inter', sans-serif", ui: "'Inter', sans-serif" },
+  classic: { display: "'Playfair Display', serif", ui: "'Lato', sans-serif" },
+  minimal: { display: "'Georgia', serif", ui: "system-ui, sans-serif" },
+};
+
+function applyFont(option) {
+  document.querySelectorAll('.theme-font-option').forEach(o => o.classList.remove('active'));
+  option.classList.add('active');
+
+  const font = option.dataset.font;
+  currentTheme.font = font;
+
+  const vars = FONT_VARS[font];
+  if (!vars) return;
+
+  const r = document.documentElement;
+  r.style.setProperty('--font-display', vars.display);
+  r.style.setProperty('--font-ui', vars.ui);
+
+  if (FONT_LINKS[font] && !document.querySelector(`link[href="${FONT_LINKS[font]}"]`)) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = FONT_LINKS[font];
+    document.head.appendChild(link);
+  }
+
+  document.querySelectorAll('h1,h2,.nav-brand,.pg-header h1,.auth-title,.rev-num,.shc-title,.vision-title,.para-stat-num,.home-leftover-big').forEach(el => {
+    el.style.fontFamily = vars.display;
+  });
+}
+
+// ── Preview dashboard name ──
+function previewName(val) {
+  const name = val || "P's Command Center";
+  document.querySelectorAll('.nav-brand').forEach(el => {
+    if (el.childNodes.length > 0) {
+      el.childNodes[0].textContent = name;
+    } else {
+      el.textContent = name;
+    }
+  });
+  currentTheme.name = name;
+}
+
+// ── Save / Load / Reset ──
+function saveTheme() {
+  try {
+    localStorage.setItem(THEME_KEY, JSON.stringify(currentTheme));
+  } catch (e) {
+    console.warn('Could not save theme:', e);
+  }
+
+  const btn = document.querySelector('.theme-save-btn');
+  if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = '✓ Saved!';
+    btn.style.background = '#15622D';
+
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = '';
+    }, 1800);
+  }
+
+  closeThemePanel();
+}
+
+function loadThemeFromStorage() {
+  try {
+    const raw = localStorage.getItem(THEME_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function populatePanel(theme) {
+  const nameInput = document.getElementById('theme-name-input');
+  if (nameInput && theme.name) nameInput.value = theme.name;
+
+  if (theme.teal) {
+    const picker = document.getElementById('theme-custom-picker');
+    const hex = document.getElementById('theme-custom-hex');
+    if (picker) picker.value = theme.teal;
+    if (hex) hex.value = theme.teal.toUpperCase();
+  }
+
+  if (theme.bg) {
+    document.querySelectorAll('.theme-bg-card').forEach(c => {
+      c.classList.toggle('active', c.dataset.bg === theme.bg);
+    });
+  }
+
+  if (theme.font) {
+    document.querySelectorAll('.theme-font-option').forEach(o => {
+      o.classList.toggle('active', o.dataset.font === theme.font);
+    });
+  }
+}
+
+function resetTheme() {
+  try {
+    localStorage.removeItem(THEME_KEY);
+  } catch (e) {}
+  location.reload();
+}
+
+// ── Apply saved theme on load ──
+(function applyStoredTheme() {
+  const saved = loadThemeFromStorage();
+  if (!saved) return;
+
+  currentTheme = { ...DEFAULT_THEME, ...saved };
+
+  if (saved.teal) {
+    setColorVars(
+      saved.teal,
+      saved.tealMid || saved.teal,
+      saved.tealLight || saved.teal
+    );
+  }
+
+  if (saved.bg && BG_VARS[saved.bg]) {
+    const r = document.documentElement;
+    Object.entries(BG_VARS[saved.bg]).forEach(([k, v]) => r.style.setProperty(k, v));
+  }
+
+  if (saved.font && FONT_VARS[saved.font]) {
+    const r = document.documentElement;
+    r.style.setProperty('--font-display', FONT_VARS[saved.font].display);
+    r.style.setProperty('--font-ui', FONT_VARS[saved.font].ui);
+  }
+
+  if (saved.name) {
+    document.addEventListener('DOMContentLoaded', () => previewName(saved.name));
+    setTimeout(() => previewName(saved.name), 300);
+  }
+})();
+
+// ── Utility: hex color helpers ──
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function lightenHex(hex, pct) {
+  let r = parseInt(hex.slice(1, 3), 16);
+  let g = parseInt(hex.slice(3, 5), 16);
+  let b = parseInt(hex.slice(5, 7), 16);
+
+  r = Math.min(255, r + Math.round((255 - r) * (pct / 100)));
+  g = Math.min(255, g + Math.round((255 - g) * (pct / 100)));
+  b = Math.min(255, b + Math.round((255 - b) * (pct / 100)));
+
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+</script>
 // ════════════════════════════════════
 // THEME EDITOR
 // ════════════════════════════════════
@@ -2973,7 +3320,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
     </div>
   </div>
 
-    <div class="nav-tabs-wrap"<div class="nav-tabs-wrap" id="nav-tabs-wrap">
+    <div class="nav-tabs-wrap" id="nav-tabs-wrap">
     <div class="tab-swipe-hint">swipe ›</div>
     <div class="nav-tabs" id="nav-tabs">
     <button class="nav-tab on" draggable="true" data-page="dashboard">Dashboard</button>
