@@ -2947,7 +2947,8 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
             <button class="auth-pw-toggle" onclick="togglePw('login-password',this)" tabindex="-1">👁</button>
           </div>
         </div>
-        <div class="auth-forgot">
+        <div class="auth-forgot" style="display:flex;justify-content:space-between;align-items:center;">
+          <button class="auth-forgot-link" onclick="switchAuthTab('signup')" style="color:var(--muted);">New here? Sign up →</button>
           <button class="auth-forgot-link" onclick="showForgot()">Forgot password?</button>
         </div>
         <button class="auth-submit" id="login-btn" onclick="handleLogin()">Log In</button>
@@ -4827,20 +4828,36 @@ async function handleLogin() {
   btn.classList.add('loading');
   btn.textContent = '';
 
-  const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pw });
+  try {
+    const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pw });
 
-  if (error) {
+    if (error) {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      btn.textContent = 'Log In';
+      showAuthError(error.message || 'Login failed. Check your email and password.');
+      return;
+    }
+
+    if (!data || !data.user) {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      btn.textContent = 'Log In';
+      showAuthError('No account found. Please sign up first.');
+      return;
+    }
+
+    const firstName = data.user?.user_metadata?.first_name || '';
+    saveSession({ email, firstName, id: data.user.id });
+    btn.textContent = '✓';
+    setTimeout(() => enterApp(firstName), 500);
+
+  } catch(e) {
     btn.disabled = false;
     btn.classList.remove('loading');
     btn.textContent = 'Log In';
-    showAuthError('Incorrect email or password. Try again.');
-    return;
+    showAuthError('Connection error: ' + e.message);
   }
-
-  const firstName = data.user?.user_metadata?.first_name || '';
-  saveSession({ email, firstName, id: data.user.id });
-  btn.textContent = '✓';
-  setTimeout(() => enterApp(firstName), 500);
 }
 
 // ── SIGNUP ──
