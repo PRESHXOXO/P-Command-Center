@@ -7866,6 +7866,189 @@ if (document.readyState !== 'loading') {
         closeThemePanel();
       });
     }
+
+    // Bind mobile nav "Customize Theme" button (no data-page attribute). This ensures
+    // the theme panel opens and the mobile drawer closes, even if inline
+    // onclick handlers are stripped.
+    document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+      // skip if already bound or if the button has a page target
+      if (btn.dataset.themeBound === 'true' || btn.dataset.page) return;
+      // Identify the customize theme button by its label text
+      if (/customize/i.test((btn.textContent || '').trim())) {
+        btn.dataset.themeBound = 'true';
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (typeof openThemePanel === 'function') openThemePanel();
+          if (typeof closeMobileNav === 'function') closeMobileNav();
+        });
+      }
+    });
+
+    // Bind Save and Reset buttons in the theme panel so they work even if
+    // inline onclick handlers are stripped.
+    document.querySelectorAll('.theme-save-btn').forEach(btn => {
+      if (btn.dataset.themeSaveBound === 'true') return;
+      btn.dataset.themeSaveBound = 'true';
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (typeof saveTheme === 'function') saveTheme();
+      });
+    });
+    document.querySelectorAll('.theme-reset-btn').forEach(btn => {
+      if (btn.dataset.themeResetBound === 'true') return;
+      btn.dataset.themeResetBound = 'true';
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (typeof resetTheme === 'function') resetTheme();
+      });
+    });
+  }
+
+  function handleCommunityModalAction(target, ev) {
+    if (!target) return false;
+
+    // Modal submission buttons (Create Pod, Create Challenge, Save Profile)
+    const submitBtn = target.closest('.comm-modal-submit');
+    if (submitBtn) {
+      if (ev) ev.preventDefault();
+      const podOpen       = document.getElementById('create-pod-overlay')?.classList.contains('open');
+      const challengeOpen = document.getElementById('create-challenge-overlay')?.classList.contains('open');
+      const editOpen      = document.getElementById('edit-profile-overlay')?.classList.contains('open');
+      if (podOpen && typeof submitCreatePod === 'function') {
+        submitCreatePod();
+      } else if (challengeOpen && typeof submitCreateChallenge === 'function') {
+        submitCreateChallenge();
+      } else if (editOpen && typeof submitEditProfile === 'function') {
+        submitEditProfile();
+      }
+      return true;
+    }
+
+    // Modal cancel buttons (Cancel)
+    const cancelBtn = target.closest('.comm-modal-cancel');
+    if (cancelBtn) {
+      if (ev) ev.preventDefault();
+      const overlay = cancelBtn.closest('.comm-modal-overlay');
+      const id = overlay && overlay.id;
+      if (id === 'create-pod-overlay' && typeof closeCreatePod === 'function') {
+        closeCreatePod();
+      } else if (id === 'create-challenge-overlay' && typeof closeCreateChallenge === 'function') {
+        closeCreateChallenge();
+      } else if (id === 'edit-profile-overlay' && typeof closeEditProfile === 'function') {
+        closeEditProfile();
+      }
+      return true;
+    }
+
+    // Modal close (X) buttons
+    const closeBtn = target.closest('.comm-modal-close');
+    if (closeBtn) {
+      if (ev) ev.preventDefault();
+      const overlay = closeBtn.closest('.comm-modal-overlay');
+      const id = overlay && overlay.id;
+      if (id === 'create-pod-overlay' && typeof closeCreatePod === 'function') {
+        closeCreatePod();
+      } else if (id === 'create-challenge-overlay' && typeof closeCreateChallenge === 'function') {
+        closeCreateChallenge();
+      } else if (id === 'edit-profile-overlay' && typeof closeEditProfile === 'function') {
+        closeEditProfile();
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  // Bind click handlers for Community page (create pod/challenge, etc.)
+  function bindCommunityControls() {
+    const commPage = document.getElementById('page-community');
+    if (commPage) {
+      // Map nav items to view names for fallback (Feed, Pods, Challenges, Wins, Messages)
+      const navItems = commPage.querySelectorAll('.comm-nav-item');
+      const viewNames = ['feed','pods','challenges','wins','messages'];
+      navItems.forEach((item, idx) => {
+        if (!item.dataset.view) item.dataset.view = viewNames[idx] || '';
+      });
+
+      // Attach input listener to update character count in post composer
+      const composer = commPage.querySelector('#comm-compose-text');
+      if (composer && composer.dataset.commBound !== 'true') {
+        composer.dataset.commBound = 'true';
+        composer.addEventListener('input', function() {
+          if (typeof updateCharCount === 'function') updateCharCount(composer);
+        });
+      }
+
+      // Delegate clicks within the community page
+      if (commPage.dataset.commBound !== 'true') {
+        commPage.dataset.commBound = 'true';
+        commPage.addEventListener('click', function(ev) {
+          const tgt = ev.target;
+
+          // Create Pod / Create Challenge buttons
+          const createBtn = tgt.closest('.comm-create-btn');
+          if (createBtn) {
+            ev.preventDefault();
+            if (createBtn.classList.contains('comm-create-btn-secondary')) {
+              if (typeof openCreateChallenge === 'function') openCreateChallenge();
+            } else {
+              if (typeof openCreatePod === 'function') openCreatePod();
+            }
+            return;
+          }
+
+          // Community navigation items (Feed, Pods, Challenges, Wins, Messages)
+          const navItem = tgt.closest('.comm-nav-item');
+          if (navItem) {
+            ev.preventDefault();
+            const view = navItem.dataset.view || viewNames[Array.from(navItem.parentElement.children).indexOf(navItem)] || 'feed';
+            if (typeof switchCommView === 'function') switchCommView(view, navItem);
+            return;
+          }
+
+          handleCommunityModalAction(tgt, ev);
+        });
+      }
+    }
+
+    // Global delegated modal fallback for overlays rendered outside #page-community.
+    if (document.body.dataset.commModalBound !== 'true') {
+      document.body.dataset.commModalBound = 'true';
+      document.body.addEventListener('click', function(ev) {
+        const tgt = ev.target;
+        if (handleCommunityModalAction(tgt, ev)) return;
+
+        // Theme controls fallback if inline onclick handlers are unavailable.
+        const settingsBtn = tgt.closest('.nav-settings-btn');
+        if (settingsBtn) {
+          ev.preventDefault();
+          if (typeof openThemePanel === 'function') openThemePanel();
+          return;
+        }
+
+        const mobileThemeBtn = tgt.closest('.mobile-nav-btn');
+        if (mobileThemeBtn && !mobileThemeBtn.dataset.page && /customize/i.test((mobileThemeBtn.textContent || '').trim())) {
+          ev.preventDefault();
+          if (typeof openThemePanel === 'function') openThemePanel();
+          if (typeof closeMobileNav === 'function') closeMobileNav();
+          return;
+        }
+
+        const saveBtn = tgt.closest('.theme-save-btn');
+        if (saveBtn) {
+          ev.preventDefault();
+          if (typeof saveTheme === 'function') saveTheme();
+          return;
+        }
+
+        const resetBtn = tgt.closest('.theme-reset-btn');
+        if (resetBtn) {
+          ev.preventDefault();
+          if (typeof resetTheme === 'function') resetTheme();
+          return;
+        }
+      });
+    }
   }
 
   // ── Community page: event delegation so all buttons work regardless of inline-onclick support ──
@@ -7971,6 +8154,17 @@ if (document.readyState !== 'loading') {
     });
   } else {
     setTimeout(initBindings, 50);
+    document.addEventListener('DOMContentLoaded', () => setTimeout(function() {
+      bindTopNavTabs();
+      bindThemeControls();
+      bindCommunityControls();
+    }, 50));
+  } else {
+    setTimeout(function() {
+      bindTopNavTabs();
+      bindThemeControls();
+      bindCommunityControls();
+    }, 50);
   }
 })();
 </script>
