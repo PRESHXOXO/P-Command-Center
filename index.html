@@ -250,29 +250,6 @@ function applyFont(option) {
   document.querySelectorAll('h1,h2,.nav-brand,.pg-header h1,.auth-title,.rev-num,.shc-title,.vision-title,.para-stat-num,.home-leftover-big').forEach(el => {
     el.style.fontFamily = vars.display;
   });
-});
-  option.classList.add('active');
-
-  const font = option.dataset.font;
-  currentTheme.font = font;
-
-  const vars = FONT_VARS[font];
-  if (!vars) return;
-
-  const r = document.documentElement;
-  r.style.setProperty('--font-display', vars.display);
-  r.style.setProperty('--font-ui', vars.ui);
-
-  if (FONT_LINKS[font] && !document.querySelector(`link[href="${FONT_LINKS[font]}"]`)) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = FONT_LINKS[font];
-    document.head.appendChild(link);
-  }
-
-  document.querySelectorAll('h1,h2,.nav-brand,.pg-header h1,.auth-title,.rev-num,.shc-title,.vision-title,.para-stat-num,.home-leftover-big').forEach(el => {
-    el.style.fontFamily = vars.display;
-  });
 }
 
 // ── Preview dashboard name ──
