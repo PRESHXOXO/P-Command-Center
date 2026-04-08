@@ -13,13 +13,9 @@ const THEME_KEY = 'pcc-user-theme';
 
 // Default theme
 const DEFAULT_THEME = {
-  name:       "P's Command Center",
-  teal:       '#0A7266',
-  tealMid:    '#0D9488',
-  tealLight:  '#14B8A6',
-  tealBorder: 'rgba(10,114,102,0.18)',
-  bg:         'marble',
-  font:       'elegant',
+  name: "P's Command Center",
+  bg: "paper-ivory",
+  font: "elegant",
 };
 
 let currentTheme = { ...DEFAULT_THEME };
@@ -93,87 +89,90 @@ function applyHexInput(val) {
   applyCustomColor(val);
 }
 
-function setColorVars(teal, mid, light) {
+function setColorVars() {
   const r = document.documentElement;
-  const mode = r.getAttribute('data-theme') || 'light';
-
-  const borderAlpha = mode === 'dark' ? 0.28 : 0.18;
-  const pillAlpha   = mode === 'dark' ? 0.16 : 0.38;
-  const tintAlpha   = mode === 'dark' ? 0.10 : 0.20;
-  const hoverAlpha  = mode === 'dark' ? 0.18 : 0.45;
-  const orbAlpha    = mode === 'dark' ? 0.18 : 0.08;
-
-  r.style.setProperty('--teal', teal);
-  r.style.setProperty('--teal-mid', mid);
-  r.style.setProperty('--teal-light', light);
-  r.style.setProperty('--teal-border', hexToRgba(teal, borderAlpha));
-  r.style.setProperty('--pill-bg', hexToRgba(light, pillAlpha));
-  r.style.setProperty('--tint', hexToRgba(light, tintAlpha));
-  r.style.setProperty('--tint-hover', hexToRgba(light, hoverAlpha));
-  r.style.setProperty('--orb-1', hexToRgba(teal, orbAlpha));
+  r.style.setProperty('--teal', '#3A342F');
+  r.style.setProperty('--teal-mid', '#5A514A');
+  r.style.setProperty('--teal-light', '#8A7F75');
+  r.style.setProperty('--teal-border', 'rgba(58,52,47,0.16)');
+  r.style.setProperty('--pill-bg', 'rgba(255,255,255,0.35)');
+  r.style.setProperty('--tint', 'rgba(255,255,255,0.18)');
+  r.style.setProperty('--tint-hover', 'rgba(255,255,255,0.28)');
+  r.style.setProperty('--orb-1', 'transparent');
 }
 
 // ── Apply background ──
 const BG_VARS = {
-  marble: {
-    '--bg': '#F7F3EE',
-    '--surface': 'rgba(252,249,245,0.84)',
-    '--surface2': 'rgba(255,253,250,0.92)',
-    '--input-bg': 'rgba(255,253,250,0.6)',
-    '--ink': '#2C2420',
-    '--ink-mid': '#3D3530',
-    '--charcoal': '#3C3C3C',
-    '--marble-grad': 'linear-gradient(145deg,#F7F3EE 0%,#EEF8F5 50%,#F7F3EE 100%)',
+  'paper-ivory': {
+    '--bg': '#F6F1E8',
+    '--surface': 'rgba(255,250,244,0.78)',
+    '--surface2': 'rgba(255,252,248,0.88)',
+    '--input-bg': 'rgba(255,252,248,0.72)',
+    '--ink': '#2C241E',
+    '--ink-mid': '#4A4038',
+    '--charcoal': '#655950',
+    '--page-texture':
+      "linear-gradient(rgba(246,241,232,0.82), rgba(246,241,232,0.82)), url('YOUR-IVORY-PAPER-TEXTURE-URL')",
   },
-  dark: {
-    '--bg': '#0F1117',
-    '--surface': 'rgba(22,26,38,0.9)',
-    '--surface2': 'rgba(28,33,48,0.95)',
-    '--input-bg': 'rgba(22,26,38,0.7)',
-    '--ink': '#F0EDE8',
-    '--ink-mid': '#D4CFC8',
-    '--charcoal': '#A09890',
-    '--marble-grad': 'linear-gradient(145deg,#0F1117 0%,#1a1f2e 50%,#0F1117 100%)',
+
+  'linen-cream': {
+    '--bg': '#F4EFE7',
+    '--surface': 'rgba(250,246,240,0.78)',
+    '--surface2': 'rgba(255,252,247,0.88)',
+    '--input-bg': 'rgba(255,252,247,0.72)',
+    '--ink': '#2A241D',
+    '--ink-mid': '#473E36',
+    '--charcoal': '#60554D',
+    '--page-texture':
+      "linear-gradient(rgba(244,239,231,0.80), rgba(244,239,231,0.80)), url('YOUR-LINEN-TEXTURE-URL')",
   },
-  sage: {
-    '--bg': '#F0F4F0',
-    '--surface': 'rgba(240,248,240,0.84)',
-    '--surface2': 'rgba(245,252,245,0.92)',
-    '--input-bg': 'rgba(245,252,245,0.6)',
-    '--ink': '#1E2B1E',
-    '--ink-mid': '#2E3F2E',
-    '--charcoal': '#3A4A3A',
-    '--marble-grad': 'linear-gradient(145deg,#F0F4F0 0%,#E8F0E8 50%,#F0F4F0 100%)',
+
+  'stone-taupe': {
+    '--bg': '#EAE4DC',
+    '--surface': 'rgba(245,240,234,0.74)',
+    '--surface2': 'rgba(250,246,241,0.86)',
+    '--input-bg': 'rgba(250,246,241,0.68)',
+    '--ink': '#28231F',
+    '--ink-mid': '#433C37',
+    '--charcoal': '#5A524C',
+    '--page-texture':
+      "linear-gradient(rgba(234,228,220,0.78), rgba(234,228,220,0.78)), url('YOUR-STONE-TEXTURE-URL')",
   },
-  blush: {
-    '--bg': '#FDF4F4',
-    '--surface': 'rgba(253,244,244,0.84)',
-    '--surface2': 'rgba(255,248,248,0.92)',
-    '--input-bg': 'rgba(255,248,248,0.6)',
-    '--ink': '#2C1820',
-    '--ink-mid': '#3D2830',
-    '--charcoal': '#4A3040',
-    '--marble-grad': 'linear-gradient(145deg,#FDF4F4 0%,#FDE8F0 50%,#FDF4F4 100%)',
+
+  'black-silk': {
+    '--bg': '#121212',
+    '--surface': 'rgba(27,27,27,0.78)',
+    '--surface2': 'rgba(34,34,34,0.90)',
+    '--input-bg': 'rgba(36,36,36,0.72)',
+    '--ink': '#F3EEE8',
+    '--ink-mid': '#D7CEC5',
+    '--charcoal': '#B3A79B',
+    '--page-texture':
+      "linear-gradient(rgba(18,18,18,0.74), rgba(18,18,18,0.74)), url('YOUR-BLACK-SILK-TEXTURE-URL')",
   },
-  linen: {
-    '--bg': '#FAF7F2',
-    '--surface': 'rgba(250,247,242,0.84)',
-    '--surface2': 'rgba(255,252,248,0.92)',
-    '--input-bg': 'rgba(255,252,248,0.6)',
-    '--ink': '#2A2218',
-    '--ink-mid': '#3A3228',
-    '--charcoal': '#484038',
-    '--marble-grad': 'linear-gradient(145deg,#FAF7F2 0%,#F5EFE6 50%,#FAF7F2 100%)',
+
+  'parchment': {
+    '--bg': '#EFE4D2',
+    '--surface': 'rgba(250,242,230,0.76)',
+    '--surface2': 'rgba(255,248,238,0.88)',
+    '--input-bg': 'rgba(255,248,238,0.72)',
+    '--ink': '#33281E',
+    '--ink-mid': '#524538',
+    '--charcoal': '#6B5D4E',
+    '--page-texture':
+      "linear-gradient(rgba(239,228,210,0.78), rgba(239,228,210,0.78)), url('YOUR-PARCHMENT-TEXTURE-URL')",
   },
-  slate: {
-    '--bg': '#1E2028',
-    '--surface': 'rgba(30,32,44,0.9)',
-    '--surface2': 'rgba(38,40,56,0.95)',
-    '--input-bg': 'rgba(30,32,44,0.7)',
-    '--ink': '#E8E6F0',
-    '--ink-mid': '#C8C6D8',
-    '--charcoal': '#A0A0B8',
-    '--marble-grad': 'linear-gradient(145deg,#1E2028 0%,#252836 50%,#1E2028 100%)',
+
+  'walnut-fabric': {
+    '--bg': '#2A211C',
+    '--surface': 'rgba(48,38,33,0.78)',
+    '--surface2': 'rgba(58,47,41,0.90)',
+    '--input-bg': 'rgba(60,49,43,0.72)',
+    '--ink': '#F4ECE3',
+    '--ink-mid': '#DCCFC2',
+    '--charcoal': '#B8AA9A',
+    '--page-texture':
+      "linear-gradient(rgba(42,33,28,0.74), rgba(42,33,28,0.74)), url('YOUR-WALNUT-FABRIC-TEXTURE-URL')",
   },
 };
 
@@ -695,32 +694,44 @@ html,body{transition:background .4s ease,color .35s ease;}
 body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
 
 /* ═══ MARBLE BACKGROUND ═══ */
-.marble-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
-.marble-bg::before{
-  content:'';position:absolute;inset:0;
-  background:
-    radial-gradient(ellipse 70% 55% at 8% 12%,  var(--marble-1) 0%,transparent 55%),
-    radial-gradient(ellipse 55% 45% at 92% 88%, var(--marble-2) 0%,transparent 55%),
-    radial-gradient(ellipse 40% 40% at 50% 45%, var(--marble-3) 0%,transparent 60%),
-    var(--marble-grad);
-  transition:background .5s ease;
+/* Static background layer only */
+.marble-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
-.marble-bg svg{position:absolute;inset:0;width:100%;height:100%;}
-.m-orb{position:absolute;border-radius:50%;filter:blur(90px);animation:mOrb ease-in-out infinite;}
-.mo1{width:550px;height:550px;top:-12%;left:-8%;background:radial-gradient(circle,var(--orb-1) 0%,transparent 70%);animation-duration:26s;}
-.mo2{width:400px;height:400px;top:38%;right:-10%;background:radial-gradient(circle,var(--orb-2) 0%,transparent 70%);animation-duration:32s;animation-delay:-12s;}
-.mo3{width:350px;height:350px;bottom:-8%;left:35%;background:radial-gradient(circle,var(--orb-3) 0%,transparent 70%);animation-duration:22s;animation-delay:-6s;}
-@keyframes mOrb{0%,100%{transform:translate(0,0);}40%{transform:translate(18px,-12px);}70%{transform:translate(-10px,16px);}}
-.bbl{position:absolute;border-radius:50%;border:1px solid var(--bbl-border);background:var(--bbl-bg);animation:bblRise linear infinite;}
-.bbl:nth-child(1){width:10px;height:10px;left:7%;animation-duration:30s;}
-.bbl:nth-child(2){width:6px;height:6px;left:21%;animation-duration:40s;animation-delay:-9s;}
-.bbl:nth-child(3){width:14px;height:14px;left:36%;animation-duration:26s;animation-delay:-4s;}
-.bbl:nth-child(4){width:8px;height:8px;left:54%;animation-duration:44s;animation-delay:-16s;}
-.bbl:nth-child(5){width:12px;height:12px;left:69%;animation-duration:34s;animation-delay:-7s;}
-.bbl:nth-child(6){width:5px;height:5px;left:83%;animation-duration:24s;animation-delay:-13s;}
-.bbl:nth-child(7){width:9px;height:9px;left:45%;animation-duration:50s;animation-delay:-28s;}
-.bbl:nth-child(8){width:16px;height:16px;left:76%;animation-duration:36s;animation-delay:-20s;}
-@keyframes bblRise{0%{transform:translateY(105vh);opacity:0;}5%{opacity:.5;}95%{opacity:.18;}100%{transform:translateY(-5vh) translateX(8px);opacity:0;}}
+
+.marble-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--page-texture, var(--marble-grad));
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: background .4s ease;
+}
+
+.marble-bg svg,
+.m-orb,
+.mo1,
+.mo2,
+.mo3,
+.bbl {
+  display: none !important;
+}
+
+@keyframes mOrb {
+  from { opacity: 1; }
+  to { opacity: 1; }
+}
+
+@keyframes bblRise {
+  from { opacity: 1; }
+  to { opacity: 1; }
+}
 
 /* ═══ NAV ═══ */
 .nav{
