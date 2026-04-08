@@ -107,14 +107,19 @@ function openThemePanel() {
   const panel = document.getElementById('theme-panel');
   const overlay = document.getElementById('theme-overlay');
   if (!panel || !overlay) {
-    // Elements not ready yet — try again shortly
-    setTimeout(openThemePanel, 100);
+    setTimeout(openThemePanel, 150);
     return;
   }
   panel.classList.add('open');
   overlay.classList.add('open');
-  const saved = typeof loadThemeFromStorage === 'function' ? loadThemeFromStorage() : null;
-  if (saved && typeof populatePanel === 'function') populatePanel(saved);
+  try {
+    const saved = typeof loadThemeFromStorage === 'function' ? loadThemeFromStorage() : null;
+    if (typeof populatePanel === 'function') {
+      populatePanel(saved || DEFAULT_THEME);
+    }
+  } catch(e) {
+    console.warn('Theme panel populate error:', e);
+  }
 }
 
 function closeThemePanel() {
@@ -724,8 +729,26 @@ function getCurrentUserName() {
   } catch(e) { return 'You'; }
 }
 
+// ── Safe toast (self-contained, no Block 2 dependency) ──
 function safeShowToast(msg) {
-  if (typeof showToast === 'function') showToast(msg);
+  // Try Block 2's showToast first
+  if (typeof showToast === 'function') { showToast(msg); return; }
+  // Fallback: build our own minimal toast
+  let t = document.getElementById('_comm_toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_comm_toast';
+    t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--teal);color:#fff;padding:.65rem 1.4rem;border-radius:50px;font-family:"DM Sans",sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.06em;z-index:9999;opacity:0;transition:all .3s ease;pointer-events:none;white-space:nowrap;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 2800);
 }
 
 // ══════════════════════════════════
@@ -950,39 +973,39 @@ function submitPost() {
 // NAV VIEWS — router
 // ══════════════════════════════════
 function switchCommView(view, navItem) {
+  // Update active nav
   document.querySelectorAll('.comm-nav-item').forEach(el => el.classList.remove('active'));
   if (navItem) navItem.classList.add('active');
+  else {
+    const idx = ['feed','pods','challenges','wins','messages'].indexOf(view);
+    const items = document.querySelectorAll('.comm-nav-item');
+    if (items[idx]) items[idx].classList.add('active');
+  }
 
   const main = document.getElementById('comm-main');
   if (!main) return;
   main.dataset.view = view;
 
-  // Reset feed filter tabs visibility
-  const feedTabsRow = document.querySelector('.comm-feed-tabs');
-  if (feedTabsRow) feedTabsRow.style.display = view === 'feed' ? 'flex' : 'none';
-  const composerEl = document.querySelector('.comm-composer');
-  if (composerEl) composerEl.style.display = view === 'feed' ? 'block' : 'none';
-  const feedEl = document.getElementById('comm-feed');
-  if (feedEl) feedEl.style.display = view === 'feed' ? 'block' : 'none';
+  // Show/hide feed elements
+  const composer = document.querySelector('#page-community .comm-composer');
+  const feedTabs = document.querySelector('#page-community .comm-feed-tabs');
+  const feedDiv  = document.getElementById('comm-feed');
+  const isFeed   = view === 'feed';
 
-  if (view === 'feed') {
-    if (feedTabsRow) feedTabsRow.style.display = 'flex';
-    if (composerEl)  composerEl.style.display  = 'block';
-    if (feedEl)      feedEl.style.display       = 'block';
-    // Remove any view panel
-    const vp = document.getElementById('comm-view-panel-container');
-    if (vp) vp.remove();
-    renderFeed();
-    return;
-  }
+  if (composer) composer.style.display = isFeed ? '' : 'none';
+  if (feedTabs) feedTabs.style.display = isFeed ? '' : 'none';
+  if (feedDiv)  feedDiv.style.display  = isFeed ? '' : 'none';
 
-  // Hide feed elements, show view panel
-  let vpCon = document.getElementById('comm-view-panel-container');
-  if (!vpCon) {
-    vpCon = document.createElement('div');
-    vpCon.id = 'comm-view-panel-container';
-    main.appendChild(vpCon);
-  }
+  // Remove old view panel
+  const old = document.getElementById('comm-view-panel-container');
+  if (old) old.remove();
+
+  if (isFeed) { renderFeed(); return; }
+
+  // Create fresh panel container
+  const vpCon = document.createElement('div');
+  vpCon.id = 'comm-view-panel-container';
+  main.appendChild(vpCon);
 
   if (view === 'pods')       renderPodsView(vpCon);
   if (view === 'challenges') renderChallengesView(vpCon);
@@ -6763,32 +6786,30 @@ setTimeout(animateVision, 200);
 
 function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
-
   const lbl = document.getElementById('theme-label');
   if (lbl) lbl.textContent = t === 'dark' ? 'Dark' : 'Light';
-
   localStorage.setItem('cc-theme', t);
 
-  // Only re-apply accent colors (teal), NOT background vars
-  // Background vars are handled by [data-theme="dark"] CSS — don't override them
-  const saved = loadThemeFromStorage();
-  const themeToUse = saved ? { ...DEFAULT_THEME, ...saved } : DEFAULT_THEME;
-
-  setColorVars(
-    themeToUse.teal,
-    themeToUse.tealMid || themeToUse.teal,
-    themeToUse.tealLight || themeToUse.teal
-  );
-
-  // Only apply custom BG_VARS in light mode — dark mode uses CSS [data-theme] vars
-  if (t !== 'dark' && themeToUse.bg && BG_VARS[themeToUse.bg]) {
-    Object.entries(BG_VARS[themeToUse.bg]).forEach(([k, v]) => {
-      document.documentElement.style.setProperty(k, v);
-    });
-  } else if (t === 'dark') {
-    // Clear any inline bg overrides so CSS dark mode vars take effect
-    const bgKeys = ['--bg','--surface','--surface2','--input-bg','--ink','--ink-mid','--charcoal','--muted','--nav-bg','--marble-grad'];
-    bgKeys.forEach(k => document.documentElement.style.removeProperty(k));
+  if (t === 'dark') {
+    // CRITICAL: remove ALL inline style property overrides so CSS dark vars win
+    const allVars = [
+      '--bg','--nav-bg','--surface','--surface2','--ink','--ink-mid','--charcoal',
+      '--muted','--input-bg','--pill-bg','--tint','--tint-hover','--teal-border',
+      '--shadow','--shadow-lg','--shadow-sm','--overlay-bg','--modal-bg',
+      '--marble-grad','--marble-1','--marble-2','--marble-3',
+      '--orb-1','--orb-2','--orb-3','--bbl-border','--bbl-bg'
+    ];
+    allVars.forEach(v => document.documentElement.style.removeProperty(v));
+  } else {
+    // Light mode: re-apply saved theme background + accent
+    const saved = typeof loadThemeFromStorage === 'function' ? loadThemeFromStorage() : null;
+    const themeToUse = saved ? { ...DEFAULT_THEME, ...saved } : DEFAULT_THEME;
+    if (typeof setColorVars === 'function') {
+      setColorVars(themeToUse.teal, themeToUse.tealMid || themeToUse.teal, themeToUse.tealLight || themeToUse.teal);
+    }
+    if (themeToUse.bg && typeof BG_VARS !== 'undefined' && BG_VARS[themeToUse.bg]) {
+      Object.entries(BG_VARS[themeToUse.bg]).forEach(([k,v]) => document.documentElement.style.setProperty(k,v));
+    }
   }
 }
 
@@ -6985,21 +7006,27 @@ function saveTabOrder() {
   try {
     const bar = document.getElementById('nav-tabs');
     if (!bar) return;
-    const order = Array.from(bar.querySelectorAll('.nav-tab')).map(t => t.dataset.page).filter(Boolean);
+    const validPages = ['dashboard','life-board','notes','vision','calendar','streams','paralegal','home','community'];
+    const order = Array.from(bar.querySelectorAll('.nav-tab'))
+      .map(t => t.dataset.page)
+      .filter(id => id && validPages.includes(id));
     localStorage.setItem('pcc-tab-order', JSON.stringify(order));
   } catch(e) {}
 }
 
 function loadTabOrder() {
   try {
-    const saved = localStorage.getItem('pcc-tab-order');
-    if (!saved) return;
-    const order = JSON.parse(saved);
+    const saved = JSON.parse(localStorage.getItem('pcc-tab-order'));
+    if (!saved || !Array.isArray(saved)) return;
     const bar = document.getElementById('nav-tabs');
     if (!bar) return;
-    const tabs = {};
-    bar.querySelectorAll('.nav-tab').forEach(t => { if(t.dataset.page) tabs[t.dataset.page] = t; });
-    order.forEach(page => { if (tabs[page]) bar.appendChild(tabs[page]); });
+    // Only reorder tabs that exist as real pages
+    const validPages = ['dashboard','life-board','notes','vision','calendar','streams','paralegal','home','community'];
+    const filtered = saved.filter(id => validPages.includes(id));
+    filtered.forEach(pageId => {
+      const tab = bar.querySelector(`.nav-tab[data-page="${pageId}"]`);
+      if (tab) bar.appendChild(tab);
+    });
   } catch(e) {}
 }
 
@@ -7798,7 +7825,7 @@ if (document.readyState !== 'loading') {
   if (typeof originalShowPage === 'function') {
     window.showPage = function(id, btn) {
       originalShowPage(id, btn);
-      document.querySelectorAll('.nav-tab[data-page="' + id + '"]').forEach(tab => tab.classList.add('on'));
+      document.querySelectorAll('.nav-tab[data-page="custom"]').forEach(tab => tab.classList.add('on'));
     };
   }
 
