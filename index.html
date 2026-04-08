@@ -730,14 +730,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   transition: background .4s ease;
 }
 
-.marble-bg svg,
-.m-orb,
-.mo1,
-.mo2,
-.mo3,
-.bbl,
-.anime-char,
-.speed-lines,
+
 [class*="anime"],
 [class*="speed-line"] {
   display: none !important;
@@ -1149,40 +1142,6 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 }
 .m-notes-input:focus{border-color:rgba(13,148,136,0.42);}
 .m-notes-input::placeholder{color:var(--muted);}
-
-
-/* ═══ BOTANICAL ILLUSTRATIONS ═══ */
-.botanical {
-  position: fixed;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0;
-  animation: botanicalFade 1.8s ease forwards;
-}
-@keyframes botanicalFade {
-  from { opacity: 0; transform: var(--bt-from, scale(0.92) rotate(-3deg)); }
-  to   { opacity: var(--bt-op, 0.18); transform: var(--bt-to, scale(1) rotate(0deg)); }
-}
-.botanical svg { display: block; }
-
-/* Individual placements */
-.bt-1 { bottom: 12%; left: -40px;  width: 220px; --bt-op: 0.15; animation-delay: 0.3s; --bt-from: scale(0.9) rotate(-6deg); --bt-to: scale(1) rotate(-4deg); }
-.bt-2 { top: 8%;    right: -30px;  width: 180px; --bt-op: 0.13; animation-delay: 0.6s; --bt-from: scale(0.9) rotate(8deg);  --bt-to: scale(1) rotate(6deg); }
-.bt-3 { top: 42%;  left: -20px;   width: 140px; --bt-op: 0.11; animation-delay: 1.0s; --bt-from: scale(0.88) rotate(-4deg); --bt-to: scale(1) rotate(-2deg); }
-.bt-4 { bottom: 2%; right: -20px; width: 200px; --bt-op: 0.14; animation-delay: 0.8s; --bt-from: scale(0.9) rotate(5deg);  --bt-to: scale(1) rotate(3deg); }
-.bt-5 { top: 2%;   left: 42%;     width: 100px; --bt-op: 0.09; animation-delay: 1.2s; --bt-from: scale(0.9) rotate(-2deg); --bt-to: scale(1) rotate(0deg); }
-
-/* Inline botanical accents inside cards */
-.card-botanical {
-  position: absolute;
-  pointer-events: none;
-  opacity: 0.08;
-  right: -8px; bottom: -8px;
-  width: 90px;
-}
-[data-theme="dark"] .botanical { --bt-op: 0.10 !important; }
-[data-theme="dark"] .card-botanical { opacity: 0.06; }
-
 
 /* ═══ REVENUE SNAPSHOT EXPANDED ═══ */
 .rev-top-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;margin-bottom:.9rem;}
