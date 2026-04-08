@@ -2911,6 +2911,66 @@ body {
     </div>
   </div>
    <button class="nav-tab nav-tab-add" type="button" onclick="addHub()">+ Hub</button>
+
+   .nav-tab-add{
+  border:1px dashed var(--teal-border);
+  background:var(--tint);
+  color:var(--teal);
+}
+.nav-tab-add:hover{
+  background:var(--tint-hover);
+  border-color:var(--teal);
+}
+.custom-hub-wrap{
+  display:grid;
+  gap:1rem;
+}
+.custom-hub-editor,
+.custom-hub-preview{
+  background:var(--surface2);
+  border:1px solid var(--teal-border);
+  border-radius:16px;
+  box-shadow:var(--shadow-sm);
+  padding:1.25rem;
+}
+.custom-hub-input,
+.custom-hub-textarea{
+  width:100%;
+  background:var(--input-bg);
+  border:1px solid var(--teal-border);
+  border-radius:10px;
+  color:var(--ink);
+  font-family:var(--font-ui, 'DM Sans', sans-serif);
+  padding:.8rem .9rem;
+  outline:none;
+}
+.custom-hub-textarea{
+  min-height:220px;
+  resize:vertical;
+}
+.custom-hub-actions{
+  display:flex;
+  gap:.65rem;
+  flex-wrap:wrap;
+  margin-top:.9rem;
+}
+.custom-hub-btn{
+  background:var(--tint);
+  border:1px solid var(--teal-border);
+  color:var(--teal);
+  border-radius:10px;
+  padding:.65rem .95rem;
+  cursor:pointer;
+  font:inherit;
+}
+.custom-hub-btn:hover{
+  background:var(--tint-hover);
+}
+.custom-hub-render{
+  color:var(--ink-mid);
+  line-height:1.75;
+  white-space:pre-wrap;
+}
 </nav>
 
 <!-- ════════ DASHBOARD ════════ -->
