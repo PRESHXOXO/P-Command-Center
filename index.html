@@ -719,15 +719,15 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   overflow: hidden;
 }
 
-.marble-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--page-texture, var(--marble-grad));
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  transition: background .4s ease;
+.marble-bg,
+.marble-bg::before,
+.marble-bg svg,
+.anime-char {
+  display: none !important;
+}
+
+body {
+  background: var(--bg) !important;
 }
 
 
