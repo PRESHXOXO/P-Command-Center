@@ -107,15 +107,14 @@ function openThemePanel() {
   const panel = document.getElementById('theme-panel');
   const overlay = document.getElementById('theme-overlay');
   if (!panel || !overlay) {
-    console.warn('Theme panel elements not found.');
+    // Elements not ready yet — try again shortly
+    setTimeout(openThemePanel, 100);
     return;
   }
-
   panel.classList.add('open');
   overlay.classList.add('open');
-
-  const saved = loadThemeFromStorage();
-  if (saved) populatePanel(saved);
+  const saved = typeof loadThemeFromStorage === 'function' ? loadThemeFromStorage() : null;
+  if (saved && typeof populatePanel === 'function') populatePanel(saved);
 }
 
 function closeThemePanel() {
@@ -201,79 +200,7 @@ function setColorVars(teal, mid, light) {
 }
 
 // ── Apply background ──
-const BG_VARS = {
-  'marble': {
-    '--bg': '#F6F1E8',
-    '--surface': 'rgba(255,250,244,0.78)',
-    '--surface2': 'rgba(255,252,248,0.88)',
-    '--input-bg': 'rgba(255,252,248,0.72)',
-    '--ink': '#2C241E',
-    '--ink-mid': '#4A4038',
-    '--charcoal': '#655950',
-    '--page-texture':
-      "linear-gradient(rgba(246,241,232,0.82), rgba(246,241,232,0.82)), url('YOUR-IVORY-PAPER-TEXTURE-URL')",
-  },
-
-  'linen-cream': {
-    '--bg': '#F4EFE7',
-    '--surface': 'rgba(250,246,240,0.78)',
-    '--surface2': 'rgba(255,252,247,0.88)',
-    '--input-bg': 'rgba(255,252,247,0.72)',
-    '--ink': '#2A241D',
-    '--ink-mid': '#473E36',
-    '--charcoal': '#60554D',
-    '--page-texture':
-      "linear-gradient(rgba(244,239,231,0.80), rgba(244,239,231,0.80)), url('YOUR-LINEN-TEXTURE-URL')",
-  },
-
-  'stone-taupe': {
-    '--bg': '#EAE4DC',
-    '--surface': 'rgba(245,240,234,0.74)',
-    '--surface2': 'rgba(250,246,241,0.86)',
-    '--input-bg': 'rgba(250,246,241,0.68)',
-    '--ink': '#28231F',
-    '--ink-mid': '#433C37',
-    '--charcoal': '#5A524C',
-    '--page-texture':
-      "linear-gradient(rgba(234,228,220,0.78), rgba(234,228,220,0.78)), url('YOUR-STONE-TEXTURE-URL')",
-  },
-
-  'black-silk': {
-    '--bg': '#121212',
-    '--surface': 'rgba(27,27,27,0.78)',
-    '--surface2': 'rgba(34,34,34,0.90)',
-    '--input-bg': 'rgba(36,36,36,0.72)',
-    '--ink': '#F3EEE8',
-    '--ink-mid': '#D7CEC5',
-    '--charcoal': '#B3A79B',
-    '--page-texture':
-      "linear-gradient(rgba(18,18,18,0.74), rgba(18,18,18,0.74)), url('YOUR-BLACK-SILK-TEXTURE-URL')",
-  },
-
-  'parchment': {
-    '--bg': '#EFE4D2',
-    '--surface': 'rgba(250,242,230,0.76)',
-    '--surface2': 'rgba(255,248,238,0.88)',
-    '--input-bg': 'rgba(255,248,238,0.72)',
-    '--ink': '#33281E',
-    '--ink-mid': '#524538',
-    '--charcoal': '#6B5D4E',
-    '--page-texture':
-      "linear-gradient(rgba(239,228,210,0.78), rgba(239,228,210,0.78)), url('YOUR-PARCHMENT-TEXTURE-URL')",
-  },
-
-  'walnut-fabric': {
-    '--bg': '#2A211C',
-    '--surface': 'rgba(48,38,33,0.78)',
-    '--surface2': 'rgba(58,47,41,0.90)',
-    '--input-bg': 'rgba(60,49,43,0.72)',
-    '--ink': '#F4ECE3',
-    '--ink-mid': '#DCCFC2',
-    '--charcoal': '#B8AA9A',
-    '--page-texture':
-      "linear-gradient(rgba(42,33,28,0.74), rgba(42,33,28,0.74)), url('YOUR-WALNUT-FABRIC-TEXTURE-URL')",
-  },
-};
+// BG_VARS in block 2
 
 function applyBackground(card) {
   document.querySelectorAll('.theme-bg-card').forEach(c => c.classList.remove('active'));
@@ -704,13 +631,7 @@ const _origOnAuthChange = _supabase.auth.onAuthStateChange;
 const COMM_KEY = 'pcc-community-posts';
 const COMM_CHALLENGE_KEY = 'pcc-challenge';
 
-const SEED_POSTS = [
-  { id:'s1', author:'Bella P', handle:'@bellap', initials:'B', color:'linear-gradient(135deg,#0A7266,#14B8A6)', type:'win', body:'Just closed my first retainer client for BrandingByBella! $2,000/month. We are SO doing this 👑🔥', time:'2m ago', likes:12, liked:false, comments:3 },
-  { id:'s2', author:'Shila', handle:'@shila', initials:'S', color:'linear-gradient(135deg,#BE185D,#F472B6)', type:'goal', body:'Setting my intention for this week — 3 new Party In Ink listings, 1 bulk pitch, and finishing the product photos. Holding myself accountable here! 🎯', time:'14m ago', likes:8, liked:false, comments:2 },
-  { id:'s3', author:'Tay', handle:'@tay', initials:'T', color:'linear-gradient(135deg,#7C3AED,#A78BFA)', type:'support', body:'Struggling with staying consistent on content this week. Anyone else in that place? How do you push through when motivation is low? 🌸', time:'1h ago', likes:15, liked:false, comments:7 },
-  { id:'s4', author:'Maya C', handle:'@mayac', initials:'M', color:'linear-gradient(135deg,#B45309,#F59E0B)', type:'update', body:'Day 8 of the income sprint ✅ Booked 2 travel clients this week. The system works when you work it. Keep going everyone! 💫', time:'2h ago', likes:21, liked:false, comments:5 },
-  { id:'s5', author:'Jade R', handle:'@jader', initials:'J', color:'linear-gradient(135deg,#065F46,#34D399)', type:'question', body:'Question — has anyone used LIHTC housing in Broward? Looking at options for a family member. Any insight on the application process? 💭', time:'3h ago', likes:6, liked:false, comments:4 },
-];
+const SEED_POSTS = [];
 
 let commPosts = [];
 let commFilter = 'all';
@@ -720,8 +641,8 @@ let dmOpen = false;
 function loadCommPosts() {
   try {
     const saved = JSON.parse(localStorage.getItem(COMM_KEY));
-    commPosts = saved && saved.length ? saved : [...SEED_POSTS];
-  } catch(e) { commPosts = [...SEED_POSTS]; }
+    commPosts = saved && Array.isArray(saved) ? saved : [];
+  } catch(e) { commPosts = []; }
 }
 function saveCommPosts() {
   try { localStorage.setItem(COMM_KEY, JSON.stringify(commPosts)); } catch(e) {}
@@ -892,6 +813,158 @@ document.addEventListener('keydown', e => {
 });
 
 setTimeout(() => { loadCommPosts(); updateCommProfile(); }, 500);
+
+
+// ════════════════════════════
+// PODS & CHALLENGES — Active views
+// ════════════════════════════
+const PODS_KEY       = 'pcc-comm-pods';
+const CHALLENGES_KEY = 'pcc-comm-challenges';
+let userPods       = [];
+let userChallenges = [];
+
+function loadPodsAndChallenges() {
+  try { userPods       = JSON.parse(localStorage.getItem(PODS_KEY)) || []; } catch(e) { userPods = []; }
+  try { userChallenges = JSON.parse(localStorage.getItem(CHALLENGES_KEY)) || []; } catch(e) { userChallenges = []; }
+}
+function savePodsAndChallenges() {
+  try { localStorage.setItem(PODS_KEY,       JSON.stringify(userPods));       } catch(e) {}
+  try { localStorage.setItem(CHALLENGES_KEY, JSON.stringify(userChallenges)); } catch(e) {}
+}
+
+// ── Create Pod ──
+function openCreatePod() {
+  document.getElementById('create-pod-overlay').classList.add('open');
+  document.getElementById('pod-name-input').focus();
+}
+function closeCreatePod() {
+  document.getElementById('create-pod-overlay').classList.remove('open');
+  ['pod-name-input','pod-emoji-input','pod-desc-input'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+}
+function submitCreatePod() {
+  const name  = document.getElementById('pod-name-input')?.value.trim();
+  const emoji = document.getElementById('pod-emoji-input')?.value.trim() || '🤝';
+  const desc  = document.getElementById('pod-desc-input')?.value.trim();
+  if (!name) return;
+  userPods.push({ id: 'pod-'+Date.now(), name, emoji, desc, members: 1, createdAt: new Date().toISOString() });
+  savePodsAndChallenges();
+  closeCreatePod();
+  showToast('Pod "' + name + '" created! 🤝');
+  // If currently viewing pods, refresh
+  const main = document.getElementById('comm-main');
+  if (main && main.dataset.view === 'pods') renderPodsView(main);
+}
+
+// ── Create Challenge ──
+function openCreateChallenge() {
+  document.getElementById('create-challenge-overlay').classList.add('open');
+  document.getElementById('challenge-name-input').focus();
+}
+function closeCreateChallenge() {
+  document.getElementById('create-challenge-overlay').classList.remove('open');
+  ['challenge-name-input','challenge-desc-input','challenge-days-input'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+}
+function submitCreateChallenge() {
+  const name = document.getElementById('challenge-name-input')?.value.trim();
+  const desc = document.getElementById('challenge-desc-input')?.value.trim();
+  const days = parseInt(document.getElementById('challenge-days-input')?.value) || 30;
+  if (!name) return;
+  userChallenges.push({ id: 'ch-'+Date.now(), name, desc, days, progress: 0, members: 1, joined: true, startDate: new Date().toISOString() });
+  savePodsAndChallenges();
+  closeCreateChallenge();
+  showToast('Challenge "' + name + '" launched! 🔥');
+  const main = document.getElementById('comm-main');
+  if (main && main.dataset.view === 'challenges') renderChallengesView(main);
+}
+
+// ── Pods view ──
+function renderPodsView(main) {
+  main.dataset.view = 'pods';
+  loadPodsAndChallenges();
+  let items = '';
+  if (!userPods.length) {
+    items = `<div class="comm-empty-state"><div class="comm-empty-icon">🤝</div>No pods yet.<br>Hit "Create Pod" to start one.</div>`;
+  } else {
+    userPods.forEach(pod => {
+      items += `<div class="comm-pod-card"><span style="font-size:1.3rem">${pod.emoji}</span><div style="flex:1"><div style="font-size:.72rem;font-weight:600;color:var(--ink)">${pod.name}</div><div style="font-size:.58rem;color:var(--muted);font-weight:400">${pod.desc||''} &middot; ${pod.members} member${pod.members!==1?'s':''}</div></div></div>`;
+    });
+  }
+  main.innerHTML = `<div class="comm-view-panel"><div class="comm-view-title">🤝 Accountability Pods</div><div class="comm-view-sub">Small groups. Real accountability.</div>${items}</div>${BACK_BTN}`;
+}
+
+// ── Challenges view ──
+function renderChallengesView(main) {
+  main.dataset.view = 'challenges';
+  loadPodsAndChallenges();
+  let items = '';
+  if (!userChallenges.length) {
+    items = `<div class="comm-empty-state"><div class="comm-empty-icon">⚡</div>No challenges yet.<br>Hit "Create Challenge" to launch one.</div>`;
+  } else {
+    userChallenges.forEach(ch => {
+      const days = Math.min(ch.days, Math.floor((Date.now()-new Date(ch.startDate))/86400000)+1);
+      const pct  = Math.round(days/ch.days*100);
+      items += `<div class="comm-challenge-item"><div class="comm-challenge-item-title">${ch.name} <span style="font-size:.5rem;color:var(--muted);font-weight:400">&middot; Day ${days} of ${ch.days}</span></div><div class="comm-challenge-item-desc">${ch.desc||''}</div><div class="comm-challenge-bar"><div class="comm-challenge-bar-fill" style="width:${pct}%"></div></div></div>`;
+    });
+  }
+  main.innerHTML = `<div class="comm-view-panel"><div class="comm-view-title">⚡ Challenges</div><div class="comm-view-sub">Set a goal. Track it daily. Win together.</div>${items}</div>${BACK_BTN}`;
+}
+
+// ── Win wall view ──
+function renderWinsView(main) {
+  main.dataset.view = 'wins';
+  const wins = (typeof commPosts !== 'undefined' ? commPosts : []).filter(p => p.type === 'win');
+  let items = '';
+  if (!wins.length) {
+    items = `<div class="comm-empty-state"><div class="comm-empty-icon">🏆</div>No wins yet.<br>Post your first win in the feed!</div>`;
+  } else {
+    wins.forEach((post,i) => {
+      items += `<div class="comm-post" style="animation-delay:${i*.06}s"><div class="comm-post-header"><div class="comm-post-avatar" style="background:${post.color}">${post.initials}</div><div class="comm-post-meta"><div class="comm-post-name">${post.author}</div><div class="comm-post-time">${post.time}</div></div><span class="comm-post-badge badge-win">🏆 Win</span></div><div class="comm-post-body">${post.body}</div></div>`;
+    });
+  }
+  main.innerHTML = `<div class="comm-view-panel"><div class="comm-view-title">🏆 Win Wall</div><div class="comm-view-sub">Every win counts — big and small.</div>${items}</div>${BACK_BTN}`;
+}
+
+// ── Messages view ──
+function renderMessagesView(main) {
+  main.dataset.view = 'messages';
+  main.innerHTML = `<div class="comm-view-panel"><div class="comm-view-title">💬 Messages</div><div class="comm-view-sub">Click any member on the right to open a DM.</div><div class="comm-empty-state"><div class="comm-empty-icon">💬</div>Your conversations will appear here.</div></div>${BACK_BTN}`;
+}
+
+// ── Override switchCommView to use real views ──
+function switchCommView(view, navItem) {
+  if (navItem) {
+    document.querySelectorAll('.comm-nav-item').forEach(el => el.classList.remove('active'));
+    navItem.classList.add('active');
+  }
+  const main = document.getElementById('comm-main');
+  if (!main) return;
+
+  if (view === 'feed')       { main.dataset.view='feed'; if(typeof renderFeed==='function') renderFeed(); return; }
+  if (view === 'pods')       { renderPodsView(main); return; }
+  if (view === 'challenges') { renderChallengesView(main); return; }
+  if (view === 'wins')       { renderWinsView(main); return; }
+  if (view === 'messages')   { renderMessagesView(main); return; }
+}
+
+// Close modals on overlay click
+document.addEventListener('click', e => {
+  if (e.target.id === 'create-pod-overlay')       closeCreatePod();
+  if (e.target.id === 'create-challenge-overlay') closeCreateChallenge();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeCreatePod(); closeCreateChallenge(); }
+});
+
+// Load on community init
+const _origLoadCommPosts2 = typeof loadCommPosts === 'function' ? loadCommPosts : null;
+function initCommunityExtras() {
+  loadPodsAndChallenges();
+}
+setTimeout(initCommunityExtras, 700);
 
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -1253,7 +1326,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 .note-tags-input{background:transparent;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:.65rem;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);width:200px;}
 .note-tags-input::placeholder{color:rgba(13,148,136,0.4);}
 .note-actions{display:flex;gap:.4rem;}
-.note-save-btn{font-size:.62rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);border:1px solid rgba(13,148,136,0.3);border-radius:6px;padding:.35rem .9rem;cursor:pointer;background:var(--tint-hover);font-family:'DM Sans',sans-serif;transition:all .2s;}
+.note-save-btn{font-size:.65rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);border:1px solid rgba(13,148,136,0.3);border-radius:6px;padding:.35rem .9rem;cursor:pointer;background:var(--tint-hover);font-family:'DM Sans',sans-serif;transition:all .2s;}
 .note-save-btn:hover{background:var(--tint);border-color:rgba(13,148,136,0.5);}
 .note-delete-btn{font-size:.62rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--charcoal);border:1px solid rgba(60,60,60,0.2);border-radius:6px;padding:.35rem .9rem;cursor:pointer;background:rgba(60,60,60,0.04);font-family:'DM Sans',sans-serif;transition:all .2s;}
 .note-delete-btn:hover{background:rgba(200,60,60,0.08);border-color:rgba(200,60,60,0.3);color:#8B2020;}
@@ -3113,7 +3186,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 .comm-profile-card::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(10,114,102,0.4),transparent);}
 .comm-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--teal-light));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;color:#fff;margin:0 auto .6rem;border:2px solid rgba(255,255,255,0.2);cursor:pointer;transition:transform .2s;}
 .comm-avatar:hover{transform:scale(1.05);}
-.comm-profile-name{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:400;color:var(--ink);margin-bottom:.12rem;}
+.comm-profile-name{font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;color:var(--ink);margin-bottom:.12rem;}
 .comm-profile-handle{font-size:.52rem;color:var(--teal);letter-spacing:.1em;margin-bottom:.7rem;}
 .comm-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem;border-top:1px solid var(--teal-border);padding-top:.65rem;}
 .comm-stat{text-align:center;}
@@ -3132,7 +3205,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 .comm-composer::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(10,114,102,0.4),transparent);}
 .comm-composer-top{display:flex;align-items:flex-start;gap:.7rem;margin-bottom:.7rem;}
 .comm-composer-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--teal-light));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:.85rem;color:#fff;flex-shrink:0;}
-.comm-composer-input{flex:1;background:var(--input-bg);border:1.5px solid var(--teal-border);border-radius:12px;color:var(--ink);font-family:'Cormorant Garamond',serif;font-size:.88rem;font-weight:300;font-style:italic;padding:.6rem .9rem;resize:none;outline:none;min-height:68px;line-height:1.65;transition:border-color .2s;width:100%;}
+.comm-composer-input{flex:1;background:var(--input-bg);border:1.5px solid var(--teal-border);border-radius:12px;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:400;font-style:normal;padding:.6rem .9rem;resize:none;outline:none;min-height:68px;line-height:1.65;transition:border-color .2s;width:100%;}
 .comm-composer-input:focus{border-color:rgba(10,114,102,0.5);}
 .comm-composer-input::placeholder{color:var(--muted);}
 .comm-post-types{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.7rem;}
@@ -3154,15 +3227,15 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 .comm-post-header{display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem;}
 .comm-post-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:.85rem;color:#fff;flex-shrink:0;}
 .comm-post-meta{flex:1;}
-.comm-post-name{font-size:.68rem;font-weight:500;color:var(--ink);margin-bottom:.06rem;}
-.comm-post-time{font-size:.48rem;color:var(--muted);letter-spacing:.04em;}
+.comm-post-name{font-size:.72rem;font-weight:600;color:var(--ink);margin-bottom:.06rem;}
+.comm-post-time{font-size:.52rem;font-weight:400;color:var(--muted);letter-spacing:.04em;}
 .comm-post-badge{font-size:.4rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:.18rem .5rem;border-radius:50px;border:1px solid;}
 .badge-win{color:#15622D;border-color:rgba(22,163,74,0.3);background:rgba(22,163,74,0.08);}
 .badge-goal{color:var(--teal);border-color:var(--teal-border);background:var(--tint);}
 .badge-update{color:#8A6800;border-color:rgba(161,121,0,0.3);background:rgba(161,121,0,0.08);}
 .badge-support{color:#BE185D;border-color:rgba(190,24,93,0.25);background:rgba(190,24,93,0.06);}
 .badge-question{color:#7C3AED;border-color:rgba(124,58,237,0.25);background:rgba(124,58,237,0.06);}
-.comm-post-body{font-family:'Cormorant Garamond',serif;font-size:.88rem;font-weight:300;color:var(--charcoal);line-height:1.72;margin-bottom:.8rem;}
+.comm-post-body{font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:400;color:var(--ink);line-height:1.72;margin-bottom:.8rem;}
 .comm-post-actions{display:flex;align-items:center;gap:.45rem;border-top:1px solid var(--teal-border);padding-top:.6rem;}
 .comm-action-btn{background:transparent;border:none;border-radius:8px;padding:.32rem .6rem;font-family:'DM Sans',sans-serif;font-size:.52rem;font-weight:500;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:.28rem;transition:all .18s;}
 .comm-action-btn:hover{background:var(--tint);color:var(--teal);}
@@ -3174,8 +3247,8 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 .comm-challenge-card{background:linear-gradient(135deg,var(--teal),var(--teal-mid));border-radius:16px;padding:1.1rem;color:#fff;position:relative;overflow:hidden;}
 .comm-challenge-card::before{content:'✦';position:absolute;top:.7rem;right:.9rem;font-size:1.4rem;opacity:.2;}
 .comm-challenge-label{font-size:.44rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.8;margin-bottom:.35rem;}
-.comm-challenge-title{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:300;margin-bottom:.45rem;line-height:1.2;}
-.comm-challenge-desc{font-size:.56rem;opacity:.85;line-height:1.55;margin-bottom:.8rem;}
+.comm-challenge-title{font-family:'DM Sans',sans-serif;font-size:.92rem;font-weight:600;margin-bottom:.45rem;line-height:1.2;}
+.comm-challenge-desc{font-size:.6rem;font-weight:400;opacity:.95;line-height:1.55;margin-bottom:.8rem;}
 .comm-challenge-progress{background:rgba(255,255,255,0.2);border-radius:50px;height:5px;margin-bottom:.32rem;overflow:hidden;}
 .comm-challenge-fill{height:100%;background:#fff;border-radius:50px;width:34%;transition:width .6s ease;}
 .comm-challenge-meta{font-size:.46rem;opacity:.75;display:flex;justify-content:space-between;}
@@ -3186,7 +3259,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 .comm-pod{display:flex;align-items:center;gap:.55rem;padding:.5rem .6rem;border-radius:10px;border:1px solid var(--teal-border);margin-bottom:.38rem;cursor:pointer;transition:all .18s;background:var(--tint);}
 .comm-pod:hover{background:var(--tint-hover);border-color:rgba(10,114,102,0.3);}
 .comm-pod-emoji{font-size:.9rem;}
-.comm-pod-name{font-size:.62rem;font-weight:500;color:var(--ink);flex:1;}
+.comm-pod-name{font-size:.66rem;font-weight:600;color:var(--ink);flex:1;}
 .comm-pod-count{font-size:.5rem;color:var(--muted);}
 .comm-pod-join{background:rgba(10,114,102,0.1);border:1px solid var(--teal-border);border-radius:6px;padding:.18rem .48rem;font-size:.42rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);cursor:pointer;transition:all .18s;white-space:nowrap;}
 .comm-pod-join:hover{background:var(--teal);color:#fff;}
@@ -3195,7 +3268,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 .comm-member{display:flex;align-items:center;gap:.5rem;padding:.35rem 0;cursor:pointer;transition:opacity .18s;}
 .comm-member:hover{opacity:.75;}
 .comm-member-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem;color:#fff;font-family:'Cormorant Garamond',serif;flex-shrink:0;}
-.comm-member-name{font-size:.6rem;font-weight:400;color:var(--ink);flex:1;}
+.comm-member-name{font-size:.65rem;font-weight:500;color:var(--ink);flex:1;}
 .comm-member-status{font-size:.48rem;color:var(--muted);}
 
 /* DM Panel */
@@ -3206,7 +3279,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 .comm-dm-close{background:none;border:none;cursor:pointer;font-size:.75rem;color:var(--muted);transition:color .18s;}
 .comm-dm-close:hover{color:var(--ink);}
 .comm-dm-messages{flex:1;height:200px;overflow-y:auto;padding:.7rem .9rem;display:flex;flex-direction:column;gap:.45rem;}
-.comm-dm-msg{max-width:82%;padding:.45rem .7rem;border-radius:12px;font-family:'Cormorant Garamond',serif;font-size:.8rem;font-weight:300;line-height:1.5;}
+.comm-dm-msg{max-width:82%;padding:.45rem .7rem;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:.74rem;font-weight:400;line-height:1.5;}
 .comm-dm-msg.mine{align-self:flex-end;background:var(--teal);color:#fff;border-bottom-right-radius:4px;}
 .comm-dm-msg.theirs{align-self:flex-start;background:var(--tint);color:var(--charcoal);border-bottom-left-radius:4px;}
 .comm-dm-input-row{display:flex;gap:.38rem;padding:.6rem .8rem;border-top:1px solid var(--teal-border);}
@@ -3216,6 +3289,187 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 
 /* Responsive */
 @media(max-width:960px){.community-layout{grid-template-columns:1fr;}.comm-sidebar,.comm-right{position:static;}}
+
+
+/* ── Community create buttons ── */
+.comm-create-btn {
+  width: 100%;
+  background: var(--teal);
+  border: none;
+  border-radius: 10px;
+  padding: .6rem .9rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .6rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #fff;
+  cursor: pointer;
+  transition: all .2s cubic-bezier(.34,1.56,.64,1);
+  margin-top: .35rem;
+}
+.comm-create-btn:hover { background: var(--teal-mid); transform: translateY(-1px); }
+.comm-create-btn-secondary {
+  background: transparent;
+  border: 1.5px solid var(--teal-border);
+  color: var(--teal);
+}
+.comm-create-btn-secondary:hover { background: var(--tint); border-color: var(--teal); }
+
+/* ── Modal for create pod / challenge ── */
+.comm-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(4px);
+  z-index: 600;
+  align-items: center;
+  justify-content: center;
+}
+.comm-modal-overlay.open { display: flex; }
+.comm-modal {
+  background: var(--surface2);
+  border: 1px solid var(--teal-border);
+  border-radius: 20px;
+  padding: 1.8rem 1.8rem 1.4rem;
+  width: 100%;
+  max-width: 400px;
+  margin: 1rem;
+  position: relative;
+  animation: authCardIn .3s cubic-bezier(.22,.68,0,1.1) both;
+}
+.comm-modal-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 1rem;
+}
+.comm-modal-field {
+  margin-bottom: .75rem;
+}
+.comm-modal-label {
+  font-size: .5rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: .3rem;
+  display: block;
+}
+.comm-modal-input {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1.5px solid var(--teal-border);
+  border-radius: 10px;
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .78rem;
+  font-weight: 400;
+  padding: .6rem .9rem;
+  outline: none;
+  transition: border-color .2s;
+}
+.comm-modal-input:focus { border-color: rgba(10,114,102,0.5); }
+.comm-modal-input::placeholder { color: var(--muted); }
+.comm-modal-footer {
+  display: flex;
+  gap: .5rem;
+  margin-top: 1rem;
+}
+.comm-modal-submit {
+  flex: 1;
+  background: var(--teal);
+  border: none;
+  border-radius: 10px;
+  padding: .65rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #fff;
+  cursor: pointer;
+  transition: all .2s;
+}
+.comm-modal-submit:hover { background: var(--teal-mid); }
+.comm-modal-cancel {
+  background: var(--tint);
+  border: 1px solid var(--teal-border);
+  border-radius: 10px;
+  padding: .65rem 1rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .62rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  cursor: pointer;
+  transition: all .2s;
+}
+.comm-modal-cancel:hover { background: var(--tint-hover); }
+.comm-modal-close {
+  position: absolute;
+  top: 1rem; right: 1rem;
+  background: none; border: none;
+  font-size: .85rem; color: var(--muted);
+  cursor: pointer;
+}
+/* Community view panels */
+.comm-view-panel {
+  background: var(--surface2);
+  border: 1px solid var(--teal-border);
+  border-radius: 16px;
+  padding: 1.4rem;
+}
+.comm-view-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: .3rem;
+}
+.comm-view-sub {
+  font-size: .65rem;
+  color: var(--muted);
+  margin-bottom: 1.1rem;
+  font-weight: 400;
+}
+.comm-empty-state {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--muted);
+  font-size: .72rem;
+  font-weight: 400;
+  line-height: 1.7;
+}
+.comm-empty-icon { font-size: 2rem; margin-bottom: .5rem; }
+.comm-pod-card {
+  background: var(--tint);
+  border: 1px solid var(--teal-border);
+  border-radius: 12px;
+  padding: .9rem 1rem;
+  margin-bottom: .5rem;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  transition: all .2s;
+}
+.comm-pod-card:hover { background: var(--tint-hover); border-color: rgba(10,114,102,.3); }
+.comm-challenge-item {
+  background: var(--tint);
+  border: 1px solid var(--teal-border);
+  border-radius: 12px;
+  padding: .9rem 1rem;
+  margin-bottom: .5rem;
+}
+.comm-challenge-item-title { font-size:.72rem; font-weight:600; color:var(--ink); margin-bottom:.25rem; }
+.comm-challenge-item-desc { font-size:.62rem; color:var(--charcoal); font-weight:400; line-height:1.5; margin-bottom:.5rem; }
+.comm-challenge-bar { height:4px; background:rgba(10,114,102,.1); border-radius:50px; overflow:hidden; }
+.comm-challenge-bar-fill { height:100%; background:linear-gradient(90deg,var(--teal),var(--teal-light)); border-radius:50px; }
+
+
+.comm-back-btn{display:block;margin-top:.75rem;background:var(--tint);border:1px solid var(--teal-border);border-radius:10px;padding:.5rem 1rem;font-family:'DM Sans',sans-serif;font-size:.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);cursor:pointer;transition:all .18s;}
+.comm-back-btn:hover{background:var(--tint-hover);}
 
 </style>
 </head>
@@ -3845,6 +4099,8 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
         <div class="comm-nav-item" onclick="switchCommView('wins',this)"><span class="comm-nav-icon">🏆</span> Win Wall</div>
         <div class="comm-nav-item" onclick="switchCommView('messages',this)"><span class="comm-nav-icon">💬</span> Messages</div>
       </div>
+      <button class="comm-create-btn" onclick="openCreatePod()">+ Create Pod</button>
+      <button class="comm-create-btn comm-create-btn-secondary" onclick="openCreateChallenge()">+ Create Challenge</button>
     </div>
 
     <div class="comm-main" id="comm-main">
@@ -4711,6 +4967,8 @@ document.addEventListener('keydown', e => {
 });
 
 // ═══ INIT ═══
+loadTabOrder();
+initTabDrag();
 // Pre-load community data so it's ready when tab is clicked
 setTimeout(() => {
   if (typeof loadCommPosts === 'function') {
@@ -7266,6 +7524,55 @@ if (document.readyState !== 'loading') {
   }
 })();
 </script>
+
+
+<!-- ══ CREATE POD MODAL ══ -->
+<div class="comm-modal-overlay" id="create-pod-overlay">
+  <div class="comm-modal">
+    <button class="comm-modal-close" onclick="closeCreatePod()">✕</button>
+    <div class="comm-modal-title">🤝 Create an Accountability Pod</div>
+    <div class="comm-modal-field">
+      <label class="comm-modal-label">Pod Name</label>
+      <input class="comm-modal-input" id="pod-name-input" placeholder="e.g. CEO Squad, Side Hustle Stack..." maxlength="40" />
+    </div>
+    <div class="comm-modal-field">
+      <label class="comm-modal-label">Emoji</label>
+      <input class="comm-modal-input" id="pod-emoji-input" placeholder="👑" maxlength="4" style="width:80px;" />
+    </div>
+    <div class="comm-modal-field">
+      <label class="comm-modal-label">Description</label>
+      <input class="comm-modal-input" id="pod-desc-input" placeholder="What's this pod about?" maxlength="80" />
+    </div>
+    <div class="comm-modal-footer">
+      <button class="comm-modal-cancel" onclick="closeCreatePod()">Cancel</button>
+      <button class="comm-modal-submit" onclick="submitCreatePod()">Create Pod ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CREATE CHALLENGE MODAL ══ -->
+<div class="comm-modal-overlay" id="create-challenge-overlay">
+  <div class="comm-modal">
+    <button class="comm-modal-close" onclick="closeCreateChallenge()">✕</button>
+    <div class="comm-modal-title">⚡ Create a Challenge</div>
+    <div class="comm-modal-field">
+      <label class="comm-modal-label">Challenge Name</label>
+      <input class="comm-modal-input" id="challenge-name-input" placeholder="e.g. 30-Day Income Sprint..." maxlength="50" />
+    </div>
+    <div class="comm-modal-field">
+      <label class="comm-modal-label">Description</label>
+      <input class="comm-modal-input" id="challenge-desc-input" placeholder="What's the goal?" maxlength="120" />
+    </div>
+    <div class="comm-modal-field">
+      <label class="comm-modal-label">Duration (days)</label>
+      <input class="comm-modal-input" id="challenge-days-input" type="number" placeholder="30" min="1" max="365" style="width:100px;" />
+    </div>
+    <div class="comm-modal-footer">
+      <button class="comm-modal-cancel" onclick="closeCreateChallenge()">Cancel</button>
+      <button class="comm-modal-submit" onclick="submitCreateChallenge()">Launch Challenge 🔥</button>
+    </div>
+  </div>
+</div>
 
 </body>
 
