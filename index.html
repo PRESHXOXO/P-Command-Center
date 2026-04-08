@@ -709,7 +709,6 @@ let commPosts = [];
 let commFilter = 'all';
 let selectedPostType = 'update';
 let dmOpen = false;
-let communityFeedTemplate = '';
 
 function loadCommPosts() {
   try {
@@ -719,21 +718,6 @@ function loadCommPosts() {
 }
 function saveCommPosts() {
   try { localStorage.setItem(COMM_KEY, JSON.stringify(commPosts)); } catch(e) {}
-}
-
-function ensureCommunityFeedTemplate() {
-  const main = document.getElementById('comm-main');
-  if (!main || communityFeedTemplate) return;
-  if (main.querySelector('#comm-feed')) communityFeedTemplate = main.innerHTML;
-}
-
-function restoreCommunityFeed(main) {
-  ensureCommunityFeedTemplate();
-  if (!main || !communityFeedTemplate) return;
-  main.innerHTML = communityFeedTemplate;
-  main.dataset.view = 'feed';
-  updateCommProfile();
-  renderFeed();
 }
 
 function renderFeed() {
@@ -805,7 +789,7 @@ function switchCommView(view, navItem) {
   }
   const main = document.getElementById('comm-main');
   if (!main) return;
-  if (view === 'feed')       { restoreCommunityFeed(main); return; }
+  if (view === 'feed')       { main.dataset.view='feed'; if(typeof renderFeed==='function') renderFeed(); return; }
   if (view === 'pods')       { renderPodsView(main); return; }
   if (view === 'challenges') { renderChallengesView(main); return; }
   if (view === 'wins')       { renderWinsView(main); return; }
@@ -903,8 +887,6 @@ document.addEventListener('keydown', e => {
 });
 
 setTimeout(() => { loadCommPosts(); updateCommProfile(); }, 500);
-setTimeout(ensureCommunityFeedTemplate, 600);
-document.addEventListener('DOMContentLoaded', ensureCommunityFeedTemplate);
 
 
 // ════════════════════════════
@@ -924,24 +906,13 @@ function savePodsAndChallenges() {
   try { localStorage.setItem(CHALLENGES_KEY, JSON.stringify(userChallenges)); } catch(e) {}
 }
 
-const BACK_BTN = `
-  <button class="comm-back-btn" type="button" onclick="switchCommView('feed', document.querySelector('.comm-nav-item'))">
-    ← Back to Feed
-  </button>
-`;
-
 // ── Create Pod ──
 function openCreatePod() {
-  const overlay = document.getElementById('create-pod-overlay');
-  const input = document.getElementById('pod-name-input');
-  if (!overlay) return;
-  overlay.classList.add('open');
-  if (input) input.focus();
+  document.getElementById('create-pod-overlay').classList.add('open');
+  document.getElementById('pod-name-input').focus();
 }
 function closeCreatePod() {
-  const overlay = document.getElementById('create-pod-overlay');
-  if (!overlay) return;
-  overlay.classList.remove('open');
+  document.getElementById('create-pod-overlay').classList.remove('open');
   ['pod-name-input','pod-emoji-input','pod-desc-input'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value='';
   });
@@ -955,22 +926,18 @@ function submitCreatePod() {
   savePodsAndChallenges();
   closeCreatePod();
   showToast('Pod "' + name + '" created! 🤝');
-  const podNav = document.querySelectorAll('.comm-nav-item')[1];
-  switchCommView('pods', podNav || null);
+  // If currently viewing pods, refresh
+  const main = document.getElementById('comm-main');
+  if (main && main.dataset.view === 'pods') renderPodsView(main);
 }
 
 // ── Create Challenge ──
 function openCreateChallenge() {
-  const overlay = document.getElementById('create-challenge-overlay');
-  const input = document.getElementById('challenge-name-input');
-  if (!overlay) return;
-  overlay.classList.add('open');
-  if (input) input.focus();
+  document.getElementById('create-challenge-overlay').classList.add('open');
+  document.getElementById('challenge-name-input').focus();
 }
 function closeCreateChallenge() {
-  const overlay = document.getElementById('create-challenge-overlay');
-  if (!overlay) return;
-  overlay.classList.remove('open');
+  document.getElementById('create-challenge-overlay').classList.remove('open');
   ['challenge-name-input','challenge-desc-input','challenge-days-input'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value='';
   });
@@ -984,8 +951,8 @@ function submitCreateChallenge() {
   savePodsAndChallenges();
   closeCreateChallenge();
   showToast('Challenge "' + name + '" launched! 🔥');
-  const challengeNav = document.querySelectorAll('.comm-nav-item')[2];
-  switchCommView('challenges', challengeNav || null);
+  const main = document.getElementById('comm-main');
+  if (main && main.dataset.view === 'challenges') renderChallengesView(main);
 }
 
 // ── Pods view ──
@@ -1050,7 +1017,7 @@ function switchCommView(view, navItem) {
   const main = document.getElementById('comm-main');
   if (!main) return;
 
-  if (view === 'feed')       { restoreCommunityFeed(main); return; }
+  if (view === 'feed')       { main.dataset.view='feed'; if(typeof renderFeed==='function') renderFeed(); return; }
   if (view === 'pods')       { renderPodsView(main); return; }
   if (view === 'challenges') { renderChallengesView(main); return; }
   if (view === 'wins')       { renderWinsView(main); return; }
@@ -7718,138 +7685,12 @@ if (document.readyState !== 'loading') {
 <script>
 (function() {
   const originalShowPage = window.showPage;
-  const communityViews = ['feed', 'pods', 'challenges', 'wins', 'messages'];
-  let communityFeedHtml = '';
-
   if (typeof originalShowPage === 'function') {
     window.showPage = function(id, btn) {
       originalShowPage(id, btn);
       document.querySelectorAll('.nav-tab[data-page="' + id + '"]').forEach(tab => tab.classList.add('on'));
-      if (id === 'community') {
-        setTimeout(function() {
-          captureCommunityFeed();
-          stableSwitchCommView('feed');
-        }, 60);
-      }
     };
   }
-
-  function forceOpenThemePanel() {
-    const panel = document.getElementById('theme-panel');
-    const overlay = document.getElementById('theme-overlay');
-    if (!panel || !overlay) return;
-    panel.classList.add('open');
-    overlay.classList.add('open');
-    panel.style.right = '0';
-    overlay.style.display = 'block';
-    if (typeof loadThemeFromStorage === 'function' && typeof populatePanel === 'function') {
-      const saved = loadThemeFromStorage();
-      if (saved) populatePanel(saved);
-    }
-  }
-
-  function forceCloseThemePanel() {
-    const panel = document.getElementById('theme-panel');
-    const overlay = document.getElementById('theme-overlay');
-    if (!panel || !overlay) return;
-    panel.classList.remove('open');
-    overlay.classList.remove('open');
-    panel.style.right = '';
-    overlay.style.display = '';
-  }
-
-  window.openThemePanel = forceOpenThemePanel;
-  window.closeThemePanel = forceCloseThemePanel;
-
-  function captureCommunityFeed() {
-    const main = document.getElementById('comm-main');
-    if (!main || communityFeedHtml) return;
-    if (main.querySelector('#comm-feed')) communityFeedHtml = main.innerHTML;
-  }
-
-  function setActiveCommunityNav(view, navItem) {
-    const items = Array.from(document.querySelectorAll('.comm-nav-item'));
-    items.forEach(item => item.classList.remove('active'));
-    if (navItem) {
-      navItem.classList.add('active');
-      return;
-    }
-    const idx = communityViews.indexOf(view);
-    if (idx >= 0 && items[idx]) items[idx].classList.add('active');
-  }
-
-  function restoreCommunityFeed() {
-    const main = document.getElementById('comm-main');
-    if (!main) return;
-    captureCommunityFeed();
-    if (communityFeedHtml) main.innerHTML = communityFeedHtml;
-    main.dataset.view = 'feed';
-    if (typeof updateCommProfile === 'function') updateCommProfile();
-    if (typeof loadCommPosts === 'function') loadCommPosts();
-    if (typeof renderFeed === 'function') renderFeed();
-    if (typeof loadChallengeState === 'function') loadChallengeState();
-  }
-
-  function stableSwitchCommView(view, navItem) {
-    const main = document.getElementById('comm-main');
-    if (!main) return;
-    setActiveCommunityNav(view, navItem);
-    if (view === 'feed') {
-      restoreCommunityFeed();
-      return;
-    }
-    if (view === 'pods' && typeof renderPodsView === 'function') {
-      renderPodsView(main);
-      return;
-    }
-    if (view === 'challenges' && typeof renderChallengesView === 'function') {
-      renderChallengesView(main);
-      return;
-    }
-    if (view === 'wins' && typeof renderWinsView === 'function') {
-      renderWinsView(main);
-      return;
-    }
-    if (view === 'messages' && typeof renderMessagesView === 'function') {
-      renderMessagesView(main);
-      return;
-    }
-  }
-
-  window.switchCommView = stableSwitchCommView;
-
-  function openCommunityOverlay(id, focusId) {
-    const overlay = document.getElementById(id);
-    if (!overlay) return;
-    overlay.classList.add('open');
-    if (focusId) {
-      const input = document.getElementById(focusId);
-      if (input) input.focus();
-    }
-  }
-
-  function closeCommunityOverlay(id, resetIds) {
-    const overlay = document.getElementById(id);
-    if (!overlay) return;
-    overlay.classList.remove('open');
-    (resetIds || []).forEach(function(resetId) {
-      const el = document.getElementById(resetId);
-      if (el) el.value = '';
-    });
-  }
-
-  window.openCreatePod = function() {
-    openCommunityOverlay('create-pod-overlay', 'pod-name-input');
-  };
-  window.closeCreatePod = function() {
-    closeCommunityOverlay('create-pod-overlay', ['pod-name-input', 'pod-emoji-input', 'pod-desc-input']);
-  };
-  window.openCreateChallenge = function() {
-    openCommunityOverlay('create-challenge-overlay', 'challenge-name-input');
-  };
-  window.closeCreateChallenge = function() {
-    closeCommunityOverlay('create-challenge-overlay', ['challenge-name-input', 'challenge-desc-input', 'challenge-days-input']);
-  };
 
   function bindTopNavTabs() {
     document.querySelectorAll('.nav-tabs .nav-tab').forEach(tab => {
@@ -7889,55 +7730,15 @@ if (document.readyState !== 'loading') {
     }
   }
 
-  function bindCommunityControls() {
-    captureCommunityFeed();
-
-    document.querySelectorAll('.comm-nav-item').forEach((item, index) => {
-      if (item.dataset.codexBound === 'true') return;
-      item.dataset.codexBound = 'true';
-      item.addEventListener('click', function(e) {
-        e.preventDefault();
-        stableSwitchCommView(communityViews[index] || 'feed', item);
-      });
-    });
-
-    const editBtn = document.querySelector('.comm-edit-profile-btn');
-    if (editBtn && editBtn.dataset.codexBound !== 'true') {
-      editBtn.dataset.codexBound = 'true';
-      editBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (typeof openEditProfile === 'function') openEditProfile();
-      });
-    }
-
-    const createButtons = document.querySelectorAll('.comm-create-btn');
-    if (createButtons[0] && createButtons[0].dataset.codexBound !== 'true') {
-      createButtons[0].dataset.codexBound = 'true';
-      createButtons[0].addEventListener('click', function(e) {
-        e.preventDefault();
-        window.openCreatePod();
-      });
-    }
-    if (createButtons[1] && createButtons[1].dataset.codexBound !== 'true') {
-      createButtons[1].dataset.codexBound = 'true';
-      createButtons[1].addEventListener('click', function(e) {
-        e.preventDefault();
-        window.openCreateChallenge();
-      });
-    }
-  }
-
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => setTimeout(function() {
       bindTopNavTabs();
       bindThemeControls();
-      bindCommunityControls();
     }, 50));
   } else {
     setTimeout(function() {
       bindTopNavTabs();
       bindThemeControls();
-      bindCommunityControls();
     }, 50);
   }
 })();
@@ -8035,10 +7836,10 @@ if (document.readyState !== 'loading') {
   </div>
 </div>
 
-<style id="motion-kill">
-.m-orb,.mo1,.mo2,.mo3,.bbl,.anime-char,.speed-lines,[class*="anime"],[class*="speed-line"]{animation:none !important;display:none !important;}
-</style>
-
 </body>
 
 </html>
+
+<style id="motion-kill">
+.m-orb,.mo1,.mo2,.mo3,.bbl,.anime-char,.speed-lines,[class*="anime"],[class*="speed-line"]{animation:none !important;display:none !important;}
+</style>
