@@ -95,14 +95,22 @@ function applyHexInput(val) {
 
 function setColorVars(teal, mid, light) {
   const r = document.documentElement;
+  const mode = r.getAttribute('data-theme') || 'light';
+
+  const borderAlpha = mode === 'dark' ? 0.28 : 0.18;
+  const pillAlpha   = mode === 'dark' ? 0.16 : 0.38;
+  const tintAlpha   = mode === 'dark' ? 0.10 : 0.20;
+  const hoverAlpha  = mode === 'dark' ? 0.18 : 0.45;
+  const orbAlpha    = mode === 'dark' ? 0.18 : 0.08;
+
   r.style.setProperty('--teal', teal);
   r.style.setProperty('--teal-mid', mid);
   r.style.setProperty('--teal-light', light);
-  r.style.setProperty('--teal-border', hexToRgba(teal, 0.18));
-  r.style.setProperty('--pill-bg', hexToRgba(light, 0.38));
-  r.style.setProperty('--tint', hexToRgba(light, 0.20));
-  r.style.setProperty('--tint-hover', hexToRgba(light, 0.45));
-  r.style.setProperty('--orb-1', hexToRgba(teal, 0.08));
+  r.style.setProperty('--teal-border', hexToRgba(teal, borderAlpha));
+  r.style.setProperty('--pill-bg', hexToRgba(light, pillAlpha));
+  r.style.setProperty('--tint', hexToRgba(light, tintAlpha));
+  r.style.setProperty('--tint-hover', hexToRgba(light, hoverAlpha));
+  r.style.setProperty('--orb-1', hexToRgba(teal, orbAlpha));
 }
 
 // ── Apply background ──
@@ -2578,7 +2586,10 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   outline: none;
   transition: border-color .2s;
 }
-.theme-name-input:focus { border-color: rgba(10,114,102,0.5); }
+.theme-name-input:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 18%, transparent);
+}
 .theme-name-input::placeholder { color: var(--muted); }
 
 /* Color swatches */
@@ -4189,14 +4200,33 @@ setTimeout(animateVision, 200);
   applyTheme(saved);
 })();
 
-function applyTheme(t){
+function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
+
   const lbl = document.getElementById('theme-label');
-  if(lbl) lbl.textContent = t === 'dark' ? 'Dark' : 'Light';
+  if (lbl) lbl.textContent = t === 'dark' ? 'Dark' : 'Light';
+
   localStorage.setItem('cc-theme', t);
+
+  // Re-apply saved accent theme after mode switch
+  const saved = loadThemeFromStorage();
+  const themeToUse = saved ? { ...DEFAULT_THEME, ...saved } : DEFAULT_THEME;
+
+  setColorVars(
+    themeToUse.teal,
+    themeToUse.tealMid || themeToUse.teal,
+    themeToUse.tealLight || themeToUse.teal
+  );
+
+  // Re-apply custom background selection too
+  if (themeToUse.bg && BG_VARS[themeToUse.bg]) {
+    Object.entries(BG_VARS[themeToUse.bg]).forEach(([k, v]) => {
+      document.documentElement.style.setProperty(k, v);
+    });
+  }
 }
 
-function toggleTheme(){
+function toggleTheme() {
   const cur = document.documentElement.getAttribute('data-theme') || 'light';
   applyTheme(cur === 'dark' ? 'light' : 'dark');
 }
