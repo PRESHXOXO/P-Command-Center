@@ -7903,103 +7903,151 @@ if (document.readyState !== 'loading') {
     });
   }
 
+  function handleCommunityModalAction(target, ev) {
+    if (!target) return false;
+
+    // Modal submission buttons (Create Pod, Create Challenge, Save Profile)
+    const submitBtn = target.closest('.comm-modal-submit');
+    if (submitBtn) {
+      if (ev) ev.preventDefault();
+      const podOpen       = document.getElementById('create-pod-overlay')?.classList.contains('open');
+      const challengeOpen = document.getElementById('create-challenge-overlay')?.classList.contains('open');
+      const editOpen      = document.getElementById('edit-profile-overlay')?.classList.contains('open');
+      if (podOpen && typeof submitCreatePod === 'function') {
+        submitCreatePod();
+      } else if (challengeOpen && typeof submitCreateChallenge === 'function') {
+        submitCreateChallenge();
+      } else if (editOpen && typeof submitEditProfile === 'function') {
+        submitEditProfile();
+      }
+      return true;
+    }
+
+    // Modal cancel buttons (Cancel)
+    const cancelBtn = target.closest('.comm-modal-cancel');
+    if (cancelBtn) {
+      if (ev) ev.preventDefault();
+      const overlay = cancelBtn.closest('.comm-modal-overlay');
+      const id = overlay && overlay.id;
+      if (id === 'create-pod-overlay' && typeof closeCreatePod === 'function') {
+        closeCreatePod();
+      } else if (id === 'create-challenge-overlay' && typeof closeCreateChallenge === 'function') {
+        closeCreateChallenge();
+      } else if (id === 'edit-profile-overlay' && typeof closeEditProfile === 'function') {
+        closeEditProfile();
+      }
+      return true;
+    }
+
+    // Modal close (X) buttons
+    const closeBtn = target.closest('.comm-modal-close');
+    if (closeBtn) {
+      if (ev) ev.preventDefault();
+      const overlay = closeBtn.closest('.comm-modal-overlay');
+      const id = overlay && overlay.id;
+      if (id === 'create-pod-overlay' && typeof closeCreatePod === 'function') {
+        closeCreatePod();
+      } else if (id === 'create-challenge-overlay' && typeof closeCreateChallenge === 'function') {
+        closeCreateChallenge();
+      } else if (id === 'edit-profile-overlay' && typeof closeEditProfile === 'function') {
+        closeEditProfile();
+      }
+      return true;
+    }
+
+    return false;
+  }
+
   // Bind click handlers for Community page (create pod/challenge, etc.)
   function bindCommunityControls() {
     const commPage = document.getElementById('page-community');
-    if (!commPage || commPage.dataset.commBound === 'true') return;
-    commPage.dataset.commBound = 'true';
-
-    // Map nav items to view names for fallback (Feed, Pods, Challenges, Wins, Messages)
-    const navItems = commPage.querySelectorAll('.comm-nav-item');
-    const viewNames = ['feed','pods','challenges','wins','messages'];
-    navItems.forEach((item, idx) => {
-      if (!item.dataset.view) item.dataset.view = viewNames[idx] || '';
-    });
-
-    // Attach input listener to update character count in post composer
-    const composer = commPage.querySelector('#comm-compose-text');
-    if (composer && composer.dataset.commBound !== 'true') {
-      composer.dataset.commBound = 'true';
-      composer.addEventListener('input', function() {
-        if (typeof updateCharCount === 'function') updateCharCount(composer);
+    if (commPage) {
+      // Map nav items to view names for fallback (Feed, Pods, Challenges, Wins, Messages)
+      const navItems = commPage.querySelectorAll('.comm-nav-item');
+      const viewNames = ['feed','pods','challenges','wins','messages'];
+      navItems.forEach((item, idx) => {
+        if (!item.dataset.view) item.dataset.view = viewNames[idx] || '';
       });
+
+      // Attach input listener to update character count in post composer
+      const composer = commPage.querySelector('#comm-compose-text');
+      if (composer && composer.dataset.commBound !== 'true') {
+        composer.dataset.commBound = 'true';
+        composer.addEventListener('input', function() {
+          if (typeof updateCharCount === 'function') updateCharCount(composer);
+        });
+      }
+
+      // Delegate clicks within the community page
+      if (commPage.dataset.commBound !== 'true') {
+        commPage.dataset.commBound = 'true';
+        commPage.addEventListener('click', function(ev) {
+          const tgt = ev.target;
+
+          // Create Pod / Create Challenge buttons
+          const createBtn = tgt.closest('.comm-create-btn');
+          if (createBtn) {
+            ev.preventDefault();
+            if (createBtn.classList.contains('comm-create-btn-secondary')) {
+              if (typeof openCreateChallenge === 'function') openCreateChallenge();
+            } else {
+              if (typeof openCreatePod === 'function') openCreatePod();
+            }
+            return;
+          }
+
+          // Community navigation items (Feed, Pods, Challenges, Wins, Messages)
+          const navItem = tgt.closest('.comm-nav-item');
+          if (navItem) {
+            ev.preventDefault();
+            const view = navItem.dataset.view || viewNames[Array.from(navItem.parentElement.children).indexOf(navItem)] || 'feed';
+            if (typeof switchCommView === 'function') switchCommView(view, navItem);
+            return;
+          }
+
+          handleCommunityModalAction(tgt, ev);
+        });
+      }
     }
 
-    // Delegate clicks within the community page
-    commPage.addEventListener('click', function(ev) {
-      const tgt = ev.target;
+    // Global delegated modal fallback for overlays rendered outside #page-community.
+    if (document.body.dataset.commModalBound !== 'true') {
+      document.body.dataset.commModalBound = 'true';
+      document.body.addEventListener('click', function(ev) {
+        const tgt = ev.target;
+        if (handleCommunityModalAction(tgt, ev)) return;
 
-      // Create Pod / Create Challenge buttons
-      const createBtn = tgt.closest('.comm-create-btn');
-      if (createBtn) {
-        ev.preventDefault();
-        if (createBtn.classList.contains('comm-create-btn-secondary')) {
-          if (typeof openCreateChallenge === 'function') openCreateChallenge();
-        } else {
-          if (typeof openCreatePod === 'function') openCreatePod();
+        // Theme controls fallback if inline onclick handlers are unavailable.
+        const settingsBtn = tgt.closest('.nav-settings-btn');
+        if (settingsBtn) {
+          ev.preventDefault();
+          if (typeof openThemePanel === 'function') openThemePanel();
+          return;
         }
-        return;
-      }
 
-      // Community navigation items (Feed, Pods, Challenges, Wins, Messages)
-      const navItem = tgt.closest('.comm-nav-item');
-      if (navItem) {
-        ev.preventDefault();
-        const view = navItem.dataset.view || viewNames[Array.from(navItem.parentElement.children).indexOf(navItem)] || 'feed';
-        if (typeof switchCommView === 'function') switchCommView(view, navItem);
-        return;
-      }
-
-      // Modal submission buttons (Create Pod, Create Challenge, Save Profile)
-      const submitBtn = tgt.closest('.comm-modal-submit');
-      if (submitBtn) {
-        ev.preventDefault();
-        // Determine which modal is currently open and call the appropriate handler
-        const podOpen       = document.getElementById('create-pod-overlay')?.classList.contains('open');
-        const challengeOpen = document.getElementById('create-challenge-overlay')?.classList.contains('open');
-        const editOpen      = document.getElementById('edit-profile-overlay')?.classList.contains('open');
-        if (podOpen && typeof submitCreatePod === 'function') {
-          submitCreatePod();
-        } else if (challengeOpen && typeof submitCreateChallenge === 'function') {
-          submitCreateChallenge();
-        } else if (editOpen && typeof submitEditProfile === 'function') {
-          submitEditProfile();
+        const mobileThemeBtn = tgt.closest('.mobile-nav-btn');
+        if (mobileThemeBtn && !mobileThemeBtn.dataset.page && /customize/i.test((mobileThemeBtn.textContent || '').trim())) {
+          ev.preventDefault();
+          if (typeof openThemePanel === 'function') openThemePanel();
+          if (typeof closeMobileNav === 'function') closeMobileNav();
+          return;
         }
-        return;
-      }
 
-      // Modal cancel buttons (Cancel)
-      const cancelBtn = tgt.closest('.comm-modal-cancel');
-      if (cancelBtn) {
-        ev.preventDefault();
-        const overlay = cancelBtn.closest('.comm-modal-overlay');
-        const id = overlay && overlay.id;
-        if (id === 'create-pod-overlay' && typeof closeCreatePod === 'function') {
-          closeCreatePod();
-        } else if (id === 'create-challenge-overlay' && typeof closeCreateChallenge === 'function') {
-          closeCreateChallenge();
-        } else if (id === 'edit-profile-overlay' && typeof closeEditProfile === 'function') {
-          closeEditProfile();
+        const saveBtn = tgt.closest('.theme-save-btn');
+        if (saveBtn) {
+          ev.preventDefault();
+          if (typeof saveTheme === 'function') saveTheme();
+          return;
         }
-        return;
-      }
 
-      // Modal close (X) buttons
-      const closeBtn = tgt.closest('.comm-modal-close');
-      if (closeBtn) {
-        ev.preventDefault();
-        const overlay = closeBtn.closest('.comm-modal-overlay');
-        const id = overlay && overlay.id;
-        if (id === 'create-pod-overlay' && typeof closeCreatePod === 'function') {
-          closeCreatePod();
-        } else if (id === 'create-challenge-overlay' && typeof closeCreateChallenge === 'function') {
-          closeCreateChallenge();
-        } else if (id === 'edit-profile-overlay' && typeof closeEditProfile === 'function') {
-          closeEditProfile();
+        const resetBtn = tgt.closest('.theme-reset-btn');
+        if (resetBtn) {
+          ev.preventDefault();
+          if (typeof resetTheme === 'function') resetTheme();
+          return;
         }
-        return;
-      }
-    });
+      });
+    }
   }
 
   if (document.readyState === 'loading') {
