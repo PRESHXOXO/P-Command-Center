@@ -143,6 +143,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 .nav-top-row{
   display:flex;align-items:center;justify-content:space-between;
   padding:0 1.5rem;height:52px;width:100%;flex-shrink:0;
+  position:relative;z-index:150;
 }
 /* Tab row scrollable */
 .nav-tabs{
@@ -1776,6 +1777,9 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   font-size: .85rem;
   transition: all .2s;
   flex-shrink: 0;
+  position: relative;
+  z-index: 160;
+  pointer-events: auto;
 }
 .nav-settings-btn:hover {
   background: var(--tint-hover);
@@ -1792,8 +1796,9 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   backdrop-filter: blur(3px);
   z-index: 19998;
   animation: fadeIn .2s ease;
+  pointer-events: none;
 }
-.theme-overlay.open { display: block; }
+.theme-overlay.open { display: block; pointer-events: auto; }
 @keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
 /* Panel */
@@ -1811,8 +1816,10 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   flex-direction: column;
   transition: right .35s cubic-bezier(.22,.68,0,1.1);
   overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
 }
-.theme-panel.open { right: 0; }
+.theme-panel.open { right: 0; visibility: visible; pointer-events: auto; }
 
 /* Panel header */
 .theme-panel-head {
@@ -2745,7 +2752,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 
       <div class="nav-date" id="nav-date">—</div>
 
-      <button class="nav-settings-btn" id="nav-settings-btn" onclick="openThemePanel()" title="Customize theme">⚙</button>
+      <button class="nav-settings-btn" id="nav-settings-btn" onclick="event.preventDefault();event.stopPropagation();const p=document.getElementById('theme-panel');const o=document.getElementById('theme-overlay');if(p&&o){o.classList.add('open');o.style.display='block';o.style.pointerEvents='auto';p.classList.add('open');p.style.right='0';p.style.visibility='visible';p.style.pointerEvents='auto';}if(typeof openThemePanel==='function'){try{openThemePanel();}catch(e){}}return false;" title="Customize theme" type="button">⚙</button>
 
       <button class="nav-logout-btn" id="nav-logout-btn" onclick="logout()" title="Log out" style="display:none;">↩</button>
 
@@ -4588,7 +4595,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
     <span class="mnb-icon">🏠</span> Home
   </button>
   <div class="mobile-nav-divider"></div>
-  <button class="mobile-nav-btn" onclick="openThemePanel();closeMobileNav()" style="color:var(--teal);">
+  <button class="mobile-nav-btn" onclick="event.preventDefault();event.stopPropagation();const p=document.getElementById('theme-panel');const o=document.getElementById('theme-overlay');if(p&&o){o.classList.add('open');o.style.display='block';o.style.pointerEvents='auto';p.classList.add('open');p.style.right='0';p.style.visibility='visible';p.style.pointerEvents='auto';}if(typeof openThemePanel==='function'){try{openThemePanel();}catch(e){}}if(typeof closeMobileNav==='function'){closeMobileNav();}return false;" style="color:var(--teal);" type="button">
     <span class="mnb-icon">⚙</span> Customize Theme
   </button>
   <button class="mobile-nav-btn" data-page="community" onclick="mobileNavGo('community',this)">
@@ -4603,7 +4610,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 <!-- ════════════════════════════════
      THEME EDITOR PANEL
 ════════════════════════════════ -->
-<div class="theme-overlay" id="theme-overlay" onclick="closeThemePanel()"></div>
+<div class="theme-overlay" id="theme-overlay" onclick="event.preventDefault();const p=document.getElementById('theme-panel');const o=document.getElementById('theme-overlay');if(p&&o){p.classList.remove('open');o.classList.remove('open');p.style.right='';p.style.visibility='';p.style.pointerEvents='';o.style.display='';o.style.pointerEvents='';}if(typeof closeThemePanel==='function'){try{closeThemePanel();}catch(e){}}return false;"></div>
 
 <div class="theme-panel" id="theme-panel">
 
@@ -4613,7 +4620,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
       <div class="theme-panel-title">✦ Customize</div>
       <div class="theme-panel-sub">Make it yours — changes apply instantly</div>
     </div>
-    <button class="theme-close-btn" onclick="closeThemePanel()">✕</button>
+    <button class="theme-close-btn" onclick="event.preventDefault();const p=document.getElementById('theme-panel');const o=document.getElementById('theme-overlay');if(p&&o){p.classList.remove('open');o.classList.remove('open');p.style.right='';p.style.visibility='';p.style.pointerEvents='';o.style.display='';o.style.pointerEvents='';}if(typeof closeThemePanel==='function'){try{closeThemePanel();}catch(e){}}return false;" type="button">✕</button>
   </div>
 
   <!-- Body -->
@@ -4966,8 +4973,14 @@ function openThemePanel() {
   const panel = document.getElementById('theme-panel');
   const overlay = document.getElementById('theme-overlay');
   if (!panel || !overlay) return;
+
+  overlay.style.display = 'block';
+  overlay.style.pointerEvents = 'auto';
   panel.classList.add('open');
   overlay.classList.add('open');
+  panel.style.right = '0';
+  panel.style.visibility = 'visible';
+  panel.style.pointerEvents = 'auto';
   try {
     const saved = loadThemeFromStorage();
     populatePanel(saved || DEFAULT_THEME);
@@ -4983,6 +4996,11 @@ function closeThemePanel() {
 
   panel.classList.remove('open');
   overlay.classList.remove('open');
+  panel.style.right = '';
+  panel.style.visibility = '';
+  panel.style.pointerEvents = '';
+  overlay.style.display = '';
+  overlay.style.pointerEvents = '';
 }
 
 // ── Apply color ──
@@ -7931,6 +7949,36 @@ if (document.readyState !== 'loading') {
   }
 
   function bindThemeControls() {
+    const navBtn = document.getElementById('nav-settings-btn');
+    if (navBtn && navBtn.dataset.themeBound !== 'true') {
+      navBtn.dataset.themeBound = 'true';
+      navBtn.addEventListener('click', function(ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        openThemePanel();
+      });
+    }
+
+    const mobileThemeBtn = document.querySelector('.mobile-nav-btn[onclick*="openThemePanel"]');
+    if (mobileThemeBtn && mobileThemeBtn.dataset.themeBound !== 'true') {
+      mobileThemeBtn.dataset.themeBound = 'true';
+      mobileThemeBtn.addEventListener('click', function(ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        openThemePanel();
+        if (typeof closeMobileNav === 'function') closeMobileNav();
+      });
+    }
+
+    const closeBtn = document.querySelector('.theme-close-btn');
+    if (closeBtn && closeBtn.dataset.themeBound !== 'true') {
+      closeBtn.dataset.themeBound = 'true';
+      closeBtn.addEventListener('click', function(ev) {
+        ev.preventDefault();
+        closeThemePanel();
+      });
+    }
+
     // Theme overlay click to close
     const overlay = document.getElementById('theme-overlay');
     if (overlay && overlay.dataset.themeBound !== 'true') {
