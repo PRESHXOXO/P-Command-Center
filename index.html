@@ -6292,7 +6292,7 @@ document.addEventListener('keydown', function(e) {
   }
 })();
 
-_supabase.auth.onAuthStateChange((event, session) => {
+try { _supabase.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' && session) {
     const firstName = session.user.user_metadata?.first_name || '';
     saveSession({ email: session.user.email, firstName, id: session.user.id });
@@ -6305,10 +6305,10 @@ _supabase.auth.onAuthStateChange((event, session) => {
     const screen = document.getElementById('auth-screen');
     if (screen) { screen.style.display = 'flex'; screen.style.opacity = '1'; }
   }
-});
+}); } catch(e) {}
 
 // Listen for auth state changes (e.g. after email confirmation)
-_supabase.auth.onAuthStateChange((event, session) => {
+try { _supabase.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' && session) {
     const firstName = session.user.user_metadata?.first_name || '';
     saveSession({ email: session.user.email, firstName, id: session.user.id });
@@ -6324,7 +6324,7 @@ _supabase.auth.onAuthStateChange((event, session) => {
       screen.style.opacity = '1';
     }
   }
-});
+}); } catch(e) {}
 
 // Logout button now in HTML nav
 
@@ -8101,6 +8101,47 @@ function initCommunity() {
   // Render feed
   renderFeed();
 }
+
+// ── DIRECT BUTTON BINDINGS (failsafe, runs after all functions are defined) ──
+window.openThemePanel    = openThemePanel;
+window.openCreatePod     = openCreatePod;
+window.openCreateChallenge = openCreateChallenge;
+
+(function directBindButtons() {
+  function bind() {
+    // ⚙ Customize theme button
+    var settingsBtn = document.getElementById('nav-settings-btn');
+    if (settingsBtn && !settingsBtn._pccBound) {
+      settingsBtn._pccBound = true;
+      settingsBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        openThemePanel();
+      });
+    }
+    // Create Pod + Create Challenge buttons
+    document.querySelectorAll('.comm-create-btn').forEach(function(btn) {
+      if (!btn._pccBound) {
+        btn._pccBound = true;
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (btn.classList.contains('comm-create-btn-secondary')) {
+            openCreateChallenge();
+          } else {
+            openCreatePod();
+          }
+        });
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bind);
+  } else {
+    bind();
+  }
+})();
+
+// Apply stored theme immediately (DOMContentLoaded already fired at this point)
+setTimeout(applyStoredTheme, 0);
 </script>
 </body>
 
