@@ -51,36 +51,31 @@
 
 /* ── DARK MODE ── */
 [data-theme="dark"] {
-  --bg:          #0C1017;
-  --nav-bg:      rgba(10,14,22,0.94);
-  --surface:     rgba(255,255,255,0.04);
-  --surface2:    rgba(255,255,255,0.07);
-  --ink:         rgba(255,255,255,0.90);
-  --ink-mid:     rgba(255,255,255,0.70);
-  --charcoal:    rgba(255,255,255,0.62);
-  --muted:       rgba(255,255,255,0.36);
-  --input-bg:    rgba(255,255,255,0.05);
-  --pill-bg:     rgba(10,114,102,0.14);
-  --tint:        rgba(10,114,102,0.10);
-  --tint-hover:  rgba(10,114,102,0.18);
-  --teal-border: rgba(10,114,102,0.28);
-  --marble-grad: linear-gradient(148deg,#0C1017 0%,#111822 30%,#0f1520 60%,#0C1017 100%);
-  --shadow:      0 4px 28px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.04) inset;
-  --shadow-lg:   0 8px 40px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.04) inset;
-  --shadow-sm:   0 1px 12px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04) inset;
-  --overlay-bg:  rgba(10,14,22,0.85);
-  --modal-bg:    rgba(15,20,30,0.98);
-  --shadow:      0 4px 28px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.03) inset;
-  --shadow-lg:   0 12px 50px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.04) inset;
-  --shadow-sm:   0 2px 16px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03) inset;
-  --orb-1:       rgba(10,114,102,0.18);
+  --bg:          #000000;
+  --nav-bg:      rgba(0,0,0,0.94);
+  --surface:     rgba(255,255,255,0.045);
+  --surface2:    rgba(255,255,255,0.075);
+  --ink:         rgba(255,255,255,0.92);
+  --ink-mid:     rgba(255,255,255,0.74);
+  --charcoal:    rgba(255,255,255,0.64);
+  --muted:       rgba(255,255,255,0.40);
+  --input-bg:    rgba(255,255,255,0.06);
+  --pill-bg:     rgba(var(--teal-rgb),0.14);
+  --tint:        rgba(var(--teal-rgb),0.10);
+  --tint-hover:  rgba(var(--teal-rgb),0.18);
+  --teal-border: rgba(var(--teal-rgb),0.28);
+  --marble-grad: linear-gradient(148deg,#000000 0%,#040404 35%,#090909 65%,#000000 100%);
+  --page-texture: linear-gradient(rgba(0,0,0,0.95), rgba(0,0,0,0.95));
+  --shadow:      0 4px 28px rgba(0,0,0,0.62), 0 1px 0 rgba(255,255,255,0.03) inset;
+  --shadow-lg:   0 12px 50px rgba(0,0,0,0.74), 0 1px 0 rgba(255,255,255,0.04) inset;
+  --shadow-sm:   0 2px 16px rgba(0,0,0,0.46), 0 0 0 1px rgba(255,255,255,0.03) inset;
+  --overlay-bg:  rgba(0,0,0,0.86);
+  --modal-bg:    rgba(10,10,10,0.98);
+  --orb-1:       rgba(var(--teal-rgb),0.18);
   --orb-2:       rgba(45,212,191,0.13);
-  --orb-3:       rgba(13,148,136,0.11);
+  --orb-3:       rgba(13,148,136,0.08);
   --bbl-border:  rgba(45,212,191,0.12);
   --bbl-bg:      rgba(45,212,191,0.04);
-  --overlay-bg:  rgba(6,10,20,0.84);
-  --modal-bg:    rgba(11,17,28,0.98);
-  --marble-grad: linear-gradient(148deg,#080F1A 0%,#0A1622 35%,#071520 65%,#0C1520 100%);
   --marble-1:    var(--tint);
   --marble-2:    rgba(6,50,45,0.22);
   --marble-3:    rgba(20,184,166,0.05);
@@ -3290,7 +3285,8 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
           <label class="auth-field-label">Email</label>
           <input class="auth-input" id="forgot-email" type="email" placeholder="your@email.com" />
         </div>
-        <button class="auth-submit" onclick="handleForgot()">Send Reset Link</button>
+        <button class="auth-submit" id="forgot-btn" onclick="handleForgot()">Send Reset Link</button>
+        <div id="forgot-status" style="display:none;font-size:.58rem;color:var(--teal);line-height:1.55;text-align:center;margin-top:.55rem;"></div>
         <button class="auth-tab" style="margin-top:.3rem;width:100%;padding:.5rem;" onclick="switchAuthTab('login')">← Back to Login</button>
       </div>
     </div>
@@ -5301,9 +5297,9 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
           <div class="theme-bg-desc">Warm beige · Default</div>
         </div>
         <div class="theme-bg-card" data-bg="dark" onclick="applyBackground(this)">
-          <div class="theme-bg-preview" style="background:linear-gradient(135deg,#0F1117,#1a1f2e,#0F1117);"></div>
+          <div class="theme-bg-preview" style="background:linear-gradient(135deg,#000000,#101010,#000000);"></div>
           <div class="theme-bg-name">Midnight</div>
-          <div class="theme-bg-desc">Deep navy dark mode</div>
+          <div class="theme-bg-desc">True black, high contrast</div>
         </div>
         <div class="theme-bg-card" data-bg="sage" onclick="applyBackground(this)">
           <div class="theme-bg-preview" style="background:linear-gradient(135deg,#F0F4F0,#E8F0E8,#EDF2ED);"></div>
@@ -5568,9 +5564,24 @@ const _supabase = {
       } catch(e){}
       try { localStorage.removeItem('pcc-sb-token'); } catch(e){}
     },
-    async resetPasswordForEmail(email) {
-      const r = await fetch(SUPABASE_URL+'/auth/v1/recover',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({email})});
-      return r.ok?{error:null}:{error:{message:'Could not send reset email'}};
+    async resetPasswordForEmail(email, options = {}) {
+      try {
+        const payload = { email };
+        if (options?.redirectTo) payload.redirect_to = options.redirectTo;
+        const r = await fetch(SUPABASE_URL+'/auth/v1/recover', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},
+          body:JSON.stringify(payload)
+        });
+        let d = {};
+        try { d = await r.json(); } catch(e) {}
+        if (!r.ok) {
+          return { data:null, error:{ message:d.msg || d.message || d.error_description || 'Could not send reset email' } };
+        }
+        return { data:d, error:null };
+      } catch (e) {
+        return { data:null, error:{ message:e.message || 'Could not send reset email' } };
+      }
     },
     signInWithOAuth({provider,options}) {
       window.location.href=SUPABASE_URL+'/auth/v1/authorize?provider='+provider+'&redirect_to='+encodeURIComponent(options?.redirectTo||window.location.origin);
@@ -5622,6 +5633,7 @@ const DEFAULT_THEME = {
   tealBorder: "rgba(10,114,102,0.18)",
   bg: "marble",
   font: "elegant",
+  mode: "light",
 };
 
 let currentTheme = { ...DEFAULT_THEME };
@@ -5842,11 +5854,43 @@ const BG_VARS = {
     '--ink': '#2C241E',
     '--ink-mid': '#4A4038',
     '--charcoal': '#655950',
-    '--page-texture':
-      "linear-gradient(rgba(246,241,232,0.82), rgba(246,241,232,0.82)), url('YOUR-IVORY-PAPER-TEXTURE-URL')",
+    '--page-texture': 'linear-gradient(145deg, #f8f2e9 0%, #efe6d8 52%, #f9f4ec 100%)',
   },
 
-  'linen-cream': {
+  'dark': {
+    '--bg': '#101010',
+    '--surface': 'rgba(25,25,25,0.82)',
+    '--surface2': 'rgba(36,36,36,0.92)',
+    '--input-bg': 'rgba(45,45,45,0.78)',
+    '--ink': '#F7F2EA',
+    '--ink-mid': '#DDD2C6',
+    '--charcoal': '#BDAF9D',
+    '--page-texture': 'linear-gradient(145deg, #0b0b0b 0%, #121212 55%, #090909 100%)',
+  },
+
+  'sage': {
+    '--bg': '#EEF4EE',
+    '--surface': 'rgba(248,252,247,0.80)',
+    '--surface2': 'rgba(252,255,251,0.90)',
+    '--input-bg': 'rgba(250,255,249,0.76)',
+    '--ink': '#243027',
+    '--ink-mid': '#415046',
+    '--charcoal': '#5E6C62',
+    '--page-texture': 'linear-gradient(145deg, #eef4ee 0%, #e4efe5 52%, #f4f8f3 100%)',
+  },
+
+  'blush': {
+    '--bg': '#F8ECEB',
+    '--surface': 'rgba(255,247,246,0.82)',
+    '--surface2': 'rgba(255,250,249,0.92)',
+    '--input-bg': 'rgba(255,248,247,0.76)',
+    '--ink': '#362625',
+    '--ink-mid': '#54403F',
+    '--charcoal': '#715C5B',
+    '--page-texture': 'linear-gradient(145deg, #fbf1f0 0%, #f5e3e3 54%, #fcf4f3 100%)',
+  },
+
+  'linen': {
     '--bg': '#F4EFE7',
     '--surface': 'rgba(250,246,240,0.78)',
     '--surface2': 'rgba(255,252,247,0.88)',
@@ -5854,58 +5898,26 @@ const BG_VARS = {
     '--ink': '#2A241D',
     '--ink-mid': '#473E36',
     '--charcoal': '#60554D',
-    '--page-texture':
-      "linear-gradient(rgba(244,239,231,0.80), rgba(244,239,231,0.80)), url('YOUR-LINEN-TEXTURE-URL')",
+    '--page-texture': 'linear-gradient(145deg, #f8f3eb 0%, #efe7db 54%, #fbf7f1 100%)',
   },
 
-  'stone-taupe': {
-    '--bg': '#EAE4DC',
-    '--surface': 'rgba(245,240,234,0.74)',
-    '--surface2': 'rgba(250,246,241,0.86)',
-    '--input-bg': 'rgba(250,246,241,0.68)',
-    '--ink': '#28231F',
-    '--ink-mid': '#433C37',
-    '--charcoal': '#5A524C',
-    '--page-texture':
-      "linear-gradient(rgba(234,228,220,0.78), rgba(234,228,220,0.78)), url('YOUR-STONE-TEXTURE-URL')",
-  },
-
-  'black-silk': {
-    '--bg': '#121212',
-    '--surface': 'rgba(27,27,27,0.78)',
-    '--surface2': 'rgba(34,34,34,0.90)',
-    '--input-bg': 'rgba(36,36,36,0.72)',
-    '--ink': '#F3EEE8',
-    '--ink-mid': '#D7CEC5',
-    '--charcoal': '#B3A79B',
-    '--page-texture':
-      "linear-gradient(rgba(18,18,18,0.74), rgba(18,18,18,0.74)), url('YOUR-BLACK-SILK-TEXTURE-URL')",
-  },
-
-  'parchment': {
-    '--bg': '#EFE4D2',
-    '--surface': 'rgba(250,242,230,0.76)',
-    '--surface2': 'rgba(255,248,238,0.88)',
-    '--input-bg': 'rgba(255,248,238,0.72)',
-    '--ink': '#33281E',
-    '--ink-mid': '#524538',
-    '--charcoal': '#6B5D4E',
-    '--page-texture':
-      "linear-gradient(rgba(239,228,210,0.78), rgba(239,228,210,0.78)), url('YOUR-PARCHMENT-TEXTURE-URL')",
-  },
-
-  'walnut-fabric': {
-    '--bg': '#2A211C',
-    '--surface': 'rgba(48,38,33,0.78)',
-    '--surface2': 'rgba(58,47,41,0.90)',
-    '--input-bg': 'rgba(60,49,43,0.72)',
-    '--ink': '#F4ECE3',
-    '--ink-mid': '#DCCFC2',
-    '--charcoal': '#B8AA9A',
-    '--page-texture':
-      "linear-gradient(rgba(42,33,28,0.74), rgba(42,33,28,0.74)), url('YOUR-WALNUT-FABRIC-TEXTURE-URL')",
+  'slate': {
+    '--bg': '#191B20',
+    '--surface': 'rgba(33,36,42,0.80)',
+    '--surface2': 'rgba(41,45,52,0.92)',
+    '--input-bg': 'rgba(50,54,61,0.76)',
+    '--ink': '#F0EDE6',
+    '--ink-mid': '#D8D0C6',
+    '--charcoal': '#B6ADA2',
+    '--page-texture': 'linear-gradient(145deg, #17191d 0%, #232730 55%, #14161a 100%)',
   },
 };
+
+BG_VARS['linen-cream'] = BG_VARS.linen;
+BG_VARS['stone-taupe'] = BG_VARS.sage;
+BG_VARS['black-silk'] = BG_VARS.dark;
+BG_VARS['parchment'] = BG_VARS.blush;
+BG_VARS['walnut-fabric'] = BG_VARS.slate;
 
 function applyBackground(card) {
   document.querySelectorAll('.theme-bg-card').forEach(c => c.classList.remove('active'));
@@ -5914,11 +5926,8 @@ function applyBackground(card) {
   const bg = card.dataset.bg;
   currentTheme.bg = bg;
 
-  const vars = BG_VARS[bg];
-  if (!vars) return;
-
-  const r = document.documentElement;
-  Object.entries(vars).forEach(([k, v]) => r.style.setProperty(k, v));
+  if (getActiveThemeMode() === 'dark') return;
+  applyBackgroundByKey(bg);
 }
 
 // ── Apply font ──
@@ -5936,11 +5945,33 @@ const FONT_VARS = {
   minimal: { display: "'Georgia', serif", ui: "system-ui, sans-serif" },
 };
 
-function applyFont(option) {
-  document.querySelectorAll('.theme-font-option').forEach(o => o.classList.remove('active'));
-  option.classList.add('active');
-  const font = option.dataset.font;
-  currentTheme.font = font;
+function normalizeTheme(theme) {
+  const merged = { ...DEFAULT_THEME, ...(theme || {}) };
+  if (!BG_VARS[merged.bg]) merged.bg = DEFAULT_THEME.bg;
+  if (!FONT_VARS[merged.font]) merged.font = DEFAULT_THEME.font;
+  if (merged.mode !== 'dark' && merged.mode !== 'light') {
+    merged.mode = localStorage.getItem('cc-theme') || DEFAULT_THEME.mode;
+  }
+  return merged;
+}
+
+function getActiveThemeMode() {
+  return document.documentElement.getAttribute('data-theme') || currentTheme.mode || DEFAULT_THEME.mode;
+}
+
+function getSavedThemeMode() {
+  const savedTheme = loadThemeFromStorage();
+  return savedTheme?.mode || localStorage.getItem('cc-theme') || DEFAULT_THEME.mode;
+}
+
+function applyBackgroundByKey(bgKey) {
+  const vars = BG_VARS[bgKey];
+  if (!vars) return;
+  Object.entries(vars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
+}
+
+function applyFontVars(fontKey) {
+  const font = FONT_VARS[fontKey] ? fontKey : DEFAULT_THEME.font;
   const vars = FONT_VARS[font];
   if (!vars) return;
   const r = document.documentElement;
@@ -5955,6 +5986,25 @@ function applyFont(option) {
   document.querySelectorAll('h1,h2,.nav-brand,.pg-header h1,.auth-title,.rev-num,.shc-title,.vision-title,.para-stat-num,.home-leftover-big').forEach(el => {
     el.style.fontFamily = vars.display;
   });
+}
+
+function saveThemeModePreference(mode) {
+  try {
+    const saved = loadThemeFromStorage() || DEFAULT_THEME;
+    const merged = normalizeTheme({ ...saved, mode });
+    localStorage.setItem(THEME_KEY, JSON.stringify(merged));
+    localStorage.setItem('cc-theme', mode);
+  } catch (e) {
+    console.warn('Could not persist theme mode:', e);
+  }
+}
+
+function applyFont(option) {
+  document.querySelectorAll('.theme-font-option').forEach(o => o.classList.remove('active'));
+  option.classList.add('active');
+  const font = option.dataset.font;
+  currentTheme.font = font;
+  applyFontVars(font);
 }
 
 // ── Preview dashboard name ──
@@ -5972,8 +6022,10 @@ function previewName(val) {
 
 // ── Save / Load / Reset ──
 function saveTheme() {
+  currentTheme = normalizeTheme({ ...currentTheme, mode: getActiveThemeMode() });
   try {
     localStorage.setItem(THEME_KEY, JSON.stringify(currentTheme));
+    localStorage.setItem('cc-theme', currentTheme.mode);
   } catch (e) {
     console.warn('Could not save theme:', e);
   }
@@ -5996,32 +6048,33 @@ function saveTheme() {
 function loadThemeFromStorage() {
   try {
     const raw = localStorage.getItem(THEME_KEY);
-    return raw ? JSON.parse(raw) : null;
+    return raw ? normalizeTheme(JSON.parse(raw)) : null;
   } catch (e) {
     return null;
   }
 }
 
 function populatePanel(theme) {
+  const safeTheme = normalizeTheme(theme || DEFAULT_THEME);
   const nameInput = document.getElementById('theme-name-input');
-  if (nameInput && theme.name) nameInput.value = theme.name;
+  if (nameInput && safeTheme.name) nameInput.value = safeTheme.name;
 
-  if (theme.teal) {
+  if (safeTheme.teal) {
     const picker = document.getElementById('theme-custom-picker');
     const hex = document.getElementById('theme-custom-hex');
-    if (picker) picker.value = theme.teal;
-    if (hex) hex.value = theme.teal.toUpperCase();
+    if (picker) picker.value = safeTheme.teal;
+    if (hex) hex.value = safeTheme.teal.toUpperCase();
   }
 
-  if (theme.bg) {
+  if (safeTheme.bg) {
     document.querySelectorAll('.theme-bg-card').forEach(c => {
-      c.classList.toggle('active', c.dataset.bg === theme.bg);
+      c.classList.toggle('active', c.dataset.bg === safeTheme.bg);
     });
   }
 
-  if (theme.font) {
+  if (safeTheme.font) {
     document.querySelectorAll('.theme-font-option').forEach(o => {
-      o.classList.toggle('active', o.dataset.font === theme.font);
+      o.classList.toggle('active', o.dataset.font === safeTheme.font);
     });
   }
 }
@@ -6029,6 +6082,7 @@ function populatePanel(theme) {
 function resetTheme() {
   try {
     localStorage.removeItem(THEME_KEY);
+    localStorage.removeItem('cc-theme');
   } catch (e) {}
   location.reload();
 }
@@ -6036,7 +6090,7 @@ function resetTheme() {
 // ── Apply saved theme on load ──
 (function applyStoredTheme() {
   const saved = loadThemeFromStorage();
-  currentTheme = { ...DEFAULT_THEME, ...(saved || {}) };
+  currentTheme = normalizeTheme(saved || DEFAULT_THEME);
 
   setColorVars(
     currentTheme.teal,
@@ -6044,16 +6098,11 @@ function resetTheme() {
     currentTheme.tealLight
   );
 
-  if (currentTheme.bg && BG_VARS[currentTheme.bg]) {
-    const r = document.documentElement;
-    Object.entries(BG_VARS[currentTheme.bg]).forEach(([k, v]) => r.style.setProperty(k, v));
+  if (currentTheme.mode !== 'dark' && currentTheme.bg && BG_VARS[currentTheme.bg]) {
+    applyBackgroundByKey(currentTheme.bg);
   }
 
-  if (currentTheme.font && FONT_VARS[currentTheme.font]) {
-    const r = document.documentElement;
-    r.style.setProperty('--font-display', FONT_VARS[currentTheme.font].display);
-    r.style.setProperty('--font-ui', FONT_VARS[currentTheme.font].ui);
-  }
+  applyFontVars(currentTheme.font);
 
   if (currentTheme.name) {
     document.addEventListener('DOMContentLoaded', () => previewName(currentTheme.name));
@@ -6208,12 +6257,10 @@ async function loadAllUserData() {
       // Apply saved theme
       const savedTheme = rows.find(r => r.section === 'theme');
       if (savedTheme?.data) {
-        currentTheme = { ...DEFAULT_THEME, ...savedTheme.data };
-        if (currentTheme.teal) setColorVars(currentTheme.teal, currentTheme.tealMid, currentTheme.tealLight);
-        if (currentTheme.bg && BG_VARS[currentTheme.bg]) {
-          Object.entries(BG_VARS[currentTheme.bg]).forEach(([k,v]) => document.documentElement.style.setProperty(k,v));
-        }
+        currentTheme = normalizeTheme(savedTheme.data);
+        applyFontVars(currentTheme.font);
         if (currentTheme.name) previewName(currentTheme.name);
+        applyTheme(currentTheme.mode || getSavedThemeMode());
       }
     }, 300);
 
@@ -6226,7 +6273,7 @@ async function loadAllUserData() {
 function clearAllLocalData() {
   const keys = [
     'pcc-home-v2', 'pcc-calendar-events', 'pcc-listing-notes',
-    'pcc-user-theme', 'pcc-tab-order', 'pcc-habits'
+    'pcc-tab-order', 'pcc-habits'
   ];
   keys.forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
   // Clear in-memory
@@ -7692,37 +7739,36 @@ setTimeout(animateVision, 200);
 
 // ═══ THEME TOGGLE ═══
 (function(){
-  const saved = localStorage.getItem('cc-theme') || 'light';
+  const saved = getSavedThemeMode();
   applyTheme(saved);
 })();
 
 function applyTheme(t) {
-  document.documentElement.setAttribute('data-theme', t);
+  const mode = t === 'dark' ? 'dark' : 'light';
+  currentTheme.mode = mode;
+  document.documentElement.setAttribute('data-theme', mode);
   const lbl = document.getElementById('theme-label');
-  if (lbl) lbl.textContent = t === 'dark' ? 'Dark' : 'Light';
-  localStorage.setItem('cc-theme', t);
+  if (lbl) lbl.textContent = mode === 'dark' ? 'Dark' : 'Light';
 
-  if (t === 'dark') {
-    // CRITICAL: remove ALL inline style property overrides so CSS dark vars win
-    const allVars = [
+  if (mode === 'dark') {
+    const surfaceVars = [
       '--bg','--nav-bg','--surface','--surface2','--ink','--ink-mid','--charcoal',
-      '--muted','--input-bg','--pill-bg','--tint','--tint-hover','--teal-border',
-      '--shadow','--shadow-lg','--shadow-sm','--overlay-bg','--modal-bg',
+      '--muted','--input-bg','--shadow','--shadow-lg','--shadow-sm','--overlay-bg','--modal-bg',
       '--marble-grad','--marble-1','--marble-2','--marble-3',
-      '--orb-1','--orb-2','--orb-3','--bbl-border','--bbl-bg'
+      '--page-texture'
     ];
-    allVars.forEach(v => document.documentElement.style.removeProperty(v));
+    surfaceVars.forEach(v => document.documentElement.style.removeProperty(v));
   } else {
-    // Light mode: re-apply saved theme background + accent
     const saved = typeof loadThemeFromStorage === 'function' ? loadThemeFromStorage() : null;
-    const themeToUse = saved ? { ...DEFAULT_THEME, ...saved } : DEFAULT_THEME;
-    if (typeof setColorVars === 'function') {
-      setColorVars(themeToUse.teal, themeToUse.tealMid || themeToUse.teal, themeToUse.tealLight || themeToUse.teal);
-    }
-    if (themeToUse.bg && typeof BG_VARS !== 'undefined' && BG_VARS[themeToUse.bg]) {
-      Object.entries(BG_VARS[themeToUse.bg]).forEach(([k,v]) => document.documentElement.style.setProperty(k,v));
-    }
+    const themeToUse = normalizeTheme(saved || currentTheme || DEFAULT_THEME);
+    applyBackgroundByKey(themeToUse.bg);
   }
+
+  if (typeof setColorVars === 'function') {
+    const themeToUse = normalizeTheme(currentTheme || DEFAULT_THEME);
+    setColorVars(themeToUse.teal, themeToUse.tealMid || themeToUse.teal, themeToUse.tealLight || themeToUse.teal);
+  }
+  saveThemeModePreference(mode);
 }
 
 function toggleTheme() {
@@ -8254,6 +8300,7 @@ function showForgot() {
   document.getElementById('form-login').style.display  = 'none';
   document.getElementById('form-signup').style.display = 'none';
   document.getElementById('form-forgot').style.display = 'block';
+  clearForgotStatus();
   clearAuthError();
 }
 
@@ -8267,6 +8314,23 @@ function clearAuthError() {
   const el = document.getElementById('auth-error');
   el.textContent = '';
   el.classList.remove('show');
+}
+
+function showForgotStatus(msg) {
+  const el = document.getElementById('forgot-status');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.style.display = msg ? 'block' : 'none';
+}
+
+function clearForgotStatus() {
+  showForgotStatus('');
+  const btn = document.getElementById('forgot-btn');
+  if (btn) {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.textContent = 'Send Reset Link';
+  }
 }
 
 // ── Toast ──
@@ -8403,16 +8467,43 @@ async function handleSignup() {
 // ── FORGOT PASSWORD ──
 async function handleForgot() {
   const email = document.getElementById('forgot-email')?.value.trim().toLowerCase();
+  const btn = document.getElementById('forgot-btn');
   if (!email || !isValidEmail(email)) { showAuthError('Please enter a valid email address.'); return; }
   clearAuthError();
+  clearForgotStatus();
 
-  const { error } = await _supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://p-command-center.vercel.app'
-  });
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add('loading');
+    btn.textContent = 'Sending...';
+  }
 
-  if (error) { showAuthError(error.message); return; }
-  showToast('Reset link sent! Check your inbox. 📬');
-  setTimeout(() => switchAuthTab('login'), 2000);
+  const redirectTo = (
+    typeof window !== 'undefined' &&
+    /^https?:/i.test(window.location.origin || '')
+  )
+    ? window.location.origin + window.location.pathname
+    : 'https://p-command-center.vercel.app';
+
+  try {
+    const { error } = await _supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) {
+      showAuthError(error.message);
+      return;
+    }
+
+    showForgotStatus("Reset link sent. If it doesn't arrive in a minute, you can resend it here.");
+    if (btn) btn.textContent = 'Resend Reset Link';
+    showToast('Reset link sent! Check your inbox. 📬');
+  } catch (e) {
+    showAuthError('Could not send reset email. Please try again.');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      if (btn.textContent === 'Sending...') btn.textContent = 'Send Reset Link';
+    }
+  }
 }
 
 // ── GOOGLE (placeholder) ──
@@ -8488,6 +8579,7 @@ document.addEventListener('keydown', function(e) {
                      document.getElementById('form-signup')?.style.display !== 'none' ? 'signup' : 'forgot';
   if (activeForm === 'login')  handleLogin();
   if (activeForm === 'signup') handleSignup();
+  if (activeForm === 'forgot') handleForgot();
 });
 
 // ── CHECK SESSION ON LOAD ──
