@@ -1346,14 +1346,14 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 
 /* Overlay to close drawer when tapping outside */
 .mobile-nav-overlay {
-  display: none;
   position: fixed;
   inset: 0;
   top: 52px;
   z-index: 98;
   background: transparent;
+  pointer-events: none;
 }
-.mobile-nav-overlay.open { display: block; }
+.mobile-nav-overlay.open { pointer-events: auto; }
 
 /* Show hamburger, hide desktop tabs on mobile */
 @media(max-width:768px) {
@@ -1791,9 +1791,10 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   background: rgba(0,0,0,0.25);
   backdrop-filter: blur(3px);
   z-index: 19998;
+  pointer-events: none;
   animation: fadeIn .2s ease;
 }
-.theme-overlay.open { display: block; }
+.theme-overlay.open { display: block; pointer-events: auto; }
 @keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
 /* Panel */
@@ -2361,10 +2362,11 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   background: rgba(0,0,0,0.3);
   backdrop-filter: blur(4px);
   z-index: 600;
+  pointer-events: none;
   align-items: center;
   justify-content: center;
 }
-.comm-modal-overlay.open { display: flex; }
+.comm-modal-overlay.open { display: flex; pointer-events: auto; }
 .comm-modal {
   background: var(--surface2);
   border: 1px solid var(--teal-border);
@@ -6196,6 +6198,7 @@ async function handleGoogle() {
 function enterApp(firstName) {
   const screen = document.getElementById('auth-screen');
   if (screen) {
+    screen.style.pointerEvents = 'none';
     screen.style.transition = 'opacity .5s ease, transform .5s ease';
     screen.style.opacity    = '0';
     screen.style.transform  = 'scale(1.02)';
@@ -6233,6 +6236,7 @@ async function logout() {
   if (brand) brand.textContent = "P's Command Center";
   const screen = document.getElementById('auth-screen');
   if (screen) {
+    screen.style.pointerEvents = '';
     screen.style.display   = 'flex';
     screen.style.opacity   = '0';
     screen.style.transform = 'scale(0.98)';
@@ -6504,6 +6508,7 @@ if (document.readyState !== 'loading') {
   const originalShowPage = window.showPage;
   if (typeof originalShowPage === 'function') {
     window.showPage = function(id, btn) {
+      if (typeof closeMobileNav === 'function') closeMobileNav();
       originalShowPage(id, btn);
       document.querySelectorAll('.nav-tab[data-page="custom"]').forEach(tab => tab.classList.add('on'));
     };
