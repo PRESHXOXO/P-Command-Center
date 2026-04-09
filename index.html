@@ -6040,8 +6040,9 @@ function clearAuthError() {
 }
 
 // ── Toast ──
-window._showToast = function showToast(msg) {
+window._showToast = window.showToast = function showToast(msg) {
   const t = document.getElementById('auth-toast');
+  if (!t) return;
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3200);
@@ -6885,24 +6886,26 @@ let currentTheme = { ...DEFAULT_THEME };
 function openThemePanel() {
   const panel = document.getElementById('theme-panel');
   const overlay = document.getElementById('theme-overlay');
-  if (!panel || !overlay) return;
+  if (!panel) return;
+  // Force open via both class and direct styles so nothing can silently block it
   panel.classList.add('open');
-  overlay.classList.add('open');
+  panel.style.right = '0';
+  if (overlay) {
+    overlay.classList.add('open');
+    overlay.style.display = 'block';
+    overlay.style.pointerEvents = 'auto';
+  }
   try {
     const saved = loadThemeFromStorage();
     populatePanel(saved || DEFAULT_THEME);
-  } catch(e) {
-    console.warn('Theme panel populate error:', e);
-  }
+  } catch(e) {}
 }
 
 function closeThemePanel() {
   const panel = document.getElementById('theme-panel');
   const overlay = document.getElementById('theme-overlay');
-  if (!panel || !overlay) return;
-
-  panel.classList.remove('open');
-  overlay.classList.remove('open');
+  if (panel) { panel.classList.remove('open'); panel.style.right = ''; }
+  if (overlay) { overlay.classList.remove('open'); overlay.style.display = ''; overlay.style.pointerEvents = ''; }
 }
 
 // ── Apply color ──
@@ -7590,11 +7593,13 @@ function openEditProfile() {
   });
   const prev = el('edit-avatar-preview');
   if (prev) { prev.textContent = name.charAt(0).toUpperCase(); prev.style.background = `linear-gradient(135deg,${commProfile.color},${commProfile.color}bb)`; }
-  el('edit-profile-overlay')?.classList.add('open');
+  const ov = el('edit-profile-overlay');
+  if (ov) { ov.classList.add('open'); ov.style.display = 'flex'; ov.style.pointerEvents = 'auto'; }
 }
 
 function closeEditProfile() {
-  document.getElementById('edit-profile-overlay')?.classList.remove('open');
+  const ov = document.getElementById('edit-profile-overlay');
+  if (ov) { ov.classList.remove('open'); ov.style.display = ''; ov.style.pointerEvents = ''; }
 }
 
 function selectProfileColor(swatch) {
@@ -7930,15 +7935,20 @@ function renderMessagesView(container) {
 // CREATE POD MODAL
 // ══════════════════════════════════
 function openCreatePod() {
+  const overlay = document.getElementById('create-pod-overlay');
+  if (!overlay) return;
   ['pod-name-input','pod-emoji-input','pod-desc-input'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value='';
   });
-  document.getElementById('create-pod-overlay')?.classList.add('open');
-  document.getElementById('pod-name-input')?.focus();
+  overlay.classList.add('open');
+  overlay.style.display = 'flex';
+  overlay.style.pointerEvents = 'auto';
+  setTimeout(() => document.getElementById('pod-name-input')?.focus(), 50);
 }
 
 function closeCreatePod() {
-  document.getElementById('create-pod-overlay')?.classList.remove('open');
+  const overlay = document.getElementById('create-pod-overlay');
+  if (overlay) { overlay.classList.remove('open'); overlay.style.display = ''; overlay.style.pointerEvents = ''; }
 }
 
 function submitCreatePod() {
@@ -7964,15 +7974,20 @@ function submitCreatePod() {
 // CREATE CHALLENGE MODAL
 // ══════════════════════════════════
 function openCreateChallenge() {
+  const overlay = document.getElementById('create-challenge-overlay');
+  if (!overlay) return;
   ['challenge-name-input','challenge-desc-input','challenge-days-input'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value='';
   });
-  document.getElementById('create-challenge-overlay')?.classList.add('open');
-  document.getElementById('challenge-name-input')?.focus();
+  overlay.classList.add('open');
+  overlay.style.display = 'flex';
+  overlay.style.pointerEvents = 'auto';
+  setTimeout(() => document.getElementById('challenge-name-input')?.focus(), 50);
 }
 
 function closeCreateChallenge() {
-  document.getElementById('create-challenge-overlay')?.classList.remove('open');
+  const overlay = document.getElementById('create-challenge-overlay');
+  if (overlay) { overlay.classList.remove('open'); overlay.style.display = ''; overlay.style.pointerEvents = ''; }
 }
 
 function submitCreateChallenge() {
