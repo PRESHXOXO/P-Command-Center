@@ -4,1326 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>P's Command Center</title>
-<script>const SUPABASE_URL = 'https://ausgchpdxghtmrdzymmy.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1c2djaHBkeGdodG1yZHp5bW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1OTUwMDIsImV4cCI6MjA5MTE3MTAwMn0.8zXw7A4Xf4v7gi1UAhWaW1VvPpYJ3mJa3MTgVWAa3sw';
-
-// ── Supabase REST client (no CDN required) ──
-const _supabase = {
-  auth: {
-    async signUp({ email, password, options }) {
-      const r = await fetch(SUPABASE_URL+'/auth/v1/signup', {
-        method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},
-        body: JSON.stringify({ email, password, data: options?.data||{} })
-      });
-      const d = await r.json();
-      if (!r.ok) return { data:null, error:{message:d.msg||d.message||'Signup failed'} };
-      try { localStorage.setItem('pcc-sb-token', JSON.stringify({access_token:d.access_token,user:d.user})); } catch(e){}
-      return { data:{user:d.user||d}, error:null };
-    },
-    async signInWithPassword({ email, password }) {
-      const r = await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password', {
-        method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},
-        body: JSON.stringify({ email, password })
-      });
-      const d = await r.json();
-      if (!r.ok||d.error) return { data:null, error:{message:d.error_description||d.msg||'Invalid credentials'} };
-      try { localStorage.setItem('pcc-sb-token', JSON.stringify({access_token:d.access_token,refresh_token:d.refresh_token,user:d.user})); } catch(e){}
-      return { data:{user:d.user, session:d}, error:null };
-    },
-    async getSession() {
-      try {
-        const s = JSON.parse(localStorage.getItem('pcc-sb-token'));
-        if (s?.access_token) return { data:{session:{user:s.user,access_token:s.access_token}}, error:null };
-      } catch(e){}
-      return { data:{session:null}, error:null };
-    },
-    async signOut() {
-      try {
-        const s = JSON.parse(localStorage.getItem('pcc-sb-token'));
-        if (s?.access_token) await fetch(SUPABASE_URL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+s.access_token}});
-      } catch(e){}
-      try { localStorage.removeItem('pcc-sb-token'); } catch(e){}
-    },
-    async resetPasswordForEmail(email) {
-      const r = await fetch(SUPABASE_URL+'/auth/v1/recover',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({email})});
-      return r.ok?{error:null}:{error:{message:'Could not send reset email'}};
-    },
-    signInWithOAuth({provider,options}) {
-      window.location.href=SUPABASE_URL+'/auth/v1/authorize?provider='+provider+'&redirect_to='+encodeURIComponent(options?.redirectTo||window.location.origin);
-      return {error:null};
-    },
-    onAuthStateChange(cb) { return {data:{subscription:{unsubscribe:()=>{}}}}; }
-  },
-  from(table) {
-    const _f=[];let _s='*';
-    return {
-      select(c){_s=c||'*';return this;},
-      eq(c,v){_f.push({c,v});return this;},
-      async upsert(row) {
-        try {
-          const s=JSON.parse(localStorage.getItem('pcc-sb-token'));
-          if(!s?.access_token) return {error:{message:'Not authenticated'}};
-          const r=await fetch(SUPABASE_URL+'/rest/v1/'+table,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+s.access_token,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(row)});
-          return r.ok?{error:null}:{error:{message:'Save failed'}};
-        } catch(e){return {error:{message:e.message}};}
-      },
-      async single() {
-        try {
-          const s=JSON.parse(localStorage.getItem('pcc-sb-token'));
-          if(!s?.access_token) return {data:null,error:null};
-          let url=SUPABASE_URL+'/rest/v1/'+table+'?select='+_s;
-          _f.forEach(f=>{url+='&'+f.c+'=eq.'+encodeURIComponent(f.v);});
-          url+='&limit=1';
-          const r=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+s.access_token}});
-          const d=await r.json();
-          return {data:Array.isArray(d)?d[0]:d,error:null};
-        } catch(e){return {data:null,error:{message:e.message}};}
-      }
-    };
-  }
-};
-
-
-/* ════════════════════════════════════
-   THEME EDITOR
-   ════════════════════════════════════ */
-const THEME_KEY = 'pcc-user-theme';
-
-// Default theme
-const DEFAULT_THEME = {
-  name: "P's Command Center",
-  teal: "#0A7266",
-  tealMid: "#0D9488",
-  tealLight: "#14B8A6",
-  tealBorder: "rgba(10,114,102,0.18)",
-  bg: "marble",
-  font: "elegant",
-};
-
-let currentTheme = { ...DEFAULT_THEME };
-
-// ── Open / Close ──
-function openThemePanel() {
-  const panel = document.getElementById('theme-panel');
-  const overlay = document.getElementById('theme-overlay');
-  if (!panel || !overlay) {
-    setTimeout(openThemePanel, 150);
-    return;
-  }
-  panel.classList.add('open');
-  overlay.classList.add('open');
-  try {
-    const saved = typeof loadThemeFromStorage === 'function' ? loadThemeFromStorage() : null;
-    if (typeof populatePanel === 'function') {
-      populatePanel(saved || DEFAULT_THEME);
-    }
-  } catch(e) {
-    console.warn('Theme panel populate error:', e);
-  }
-}
-
-function closeThemePanel() {
-  const panel = document.getElementById('theme-panel');
-  const overlay = document.getElementById('theme-overlay');
-  if (!panel || !overlay) return;
-
-  panel.classList.remove('open');
-  overlay.classList.remove('open');
-}
-
-// ── Apply color ──
-function applyColor(swatch) {
-  document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
-  swatch.classList.add('active');
-
-  const t = swatch.dataset.teal;
-  const m = swatch.dataset.mid;
-  const l = swatch.dataset.light;
-
-  setColorVars(t, m, l);
-  currentTheme.teal = t;
-  currentTheme.tealMid = m;
-  currentTheme.tealLight = l;
-
-  const picker = document.getElementById('theme-custom-picker');
-  const hex = document.getElementById('theme-custom-hex');
-  if (picker) picker.value = t;
-  if (hex) hex.value = t.toUpperCase();
-}
-
-function applyCustomColor(hex) {
-  document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
-
-  const hexInput = document.getElementById('theme-custom-hex');
-  if (hexInput) hexInput.value = hex.toUpperCase();
-
-  const mid = lightenHex(hex, 15);
-  const light = lightenHex(hex, 35);
-
-  setColorVars(hex, mid, light);
-  currentTheme.teal = hex;
-  currentTheme.tealMid = mid;
-  currentTheme.tealLight = light;
-}
-
-function applyHexInput(val) {
-  if (!/^#[0-9A-Fa-f]{6}$/.test(val)) return;
-
-  const picker = document.getElementById('theme-custom-picker');
-  if (picker) picker.value = val;
-
-  applyCustomColor(val);
-}
-
-function setColorVars(teal, mid, light) {
-  const r = document.documentElement;
-  const mode = r.getAttribute('data-theme') || 'light';
-
-  const borderAlpha = mode === 'dark' ? 0.28 : 0.18;
-  const pillAlpha   = mode === 'dark' ? 0.16 : 0.38;
-  const tintAlpha   = mode === 'dark' ? 0.10 : 0.20;
-  const hoverAlpha  = mode === 'dark' ? 0.18 : 0.45;
-  const orbAlpha    = mode === 'dark' ? 0.18 : 0.08;
-
-  const safeTeal  = teal || currentTheme.teal || DEFAULT_THEME.teal;
-  const safeMid   = mid || currentTheme.tealMid || DEFAULT_THEME.tealMid;
-  const safeLight = light || currentTheme.tealLight || DEFAULT_THEME.tealLight;
-
-  const red = parseInt(safeTeal.slice(1, 3), 16);
-  const green = parseInt(safeTeal.slice(3, 5), 16);
-  const blue = parseInt(safeTeal.slice(5, 7), 16);
-
-  r.style.setProperty('--teal', safeTeal);
-  r.style.setProperty('--teal-mid', safeMid);
-  r.style.setProperty('--teal-light', safeLight);
-  r.style.setProperty('--teal-rgb', `${red}, ${green}, ${blue}`);
-  r.style.setProperty('--teal-border', hexToRgba(safeTeal, borderAlpha));
-  r.style.setProperty('--pill-bg', hexToRgba(safeLight, pillAlpha));
-  r.style.setProperty('--tint', hexToRgba(safeLight, tintAlpha));
-  r.style.setProperty('--tint-hover', hexToRgba(safeLight, hoverAlpha));
-  r.style.setProperty('--orb-1', hexToRgba(safeTeal, orbAlpha));
-}
-
-// ── Apply background ──
-const BG_VARS = {
-  'marble': {
-    '--bg': '#F6F1E8',
-    '--surface': 'rgba(255,250,244,0.78)',
-    '--surface2': 'rgba(255,252,248,0.88)',
-    '--input-bg': 'rgba(255,252,248,0.72)',
-    '--ink': '#2C241E',
-    '--ink-mid': '#4A4038',
-    '--charcoal': '#655950',
-    '--page-texture':
-      "linear-gradient(rgba(246,241,232,0.82), rgba(246,241,232,0.82)), url('YOUR-IVORY-PAPER-TEXTURE-URL')",
-  },
-
-  'linen-cream': {
-    '--bg': '#F4EFE7',
-    '--surface': 'rgba(250,246,240,0.78)',
-    '--surface2': 'rgba(255,252,247,0.88)',
-    '--input-bg': 'rgba(255,252,247,0.72)',
-    '--ink': '#2A241D',
-    '--ink-mid': '#473E36',
-    '--charcoal': '#60554D',
-    '--page-texture':
-      "linear-gradient(rgba(244,239,231,0.80), rgba(244,239,231,0.80)), url('YOUR-LINEN-TEXTURE-URL')",
-  },
-
-  'stone-taupe': {
-    '--bg': '#EAE4DC',
-    '--surface': 'rgba(245,240,234,0.74)',
-    '--surface2': 'rgba(250,246,241,0.86)',
-    '--input-bg': 'rgba(250,246,241,0.68)',
-    '--ink': '#28231F',
-    '--ink-mid': '#433C37',
-    '--charcoal': '#5A524C',
-    '--page-texture':
-      "linear-gradient(rgba(234,228,220,0.78), rgba(234,228,220,0.78)), url('YOUR-STONE-TEXTURE-URL')",
-  },
-
-  'black-silk': {
-    '--bg': '#121212',
-    '--surface': 'rgba(27,27,27,0.78)',
-    '--surface2': 'rgba(34,34,34,0.90)',
-    '--input-bg': 'rgba(36,36,36,0.72)',
-    '--ink': '#F3EEE8',
-    '--ink-mid': '#D7CEC5',
-    '--charcoal': '#B3A79B',
-    '--page-texture':
-      "linear-gradient(rgba(18,18,18,0.74), rgba(18,18,18,0.74)), url('YOUR-BLACK-SILK-TEXTURE-URL')",
-  },
-
-  'parchment': {
-    '--bg': '#EFE4D2',
-    '--surface': 'rgba(250,242,230,0.76)',
-    '--surface2': 'rgba(255,248,238,0.88)',
-    '--input-bg': 'rgba(255,248,238,0.72)',
-    '--ink': '#33281E',
-    '--ink-mid': '#524538',
-    '--charcoal': '#6B5D4E',
-    '--page-texture':
-      "linear-gradient(rgba(239,228,210,0.78), rgba(239,228,210,0.78)), url('YOUR-PARCHMENT-TEXTURE-URL')",
-  },
-
-  'walnut-fabric': {
-    '--bg': '#2A211C',
-    '--surface': 'rgba(48,38,33,0.78)',
-    '--surface2': 'rgba(58,47,41,0.90)',
-    '--input-bg': 'rgba(60,49,43,0.72)',
-    '--ink': '#F4ECE3',
-    '--ink-mid': '#DCCFC2',
-    '--charcoal': '#B8AA9A',
-    '--page-texture':
-      "linear-gradient(rgba(42,33,28,0.74), rgba(42,33,28,0.74)), url('YOUR-WALNUT-FABRIC-TEXTURE-URL')",
-  },
-};
-
-function applyBackground(card) {
-  document.querySelectorAll('.theme-bg-card').forEach(c => c.classList.remove('active'));
-  card.classList.add('active');
-
-  const bg = card.dataset.bg;
-  currentTheme.bg = bg;
-
-  const vars = BG_VARS[bg];
-  if (!vars) return;
-
-  const r = document.documentElement;
-  Object.entries(vars).forEach(([k, v]) => r.style.setProperty(k, v));
-}
-
-// ── Apply font ──
-const FONT_LINKS = {
-  elegant: null,
-  modern: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap',
-  classic: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Lato:wght@300;400&display=swap',
-  minimal: null,
-};
-
-const FONT_VARS = {
-  elegant: { display: "'Cormorant Garamond', serif", ui: "'DM Sans', sans-serif" },
-  modern:  { display: "'Inter', sans-serif", ui: "'Inter', sans-serif" },
-  classic: { display: "'Playfair Display', serif", ui: "'Lato', sans-serif" },
-  minimal: { display: "'Georgia', serif", ui: "system-ui, sans-serif" },
-};
-
-function applyFont(option) {
-  document.querySelectorAll('.theme-font-option').forEach(o => o.classList.remove('active'));
-  option.classList.add('active');
-  const font = option.dataset.font;
-  currentTheme.font = font;
-  const vars = FONT_VARS[font];
-  if (!vars) return;
-  const r = document.documentElement;
-  r.style.setProperty('--font-display', vars.display);
-  r.style.setProperty('--font-ui', vars.ui);
-  if (FONT_LINKS[font] && !document.querySelector('link[href="' + FONT_LINKS[font] + '"]')) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = FONT_LINKS[font];
-    document.head.appendChild(link);
-  }
-  document.querySelectorAll('h1,h2,.nav-brand,.pg-header h1,.auth-title,.rev-num,.shc-title,.vision-title,.para-stat-num,.home-leftover-big').forEach(el => {
-    el.style.fontFamily = vars.display;
-  });
-}
-
-// ── Preview dashboard name ──
-function previewName(val) {
-  const name = val || "P's Command Center";
-  document.querySelectorAll('.nav-brand').forEach(el => {
-    if (el.childNodes.length > 0) {
-      el.childNodes[0].textContent = name;
-    } else {
-      el.textContent = name;
-    }
-  });
-  currentTheme.name = name;
-}
-
-// ── Save / Load / Reset ──
-function saveTheme() {
-  try {
-    localStorage.setItem(THEME_KEY, JSON.stringify(currentTheme));
-  } catch (e) {
-    console.warn('Could not save theme:', e);
-  }
-
-  const btn = document.querySelector('.theme-save-btn');
-  if (btn) {
-    const orig = btn.textContent;
-    btn.textContent = '✓ Saved!';
-    btn.style.background = '#15622D';
-
-    setTimeout(() => {
-      btn.textContent = orig;
-      btn.style.background = '';
-    }, 1800);
-  }
-
-  closeThemePanel();
-}
-
-function loadThemeFromStorage() {
-  try {
-    const raw = localStorage.getItem(THEME_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch (e) {
-    return null;
-  }
-}
-
-function populatePanel(theme) {
-  const nameInput = document.getElementById('theme-name-input');
-  if (nameInput && theme.name) nameInput.value = theme.name;
-
-  if (theme.teal) {
-    const picker = document.getElementById('theme-custom-picker');
-    const hex = document.getElementById('theme-custom-hex');
-    if (picker) picker.value = theme.teal;
-    if (hex) hex.value = theme.teal.toUpperCase();
-  }
-
-  if (theme.bg) {
-    document.querySelectorAll('.theme-bg-card').forEach(c => {
-      c.classList.toggle('active', c.dataset.bg === theme.bg);
-    });
-  }
-
-  if (theme.font) {
-    document.querySelectorAll('.theme-font-option').forEach(o => {
-      o.classList.toggle('active', o.dataset.font === theme.font);
-    });
-  }
-}
-
-function resetTheme() {
-  try {
-    localStorage.removeItem(THEME_KEY);
-  } catch (e) {}
-  location.reload();
-}
-
-// ── Apply saved theme on load ──
-(function applyStoredTheme() {
-  const saved = loadThemeFromStorage();
-  currentTheme = { ...DEFAULT_THEME, ...(saved || {}) };
-
-  setColorVars(
-    currentTheme.teal,
-    currentTheme.tealMid,
-    currentTheme.tealLight
-  );
-
-  if (currentTheme.bg && BG_VARS[currentTheme.bg]) {
-    const r = document.documentElement;
-    Object.entries(BG_VARS[currentTheme.bg]).forEach(([k, v]) => r.style.setProperty(k, v));
-  }
-
-  if (currentTheme.font && FONT_VARS[currentTheme.font]) {
-    const r = document.documentElement;
-    r.style.setProperty('--font-display', FONT_VARS[currentTheme.font].display);
-    r.style.setProperty('--font-ui', FONT_VARS[currentTheme.font].ui);
-  }
-
-  if (currentTheme.name) {
-    document.addEventListener('DOMContentLoaded', () => previewName(currentTheme.name));
-    setTimeout(() => previewName(currentTheme.name), 300);
-  }
-})();
-
-// ── Utility: hex color helpers ──
-function hexToRgba(hex, alpha) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-
-function lightenHex(hex, pct) {
-  let r = parseInt(hex.slice(1, 3), 16);
-  let g = parseInt(hex.slice(3, 5), 16);
-  let b = parseInt(hex.slice(5, 7), 16);
-
-  r = Math.min(255, r + Math.round((255 - r) * (pct / 100)));
-  g = Math.min(255, g + Math.round((255 - g) * (pct / 100)));
-  b = Math.min(255, b + Math.round((255 - b) * (pct / 100)));
-
-  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
-}
-
-
-// ════════════════════════════════════════════════════════
-// SUPABASE DATA SYNC LAYER
-// Every section of the dashboard syncs to the cloud.
-// Sections: goals, notes, habits, life-board, calendar,
-//           home, streams, paralegal, theme, settings
-// ════════════════════════════════════════════════════════
-
-const DB_TABLE = 'user_data';
-
-// ── Get current user ID from session ──
-function getCurrentUserId() {
-  try {
-    const s = JSON.parse(localStorage.getItem('pcc-auth-session'));
-    return s?.id || null;
-  } catch(e) { return null; }
-}
-
-// ── Save a section to Supabase ──
-async function syncToCloud(section, data) {
-  const userId = getCurrentUserId();
-  if (!userId) return; // not logged in, localStorage only
-
-  try {
-    await _supabase.from(DB_TABLE).upsert({
-      user_id:    userId,
-      section:    section,
-      data:       data,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id,section' });
-  } catch(e) {
-    console.warn('Sync error for section:', section, e);
-  }
-}
-
-// ── Load a section from Supabase ──
-async function loadFromCloud(section) {
-  const userId = getCurrentUserId();
-  if (!userId) return null;
-
-  try {
-    const { data, error } = await _supabase
-      .from(DB_TABLE)
-      .select('data')
-      .eq('user_id', userId)
-      .eq('section', section)
-      .single();
-
-    if (error || !data) return null;
-    return data.data;
-  } catch(e) {
-    return null;
-  }
-}
-
-// ── Load ALL sections at once on login ──
-async function loadAllUserData() {
-  const userId = getCurrentUserId();
-  if (!userId) return;
-
-  try {
-    const { data: rows, error } = await _supabase
-      .from(DB_TABLE)
-      .select('section, data')
-      .eq('user_id', userId);
-
-    if (error || !rows || rows.length === 0) {
-      // New user — clear any leftover data from previous user
-      clearAllLocalData();
-      return;
-    }
-
-    // Map sections to localStorage keys and populate
-    const sectionMap = {
-      'home':        'pcc-home-v2',
-      'calendar':    'pcc-calendar-events',
-      'listing-notes': 'pcc-listing-notes',
-      'theme':       'pcc-user-theme',
-      'tab-order':   'pcc-tab-order',
-    };
-
-    rows.forEach(row => {
-      const lsKey = sectionMap[row.section];
-      if (lsKey && row.data) {
-        try {
-          localStorage.setItem(lsKey, JSON.stringify(row.data));
-        } catch(e) {}
-      }
-
-      // Handle special sections
-      if (row.section === 'goals' && row.data) {
-        // Goals are stored per month key
-        Object.entries(row.data).forEach(([key, val]) => {
-          try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
-        });
-      }
-      if (row.section === 'notes' && row.data) {
-        // Notes array — store in memory
-        if (Array.isArray(row.data)) {
-          notes = row.data;
-          nextNoteId = notes.reduce((max,n) => Math.max(max, n.id||0), 0) + 1;
-        }
-      }
-      if (row.section === 'todos' && row.data) {
-        if (Array.isArray(row.data)) homeTodos = row.data;
-      }
-      if (row.section === 'apt-search' && row.data) {
-        if (Array.isArray(row.data)) aptSearchList = row.data;
-      }
-      if (row.section === 'habits' && row.data) {
-        try { localStorage.setItem('pcc-habits', JSON.stringify(row.data)); } catch(e) {}
-      }
-    });
-
-    // Re-render everything with loaded data
-    setTimeout(() => {
-      loadHomeData();
-      loadTabOrder();
-      initTabDrag();
-      renderNotesList();
-      if (notes.length > 0) loadNote(notes[0]);
-      renderBoard();
-      renderHomeTodos();
-      renderAptSearch();
-      // Apply saved theme
-      const savedTheme = rows.find(r => r.section === 'theme');
-      if (savedTheme?.data) {
-        currentTheme = { ...DEFAULT_THEME, ...savedTheme.data };
-        if (currentTheme.teal) setColorVars(currentTheme.teal, currentTheme.tealMid, currentTheme.tealLight);
-        if (currentTheme.bg && BG_VARS[currentTheme.bg]) {
-          Object.entries(BG_VARS[currentTheme.bg]).forEach(([k,v]) => document.documentElement.style.setProperty(k,v));
-        }
-        if (currentTheme.name) previewName(currentTheme.name);
-      }
-    }, 300);
-
-  } catch(e) {
-    console.warn('loadAllUserData error:', e);
-  }
-}
-
-// ── Clear all local data (new user or logout) ──
-function clearAllLocalData() {
-  const keys = [
-    'pcc-home-v2', 'pcc-calendar-events', 'pcc-listing-notes',
-    'pcc-user-theme', 'pcc-tab-order', 'pcc-habits'
-  ];
-  keys.forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
-  // Clear in-memory
-  notes = [];
-  homeTodos = [];
-  aptSearchList = [];
-  events = [];
-}
-
-// ══════════════════════════════════════════════
-// PATCH EXISTING SAVE FUNCTIONS TO DUAL-WRITE
-// ══════════════════════════════════════════════
-
-// Patch: saveHomeData
-const _origSaveHomeData = window.saveHomeData;
-window.saveHomeData = function() {
-  _origSaveHomeData && _origSaveHomeData();
-  // Also sync todos and apt search
-  try {
-    const raw = localStorage.getItem('pcc-home-v2');
-    if (raw) syncToCloud('home', JSON.parse(raw));
-    syncToCloud('todos', homeTodos);
-    syncToCloud('apt-search', aptSearchList);
-  } catch(e) {}
-};
-
-// Patch: saveEvents
-const _origSaveEvents = window.saveEvents;
-window.saveEvents = function() {
-  _origSaveEvents && _origSaveEvents();
-  syncToCloud('calendar', events);
-};
-
-// Patch: saveListingNote
-const _origSaveListingNote = window.saveListingNote;
-window.saveListingNote = function(id, text) {
-  _origSaveListingNote && _origSaveListingNote(id, text);
-  syncToCloud('listing-notes', listingNotes);
-};
-
-// Patch: saveNote (notes tab)
-const _origSaveNote = window.saveNote;
-window.saveNote = function() {
-  _origSaveNote && _origSaveNote();
-  syncToCloud('notes', notes);
-};
-
-// Patch: deleteNote
-const _origDeleteNote = window.deleteNote;
-window.deleteNote = function() {
-  _origDeleteNote && _origDeleteNote();
-  syncToCloud('notes', notes);
-};
-
-// Patch: saveTheme
-const _origSaveTheme = window.saveTheme;
-window.saveTheme = function() {
-  _origSaveTheme && _origSaveTheme();
-  syncToCloud('theme', currentTheme);
-};
-
-// Patch: saveTabOrder
-const _origSaveTabOrder = window.saveTabOrder;
-window.saveTabOrder = function() {
-  _origSaveTabOrder && _origSaveTabOrder();
-  try {
-    const order = JSON.parse(localStorage.getItem('pcc-tab-order'));
-    if (order) syncToCloud('tab-order', order);
-  } catch(e) {}
-};
-
-// Patch: goals — intercept goal saves
-const _origRenderGoals = window.renderGoals;
-window.renderGoals = function() {
-  _origRenderGoals && _origRenderGoals();
-  // Collect all goal data across months
-  setTimeout(() => {
-    const goalData = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.match(/^\d{4}-\d{2}$/)) {
-        try { goalData[key] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
-      }
-    }
-    if (Object.keys(goalData).length) syncToCloud('goals', goalData);
-  }, 500);
-};
-
-// ══════════════════════════════════════
-// HOOK INTO enterApp TO LOAD USER DATA
-// ══════════════════════════════════════
-const _origEnterApp = window.enterApp;
-window.enterApp = function(firstName) {
-  _origEnterApp && _origEnterApp(firstName);
-  // Load this user's data after entering
-  setTimeout(loadAllUserData, 600);
-};
-
-// Also load on auth state change (returning user)
-const _origOnAuthChange = _supabase.auth.onAuthStateChange;
-// Already set up above — loadAllUserData called when SIGNED_IN
-
-// ════════════════════════════════════════════════════════════
-// COMMUNITY HUB — Single authoritative JS block
-// ════════════════════════════════════════════════════════════
-
-// ── Storage keys ──
-const COMM_KEY           = 'pcc-community-posts';
-const COMM_CHALLENGE_KEY = 'pcc-challenge-joined';
-const PODS_KEY           = 'pcc-comm-pods';
-const CHALLENGES_KEY     = 'pcc-comm-challenges';
-const COMM_PROFILE_KEY   = 'pcc-comm-profile';
-
-// ── State ──
-let commPosts       = [];
-let commFilter      = 'all';
-let selectedPostType = 'update';
-let dmOpen          = false;
-let userPods        = [];
-let userChallenges  = [];
-let commProfile     = { name:'', handle:'', bio:'', color:'#0A7266' };
-
-// ── Helpers ──
-function getCurrentUserName() {
-  try {
-    const s = JSON.parse(localStorage.getItem('pcc-auth-session'));
-    return s?.firstName || 'You';
-  } catch(e) { return 'You'; }
-}
-
-// ── Safe toast (self-contained, no Block 2 dependency) ──
-function safeShowToast(msg) {
-  // Try Block 2's showToast first
-  if (typeof showToast === 'function') { showToast(msg); return; }
-  // Fallback: build our own minimal toast
-  let t = document.getElementById('_comm_toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = '_comm_toast';
-    t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--teal);color:#fff;padding:.65rem 1.4rem;border-radius:50px;font-family:"DM Sans",sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.06em;z-index:9999;opacity:0;transition:all .3s ease;pointer-events:none;white-space:nowrap;';
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  t.style.transform = 'translateX(-50%) translateY(0)';
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => {
-    t.style.opacity = '0';
-    t.style.transform = 'translateX(-50%) translateY(20px)';
-  }, 2800);
-}
-
-// ══════════════════════════════════
-// PROFILE
-// ══════════════════════════════════
-function loadCommProfile() {
-  try {
-    const s = JSON.parse(localStorage.getItem(COMM_PROFILE_KEY));
-    if (s) commProfile = { ...commProfile, ...s };
-  } catch(e) {}
-}
-
-function saveCommProfile() {
-  try { localStorage.setItem(COMM_PROFILE_KEY, JSON.stringify(commProfile)); } catch(e) {}
-}
-
-function updateCommProfile() {
-  loadCommProfile();
-  const name    = commProfile.name    || getCurrentUserName();
-  const handle  = commProfile.handle  || ('@' + (name||'you').toLowerCase().replace(/\s+/g,''));
-  const color   = commProfile.color   || '#0A7266';
-  const initial = name.charAt(0).toUpperCase();
-  const grad    = `linear-gradient(135deg,${color},${color}bb)`;
-
-  const av = document.getElementById('comm-avatar');
-  if (av) { av.textContent = initial; av.style.background = grad; }
-  const cAv = document.getElementById('comm-composer-av');
-  if (cAv) { cAv.textContent = initial; cAv.style.background = grad; }
-  const pn = document.getElementById('comm-profile-name');
-  if (pn) pn.textContent = name;
-  const ph = document.getElementById('comm-profile-handle');
-  if (ph) ph.textContent = handle;
-
-  // Bio
-  if (commProfile.bio) {
-    let bioEl = document.getElementById('comm-profile-bio');
-    if (!bioEl) {
-      bioEl = document.createElement('div');
-      bioEl.id = 'comm-profile-bio';
-      bioEl.style.cssText = 'font-size:.65rem;color:var(--muted);margin:.35rem 0;line-height:1.5;font-weight:400;';
-      const editBtn = document.querySelector('.comm-edit-profile-btn');
-      if (editBtn && editBtn.parentNode) editBtn.parentNode.insertBefore(bioEl, editBtn);
-    }
-    bioEl.textContent = commProfile.bio;
-  }
-
-  // Update post count stat
-  const cnt = document.getElementById('comm-posts-count');
-  if (cnt) cnt.textContent = commPosts.filter(p => p.author === name).length;
-}
-
-// Edit Profile modal
-function openEditProfile() {
-  loadCommProfile();
-  const name = commProfile.name || getCurrentUserName();
-  const el = (id) => document.getElementById(id);
-  if (el('edit-display-name')) el('edit-display-name').value = name;
-  if (el('edit-handle'))       el('edit-handle').value       = commProfile.handle || ('@'+name.toLowerCase().replace(/\s+/g,''));
-  if (el('edit-bio'))          el('edit-bio').value          = commProfile.bio || '';
-  document.querySelectorAll('.edit-color-swatch').forEach(s => {
-    s.classList.toggle('active', s.dataset.color === commProfile.color);
-  });
-  const prev = el('edit-avatar-preview');
-  if (prev) { prev.textContent = name.charAt(0).toUpperCase(); prev.style.background = `linear-gradient(135deg,${commProfile.color},${commProfile.color}bb)`; }
-  el('edit-profile-overlay')?.classList.add('open');
-}
-
-function closeEditProfile() {
-  document.getElementById('edit-profile-overlay')?.classList.remove('open');
-}
-
-function selectProfileColor(swatch) {
-  document.querySelectorAll('.edit-color-swatch').forEach(s => s.classList.remove('active'));
-  swatch.classList.add('active');
-  commProfile.color = swatch.dataset.color;
-  const prev = document.getElementById('edit-avatar-preview');
-  if (prev) prev.style.background = `linear-gradient(135deg,${commProfile.color},${commProfile.color}bb)`;
-}
-
-function submitEditProfile() {
-  const name   = document.getElementById('edit-display-name')?.value.trim();
-  const handle = document.getElementById('edit-handle')?.value.trim();
-  const bio    = document.getElementById('edit-bio')?.value.trim();
-  if (!name) { safeShowToast('Please enter a display name.'); return; }
-  commProfile = { name, handle: handle || ('@'+name.toLowerCase().replace(/\s+/g,'')), bio: bio||'', color: commProfile.color };
-  saveCommProfile();
-  closeEditProfile();
-  updateCommProfile();
-  safeShowToast('Profile updated! ✦');
-}
-
-// ══════════════════════════════════
-// POSTS — Feed
-// ══════════════════════════════════
-function loadCommPosts() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(COMM_KEY));
-    commPosts = saved && Array.isArray(saved) ? saved : [];
-  } catch(e) { commPosts = []; }
-}
-
-function saveCommPosts() {
-  try { localStorage.setItem(COMM_KEY, JSON.stringify(commPosts)); } catch(e) {}
-}
-
-function renderFeed() {
-  const feed = document.getElementById('comm-feed');
-  if (!feed) return;
-
-  const filtered = commFilter === 'all'
-    ? commPosts
-    : commPosts.filter(p => p.type === commFilter);
-
-  if (!filtered.length) {
-    feed.innerHTML = `<div style="text-align:center;padding:3rem 1rem;">
-      <div style="font-size:2rem;margin-bottom:.75rem;">✦</div>
-      <div style="font-size:.85rem;font-weight:600;color:var(--ink);margin-bottom:.35rem;">
-        ${commFilter === 'all' ? 'Nothing posted yet.' : 'No ' + commFilter + 's posted yet.'}
-      </div>
-      <div style="font-size:.72rem;color:var(--muted);">Be the first to share something with the community. 👑</div>
-    </div>`;
-    return;
-  }
-
-  const BADGES = {
-    win:      ['badge-win',      '🏆 Win'],
-    goal:     ['badge-goal',     '🎯 Goal'],
-    update:   ['badge-update',   '📢 Update'],
-    support:  ['badge-support',  '🌸 Support'],
-    question: ['badge-question', '💭 Question'],
-  };
-
-  feed.innerHTML = filtered.map((post, i) => {
-    const [bc, bl] = BADGES[post.type] || BADGES.update;
-    return `
-    <div class="comm-post" style="animation-delay:${i*.06}s">
-      <div class="comm-post-header">
-        <div class="comm-post-avatar" style="background:${post.color || 'linear-gradient(135deg,var(--teal),var(--teal-light))'}">
-          ${post.initials || '?'}
-        </div>
-        <div class="comm-post-meta">
-          <div class="comm-post-name">${post.author}
-            <span style="font-size:.58rem;color:var(--muted);font-weight:400;margin-left:.3rem;">${post.handle||''}</span>
-          </div>
-          <div class="comm-post-time">${post.time}</div>
-        </div>
-        <span class="comm-post-badge ${bc}">${bl}</span>
-      </div>
-      <div class="comm-post-body">${post.body}</div>
-      <div class="comm-post-actions">
-        <button class="comm-action-btn ${post.liked?'liked':''}" onclick="toggleLike('${post.id}',this)">
-          <span class="comm-action-icon">${post.liked?'♥':'♡'}</span> ${post.likes}
-        </button>
-        <button class="comm-action-btn">
-          <span class="comm-action-icon">💬</span> ${post.comments}
-        </button>
-        <button class="comm-action-btn" onclick="safeShowToast('Copied! Share the love 👑')">
-          <span class="comm-action-icon">↗</span> Share
-        </button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function toggleLike(id, btn) {
-  const post = commPosts.find(p => p.id === id);
-  if (!post) return;
-  post.liked = !post.liked;
-  post.likes += post.liked ? 1 : -1;
-  saveCommPosts();
-  renderFeed();
-}
-
-function filterFeed(type, btn) {
-  commFilter = type;
-  document.querySelectorAll('.comm-feed-tab').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  renderFeed();
-}
-
-function selectPostType(btn) {
-  document.querySelectorAll('.comm-type-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  selectedPostType = btn.dataset.type;
-}
-
-function updateCharCount(ta) {
-  const cnt = document.getElementById('comm-char-count');
-  if (cnt) cnt.textContent = ta.value.length + ' / 500';
-}
-
-function submitPost() {
-  const text = document.getElementById('comm-compose-text')?.value.trim();
-  if (!text) return;
-  loadCommProfile();
-  const name   = commProfile.name || getCurrentUserName();
-  const color  = commProfile.color || '#0A7266';
-  const newPost = {
-    id:       'post-' + Date.now(),
-    author:   name,
-    handle:   commProfile.handle || ('@'+name.toLowerCase().replace(/\s+/g,'')),
-    initials: name.charAt(0).toUpperCase(),
-    color:    `linear-gradient(135deg,${color},${color}bb)`,
-    type:     selectedPostType,
-    body:     text,
-    time:     'just now',
-    likes:    0,
-    liked:    false,
-    comments: 0,
-  };
-  commPosts.unshift(newPost);
-  saveCommPosts();
-  document.getElementById('comm-compose-text').value = '';
-  const cnt = document.getElementById('comm-char-count');
-  if (cnt) cnt.textContent = '0 / 500';
-  renderFeed();
-  updateCommProfile();
-  safeShowToast('Posted! 👑');
-}
-
-// ══════════════════════════════════
-// NAV VIEWS — router
-// ══════════════════════════════════
-function switchCommView(view, navItem) {
-  // Update active nav
-  document.querySelectorAll('.comm-nav-item').forEach(el => el.classList.remove('active'));
-  if (navItem) navItem.classList.add('active');
-  else {
-    const idx = ['feed','pods','challenges','wins','messages'].indexOf(view);
-    const items = document.querySelectorAll('.comm-nav-item');
-    if (items[idx]) items[idx].classList.add('active');
-  }
-
-  const main = document.getElementById('comm-main');
-  if (!main) return;
-  main.dataset.view = view;
-
-  // Show/hide feed elements
-  const composer = document.querySelector('#page-community .comm-composer');
-  const feedTabs = document.querySelector('#page-community .comm-feed-tabs');
-  const feedDiv  = document.getElementById('comm-feed');
-  const isFeed   = view === 'feed';
-
-  if (composer) composer.style.display = isFeed ? '' : 'none';
-  if (feedTabs) feedTabs.style.display = isFeed ? '' : 'none';
-  if (feedDiv)  feedDiv.style.display  = isFeed ? '' : 'none';
-
-  // Remove old view panel
-  const old = document.getElementById('comm-view-panel-container');
-  if (old) old.remove();
-
-  if (isFeed) { renderFeed(); return; }
-
-  // Create fresh panel container
-  const vpCon = document.createElement('div');
-  vpCon.id = 'comm-view-panel-container';
-  main.appendChild(vpCon);
-
-  if (view === 'pods')       renderPodsView(vpCon);
-  if (view === 'challenges') renderChallengesView(vpCon);
-  if (view === 'wins')       renderWinsView(vpCon);
-  if (view === 'messages')   renderMessagesView(vpCon);
-}
-
-function commGoFeed() {
-  const firstNav = document.querySelector('.comm-nav-item');
-  if (firstNav) switchCommView('feed', firstNav);
-}
-
-// Back button HTML shared
-const BACK_BTN = `<button onclick="commGoFeed()" class="comm-back-btn">← Back to Feed</button>`;
-
-// ══════════════════════════════════
-// PODS VIEW
-// ══════════════════════════════════
-function loadPodsAndChallenges() {
-  try { userPods       = JSON.parse(localStorage.getItem(PODS_KEY)) || []; } catch(e) { userPods=[]; }
-  try { userChallenges = JSON.parse(localStorage.getItem(CHALLENGES_KEY)) || []; } catch(e) { userChallenges=[]; }
-}
-function savePodsAndChallenges() {
-  try { localStorage.setItem(PODS_KEY, JSON.stringify(userPods)); } catch(e) {}
-  try { localStorage.setItem(CHALLENGES_KEY, JSON.stringify(userChallenges)); } catch(e) {}
-}
-
-function renderPodsView(container) {
-  loadPodsAndChallenges();
-  const items = userPods.length
-    ? userPods.map(p => `
-        <div class="comm-pod-card">
-          <span style="font-size:1.4rem">${p.emoji}</span>
-          <div style="flex:1">
-            <div style="font-size:.78rem;font-weight:700;color:var(--ink)">${p.name}</div>
-            <div style="font-size:.65rem;color:var(--muted);margin-top:.15rem">${p.desc||''} · ${p.members} member${p.members!==1?'s':''}</div>
-          </div>
-          <button class="comm-pod-join" onclick="openDM('${p.name}','${p.emoji}')">Open →</button>
-        </div>`).join('')
-    : `<div class="comm-empty-state">
-        <div class="comm-empty-icon">🤝</div>
-        <div style="font-size:.82rem;font-weight:600;color:var(--ink);margin-bottom:.3rem">No pods yet</div>
-        <div>Use the "Create Pod" button on the left to start your first accountability group.</div>
-       </div>`;
-
-  container.innerHTML = `
-    <div class="comm-view-panel">
-      <div class="comm-view-title">🤝 Accountability Pods</div>
-      <div class="comm-view-sub">Small groups. Real accountability. Ride or die energy.</div>
-      ${items}
-    </div>
-    ${BACK_BTN}`;
-}
-
-// ══════════════════════════════════
-// CHALLENGES VIEW
-// ══════════════════════════════════
-function renderChallengesView(container) {
-  loadPodsAndChallenges();
-  const items = userChallenges.length
-    ? userChallenges.map(ch => {
-        const elapsed = Math.floor((Date.now() - new Date(ch.startDate)) / 86400000) + 1;
-        const days    = Math.min(ch.days, elapsed);
-        const pct     = Math.round(days / ch.days * 100);
-        return `
-        <div class="comm-challenge-item">
-          <div class="comm-challenge-item-title">${ch.name}
-            <span style="font-size:.58rem;color:var(--muted);font-weight:400"> · Day ${days} of ${ch.days}</span>
-          </div>
-          <div class="comm-challenge-item-desc">${ch.desc||''}</div>
-          <div class="comm-challenge-bar">
-            <div class="comm-challenge-bar-fill" style="width:${pct}%"></div>
-          </div>
-          <div style="font-size:.58rem;color:var(--muted);margin-top:.3rem">${pct}% complete · ${ch.members} member${ch.members!==1?'s':''}</div>
-        </div>`;
-      }).join('')
-    : `<div class="comm-empty-state">
-        <div class="comm-empty-icon">⚡</div>
-        <div style="font-size:.82rem;font-weight:600;color:var(--ink);margin-bottom:.3rem">No challenges yet</div>
-        <div>Use the "Create Challenge" button to launch your first community challenge.</div>
-       </div>`;
-
-  container.innerHTML = `
-    <div class="comm-view-panel">
-      <div class="comm-view-title">⚡ Challenges</div>
-      <div class="comm-view-sub">Set a goal. Track it daily. Win together.</div>
-      ${items}
-    </div>
-    ${BACK_BTN}`;
-}
-
-// ══════════════════════════════════
-// WIN WALL VIEW
-// ══════════════════════════════════
-function renderWinsView(container) {
-  const wins = commPosts.filter(p => p.type === 'win');
-  const items = wins.length
-    ? wins.map((p, i) => `
-        <div class="comm-post" style="animation-delay:${i*.06}s">
-          <div class="comm-post-header">
-            <div class="comm-post-avatar" style="background:${p.color||'linear-gradient(135deg,var(--teal),var(--teal-light))'}">
-              ${p.initials||'?'}
-            </div>
-            <div class="comm-post-meta">
-              <div class="comm-post-name">${p.author}</div>
-              <div class="comm-post-time">${p.time}</div>
-            </div>
-            <span class="comm-post-badge badge-win">🏆 Win</span>
-          </div>
-          <div class="comm-post-body">${p.body}</div>
-        </div>`).join('')
-    : `<div class="comm-empty-state">
-        <div class="comm-empty-icon">🏆</div>
-        <div style="font-size:.82rem;font-weight:600;color:var(--ink);margin-bottom:.3rem">No wins posted yet</div>
-        <div>Post a 🏆 Win in the feed and it'll show up here.</div>
-       </div>`;
-
-  container.innerHTML = `
-    <div class="comm-view-panel">
-      <div class="comm-view-title">🏆 Win Wall</div>
-      <div class="comm-view-sub">Every win counts — big and small. Celebrate here.</div>
-      ${items}
-    </div>
-    ${BACK_BTN}`;
-}
-
-// ══════════════════════════════════
-// MESSAGES VIEW
-// ══════════════════════════════════
-function renderMessagesView(container) {
-  container.innerHTML = `
-    <div class="comm-view-panel">
-      <div class="comm-view-title">💬 Messages</div>
-      <div class="comm-view-sub">Click any member in the Online Now panel to open a DM.</div>
-      <div class="comm-empty-state">
-        <div class="comm-empty-icon">💬</div>
-        <div style="font-size:.82rem;font-weight:600;color:var(--ink);margin-bottom:.3rem">Your DMs will live here</div>
-        <div>Click someone from the Online Now panel on the right to start a conversation.</div>
-      </div>
-    </div>
-    ${BACK_BTN}`;
-}
-
-// ══════════════════════════════════
-// CREATE POD MODAL
-// ══════════════════════════════════
-function openCreatePod() {
-  ['pod-name-input','pod-emoji-input','pod-desc-input'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.value='';
-  });
-  document.getElementById('create-pod-overlay')?.classList.add('open');
-  document.getElementById('pod-name-input')?.focus();
-}
-
-function closeCreatePod() {
-  document.getElementById('create-pod-overlay')?.classList.remove('open');
-}
-
-function submitCreatePod() {
-  const name  = document.getElementById('pod-name-input')?.value.trim();
-  const emoji = document.getElementById('pod-emoji-input')?.value.trim() || '🤝';
-  const desc  = document.getElementById('pod-desc-input')?.value.trim() || '';
-  if (!name) { safeShowToast('Give your pod a name first!'); return; }
-  loadPodsAndChallenges();
-  userPods.push({ id:'pod-'+Date.now(), name, emoji, desc, members:1, createdAt:new Date().toISOString() });
-  savePodsAndChallenges();
-  closeCreatePod();
-  safeShowToast(`Pod "${name}" created! 🤝`);
-  // Refresh view if currently on pods
-  const main = document.getElementById('comm-main');
-  if (main?.dataset.view === 'pods') {
-    let vpCon = document.getElementById('comm-view-panel-container');
-    if (!vpCon) { vpCon=document.createElement('div'); vpCon.id='comm-view-panel-container'; main.appendChild(vpCon); }
-    renderPodsView(vpCon);
-  }
-}
-
-// ══════════════════════════════════
-// CREATE CHALLENGE MODAL
-// ══════════════════════════════════
-function openCreateChallenge() {
-  ['challenge-name-input','challenge-desc-input','challenge-days-input'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.value='';
-  });
-  document.getElementById('create-challenge-overlay')?.classList.add('open');
-  document.getElementById('challenge-name-input')?.focus();
-}
-
-function closeCreateChallenge() {
-  document.getElementById('create-challenge-overlay')?.classList.remove('open');
-}
-
-function submitCreateChallenge() {
-  const name = document.getElementById('challenge-name-input')?.value.trim();
-  const desc = document.getElementById('challenge-desc-input')?.value.trim() || '';
-  const days = parseInt(document.getElementById('challenge-days-input')?.value) || 30;
-  if (!name) { safeShowToast('Give your challenge a name first!'); return; }
-  loadPodsAndChallenges();
-  userChallenges.push({ id:'ch-'+Date.now(), name, desc, days, members:1, joined:true, startDate:new Date().toISOString() });
-  savePodsAndChallenges();
-  closeCreateChallenge();
-  safeShowToast(`Challenge "${name}" launched! 🔥`);
-  const main = document.getElementById('comm-main');
-  if (main?.dataset.view === 'challenges') {
-    let vpCon = document.getElementById('comm-view-panel-container');
-    if (!vpCon) { vpCon=document.createElement('div'); vpCon.id='comm-view-panel-container'; main.appendChild(vpCon); }
-    renderChallengesView(vpCon);
-  }
-}
-
-// ══════════════════════════════════
-// DM PANEL
-// ══════════════════════════════════
-function openDM(name, emoji) {
-  const panel = document.getElementById('comm-dm-panel');
-  const nameEl = document.getElementById('dm-name');
-  const av     = document.getElementById('dm-avatar');
-  if (!panel) return;
-  if (nameEl) nameEl.textContent = (emoji||'') + ' ' + name;
-  if (av)     av.textContent     = name.charAt(0).toUpperCase();
-  panel.classList.add('open');
-  dmOpen = true;
-  document.getElementById('dm-input')?.focus();
-}
-
-function closeDM() {
-  document.getElementById('comm-dm-panel')?.classList.remove('open');
-  dmOpen = false;
-}
-
-function sendDM() {
-  const inp  = document.getElementById('dm-input');
-  const msgs = document.getElementById('dm-messages');
-  if (!inp||!msgs||!inp.value.trim()) return;
-  const div = document.createElement('div');
-  div.className = 'comm-dm-msg mine';
-  div.textContent = inp.value.trim();
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-  inp.value = '';
-}
-
-// ══════════════════════════════════
-// 30-DAY CHALLENGE (right sidebar)
-// ══════════════════════════════════
-function joinChallenge() {
-  const btn       = document.getElementById('challenge-join-btn');
-  const membersEl = document.getElementById('challenge-members');
-  if (!btn || !btn.textContent.includes('Join')) return;
-  btn.textContent    = '✓ Joined!';
-  btn.style.background = 'rgba(255,255,255,0.35)';
-  if (membersEl) {
-    const cur = parseInt(membersEl.textContent) || 1;
-    membersEl.textContent = (cur + 1) + ' members joined';
-  }
-  try { localStorage.setItem(COMM_CHALLENGE_KEY, JSON.stringify({joined:true,day:1,startDate:new Date().toISOString()})); } catch(e) {}
-  safeShowToast("You're in! Day 1 starts now 🔥");
-}
-
-function loadChallengeState() {
-  try {
-    const s = JSON.parse(localStorage.getItem(COMM_CHALLENGE_KEY));
-    if (!s?.joined) return;
-    const days = Math.min(30, Math.floor((Date.now()-new Date(s.startDate))/86400000)+1);
-    const fill  = document.getElementById('challenge-fill');
-    const dayEl = document.getElementById('challenge-day');
-    const btn   = document.getElementById('challenge-join-btn');
-    if (fill)  fill.style.width       = (days/30*100) + '%';
-    if (dayEl) dayEl.textContent      = 'Day ' + days + ' of 30';
-    if (btn)   { btn.textContent      = '✓ You\'re In!'; btn.style.background = 'rgba(255,255,255,0.35)'; }
-  } catch(e) {}
-}
-
-function joinPod(name) { safeShowToast('Joined ' + name + '! 🤝'); }
-
-// ══════════════════════════════════
-// KEYBOARD / CLICK HANDLERS
-// ══════════════════════════════════
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeCreatePod(); closeCreateChallenge(); closeEditProfile(); closeDM(); }
-  if (e.key === 'Enter' && !e.shiftKey && dmOpen && document.activeElement?.id === 'dm-input') {
-    e.preventDefault(); sendDM();
-  }
-});
-
-document.addEventListener('click', e => {
-  if (e.target.id === 'create-pod-overlay')       closeCreatePod();
-  if (e.target.id === 'create-challenge-overlay') closeCreateChallenge();
-  if (e.target.id === 'edit-profile-overlay')     closeEditProfile();
-});
-
-// ══════════════════════════════════
-// INIT — called by showPage('community')
-// ══════════════════════════════════
-function initCommunity() {
-  loadCommPosts();
-  loadPodsAndChallenges();
-  loadCommProfile();
-  updateCommProfile();
-  loadChallengeState();
-  commFilter = 'all';
-
-  // Reset feed tab state
-  document.querySelectorAll('.comm-feed-tab').forEach((b,i) => b.classList.toggle('active',i===0));
-  // Reset nav state
-  document.querySelectorAll('.comm-nav-item').forEach((el,i) => el.classList.toggle('active',i===0));
-  // Show feed elements
-  const feedTabsRow = document.querySelector('.comm-feed-tabs');
-  const composerEl  = document.querySelector('.comm-composer');
-  const feedEl      = document.getElementById('comm-feed');
-  if (feedTabsRow) feedTabsRow.style.display = 'flex';
-  if (composerEl)  composerEl.style.display  = 'block';
-  if (feedEl)      feedEl.style.display      = 'block';
-  // Remove any leftover view panel
-  document.getElementById('comm-view-panel-container')?.remove();
-  // Render feed
-  renderFeed();
-}</script>
+<!-- theme JS moved to body -->
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 /* ── LIGHT MODE (default) ── */
@@ -1475,11 +156,10 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 }
 .nav-tabs::-webkit-scrollbar{display:none;}
 .nav-brand{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:300;letter-spacing:.06em;background:linear-gradient(135deg,var(--ink) 30%,var(--teal-mid));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.nav-tabs{display:flex;gap:.2rem;position:absolute;left:50%;transform:translateX(-50%);}
 .nav-tab{background:transparent;border:none;font-family:'DM Sans',sans-serif;font-size:.58rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:.42rem .8rem;border-radius:6px;cursor:pointer;transition:all .2s;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;}
 .nav-tab:hover{color:var(--ink);background:rgba(13,148,136,0.06);}
 .nav-tab.on{color:var(--teal);background:rgba(13,148,136,0.08);border-bottom-color:var(--teal);}
-.nav-right{display:flex;align-items:center;gap:1rem;margin-left:auto;}
+.nav-right{display:flex;align-items:center;gap:1rem;margin-left:auto;position:relative;z-index:101;}
 .nav-date{font-size:.62rem;font-weight:400;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);}
 .nav-month-ctrl{display:flex;align-items:center;gap:.4rem;}
 .nav-month-btn{background:var(--tint-hover);border:1px solid rgba(13,148,136,0.2);border-radius:4px;width:1.6rem;height:1.6rem;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--teal);font-size:.75rem;font-family:'DM Sans',sans-serif;transition:all .18s;}
@@ -2671,9 +1351,9 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   top: 52px;
   z-index: 98;
   background: transparent;
-  pointer-events: none;   /* invisible by default — never blocks page content */
+  pointer-events: none;
 }
-.mobile-nav-overlay.open { pointer-events: auto; } /* intercept clicks only when drawer is open */
+.mobile-nav-overlay.open { pointer-events: auto; }
 
 /* Show hamburger, hide desktop tabs on mobile */
 @media(max-width:768px) {
@@ -3110,8 +1790,8 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   inset: 0;
   background: rgba(0,0,0,0.25);
   backdrop-filter: blur(3px);
-  z-index: 998;
-  pointer-events: none;   /* cannot block clicks when closed */
+  z-index: 19998;
+  pointer-events: none;
   animation: fadeIn .2s ease;
 }
 .theme-overlay.open { display: block; pointer-events: auto; }
@@ -3127,7 +1807,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   background: var(--surface2);
   border-left: 1px solid var(--teal-border);
   box-shadow: -8px 0 40px rgba(0,0,0,0.12);
-  z-index: 999;
+  z-index: 19999;
   display: flex;
   flex-direction: column;
   transition: right .35s cubic-bezier(.22,.68,0,1.1);
@@ -3682,7 +2362,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   background: rgba(0,0,0,0.3);
   backdrop-filter: blur(4px);
   z-index: 600;
-  pointer-events: none;   /* cannot block clicks when closed */
+  pointer-events: none;
   align-items: center;
   justify-content: center;
 }
@@ -7518,7 +6198,7 @@ async function handleGoogle() {
 function enterApp(firstName) {
   const screen = document.getElementById('auth-screen');
   if (screen) {
-    screen.style.pointerEvents = 'none';   // immediately unblock page clicks during fade-out
+    screen.style.pointerEvents = 'none';
     screen.style.transition = 'opacity .5s ease, transform .5s ease';
     screen.style.opacity    = '0';
     screen.style.transform  = 'scale(1.02)';
@@ -7556,7 +6236,7 @@ async function logout() {
   if (brand) brand.textContent = "P's Command Center";
   const screen = document.getElementById('auth-screen');
   if (screen) {
-    screen.style.pointerEvents = '';   // restore pointer events on auth screen
+    screen.style.pointerEvents = '';
     screen.style.display   = 'flex';
     screen.style.opacity   = '0';
     screen.style.transform = 'scale(0.98)';
@@ -7612,7 +6292,7 @@ document.addEventListener('keydown', function(e) {
   }
 })();
 
-_supabase.auth.onAuthStateChange((event, session) => {
+try { _supabase.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' && session) {
     const firstName = session.user.user_metadata?.first_name || '';
     saveSession({ email: session.user.email, firstName, id: session.user.id });
@@ -7625,10 +6305,10 @@ _supabase.auth.onAuthStateChange((event, session) => {
     const screen = document.getElementById('auth-screen');
     if (screen) { screen.style.display = 'flex'; screen.style.opacity = '1'; }
   }
-});
+}); } catch(e) {}
 
 // Listen for auth state changes (e.g. after email confirmation)
-_supabase.auth.onAuthStateChange((event, session) => {
+try { _supabase.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' && session) {
     const firstName = session.user.user_metadata?.first_name || '';
     saveSession({ email: session.user.email, firstName, id: session.user.id });
@@ -7644,7 +6324,7 @@ _supabase.auth.onAuthStateChange((event, session) => {
       screen.style.opacity = '1';
     }
   }
-});
+}); } catch(e) {}
 
 // Logout button now in HTML nav
 
@@ -7828,7 +6508,6 @@ if (document.readyState !== 'loading') {
   const originalShowPage = window.showPage;
   if (typeof originalShowPage === 'function') {
     window.showPage = function(id, btn) {
-      // Always close mobile nav overlay before navigating (prevents transparent overlay blocking page clicks)
       if (typeof closeMobileNav === 'function') closeMobileNav();
       originalShowPage(id, btn);
       document.querySelectorAll('.nav-tab[data-page="custom"]').forEach(tab => tab.classList.add('on'));
@@ -7846,137 +6525,167 @@ if (document.readyState !== 'loading') {
   }
 
   function bindThemeControls() {
-    // Theme open button
-    document.querySelectorAll('.nav-settings-btn').forEach(btn => {
-      if (btn.dataset.themeBound === 'true') return;
-      btn.dataset.themeBound = 'true';
-      btn.addEventListener('click', function() {
-        openThemePanel();
-      });
-    });
-
-    // Theme close button
-    document.querySelectorAll('.theme-close-btn').forEach(btn => {
-      if (btn.dataset.themeBound === 'true') return;
-      btn.dataset.themeBound = 'true';
-      btn.addEventListener('click', function() {
-        closeThemePanel();
-      });
-    });
-
-    // Theme overlay click-outside
+    // Theme overlay click to close
     const overlay = document.getElementById('theme-overlay');
     if (overlay && overlay.dataset.themeBound !== 'true') {
       overlay.dataset.themeBound = 'true';
       overlay.addEventListener('click', function() {
-        closeThemePanel();
+        if (typeof closeThemePanel === 'function') closeThemePanel();
       });
     }
   }
 
-  // ── Community page: event delegation so all buttons work regardless of inline-onclick support ──
-  function bindCommunityPage() {
-    const page = document.getElementById('page-community');
-    if (!page || page.dataset.commBound === 'true') return;
-    page.dataset.commBound = 'true';
+  // Bind click handlers for Community page (create pod/challenge, etc.)
+  function bindCommunityControls() {
+    const commPage = document.getElementById('page-community');
+    if (!commPage || commPage.dataset.commBound === 'true') return;
+    commPage.dataset.commBound = 'true';
 
-    const COMM_VIEWS = ['feed', 'pods', 'challenges', 'wins', 'messages'];
+    // Map nav items to view names for fallback (Feed, Pods, Challenges, Wins, Messages)
+    const navItems = commPage.querySelectorAll('.comm-nav-item');
+    const viewNames = ['feed','pods','challenges','wins','messages'];
+    navItems.forEach((item, idx) => {
+      if (!item.dataset.view) item.dataset.view = viewNames[idx] || '';
+    });
 
-    page.addEventListener('click', function(e) {
-      // Sidebar nav items
-      const navItem = e.target.closest('.comm-nav-item');
-      if (navItem) {
-        const allNavItems = Array.from(document.querySelectorAll('.comm-nav-item'));
-        const idx = allNavItems.indexOf(navItem);
-        switchCommView(COMM_VIEWS[idx] || 'feed', navItem);
-        return;
-      }
+    // Attach input listener to update character count in post composer
+    const composer = commPage.querySelector('#comm-compose-text');
+    if (composer && composer.dataset.commBound !== 'true') {
+      composer.dataset.commBound = 'true';
+      composer.addEventListener('input', function() {
+        if (typeof updateCharCount === 'function') updateCharCount(composer);
+      });
+    }
 
-      // Edit profile
-      if (e.target.closest('.comm-edit-profile-btn')) {
-        openEditProfile();
-        return;
-      }
+    // Delegate clicks within the community page
+    commPage.addEventListener('click', function(ev) {
+      const tgt = ev.target;
 
-      // Create pod
-      if (e.target.closest('.comm-create-btn:not(.comm-create-btn-secondary)')) {
-        openCreatePod();
-        return;
-      }
-
-      // Create challenge
-      if (e.target.closest('.comm-create-btn-secondary')) {
-        openCreateChallenge();
-        return;
-      }
-
-      // Post type selector
-      const typeBtn = e.target.closest('.comm-type-btn');
-      if (typeBtn) {
-        selectPostType(typeBtn);
-        return;
-      }
-
-      // Submit post
-      if (e.target.closest('.comm-post-btn')) {
-        submitPost();
-        return;
-      }
-
-      // Feed filter tabs
-      const feedTab = e.target.closest('.comm-feed-tab');
-      if (feedTab) {
-        const FEED_TYPES = ['all', 'win', 'goal', 'support', 'question'];
-        const allTabs = Array.from(document.querySelectorAll('.comm-feed-tab'));
-        const tidx = allTabs.indexOf(feedTab);
-        filterFeed(FEED_TYPES[tidx] || 'all', feedTab);
-        return;
-      }
-
-      // Join challenge
-      if (e.target.closest('#challenge-join-btn')) {
-        joinChallenge();
-        return;
-      }
-
-      // Pod cards
-      const pod = e.target.closest('.comm-pod');
-      if (pod) {
-        const podName  = pod.querySelector('.comm-pod-name')  ? pod.querySelector('.comm-pod-name').textContent.trim()  : '';
-        const podEmoji = pod.querySelector('.comm-pod-emoji') ? pod.querySelector('.comm-pod-emoji').textContent.trim() : '';
-        const joinBtn  = pod.querySelector('.comm-pod-join');
-        if (joinBtn && joinBtn.textContent.trim() === 'Open') {
-          openDM(podName, podEmoji);
+      // Create Pod / Create Challenge buttons
+      const createBtn = tgt.closest('.comm-create-btn');
+      if (createBtn) {
+        ev.preventDefault();
+        if (createBtn.classList.contains('comm-create-btn-secondary')) {
+          if (typeof openCreateChallenge === 'function') openCreateChallenge();
         } else {
-          joinPod(podName);
+          if (typeof openCreatePod === 'function') openCreatePod();
         }
         return;
       }
 
-      // Online members
-      const member = e.target.closest('.comm-member');
-      if (member) {
-        const mName  = member.querySelector('.comm-member-name') ? member.querySelector('.comm-member-name').textContent.trim() : '';
-        const mAvEl  = member.querySelector('.comm-member-av');
-        const mEmoji = mAvEl ? mAvEl.textContent.trim() : '';
-        openDM(mName, mEmoji);
+      // Community navigation items (Feed, Pods, Challenges, Wins, Messages)
+      const navItem = tgt.closest('.comm-nav-item');
+      if (navItem) {
+        ev.preventDefault();
+        const view = navItem.dataset.view || viewNames[Array.from(navItem.parentElement.children).indexOf(navItem)] || 'feed';
+        if (typeof switchCommView === 'function') switchCommView(view, navItem);
+        return;
+      }
+
+      // Modal submission buttons (Create Pod, Create Challenge, Save Profile)
+      const submitBtn = tgt.closest('.comm-modal-submit');
+      if (submitBtn) {
+        ev.preventDefault();
+        // Determine which modal is currently open and call the appropriate handler
+        const podOpen       = document.getElementById('create-pod-overlay')?.classList.contains('open');
+        const challengeOpen = document.getElementById('create-challenge-overlay')?.classList.contains('open');
+        const editOpen      = document.getElementById('edit-profile-overlay')?.classList.contains('open');
+        if (podOpen && typeof submitCreatePod === 'function') {
+          submitCreatePod();
+        } else if (challengeOpen && typeof submitCreateChallenge === 'function') {
+          submitCreateChallenge();
+        } else if (editOpen && typeof submitEditProfile === 'function') {
+          submitEditProfile();
+        }
+        return;
+      }
+
+      // Modal cancel buttons (Cancel)
+      const cancelBtn = tgt.closest('.comm-modal-cancel');
+      if (cancelBtn) {
+        ev.preventDefault();
+        const overlay = cancelBtn.closest('.comm-modal-overlay');
+        const id = overlay && overlay.id;
+        if (id === 'create-pod-overlay' && typeof closeCreatePod === 'function') {
+          closeCreatePod();
+        } else if (id === 'create-challenge-overlay' && typeof closeCreateChallenge === 'function') {
+          closeCreateChallenge();
+        } else if (id === 'edit-profile-overlay' && typeof closeEditProfile === 'function') {
+          closeEditProfile();
+        }
+        return;
+      }
+
+      // Modal close (X) buttons
+      const closeBtn = tgt.closest('.comm-modal-close');
+      if (closeBtn) {
+        ev.preventDefault();
+        const overlay = closeBtn.closest('.comm-modal-overlay');
+        const id = overlay && overlay.id;
+        if (id === 'create-pod-overlay' && typeof closeCreatePod === 'function') {
+          closeCreatePod();
+        } else if (id === 'create-challenge-overlay' && typeof closeCreateChallenge === 'function') {
+          closeCreateChallenge();
+        } else if (id === 'edit-profile-overlay' && typeof closeEditProfile === 'function') {
+          closeEditProfile();
+        }
         return;
       }
     });
-  }
 
-  function initBindings() {
-    bindTopNavTabs();
-    bindThemeControls();
-    bindCommunityPage();
+    // Also bind modal controls at the document level because modals are outside #page-community.
+    const body = document.body;
+    if (body && body.dataset.commModalBound !== 'true') {
+      body.dataset.commModalBound = 'true';
+      body.addEventListener('click', function(ev) {
+        const tgt = ev.target;
+        const submitBtn = tgt.closest('.comm-modal-submit');
+        if (submitBtn) {
+          ev.preventDefault();
+          const podOpen       = document.getElementById('create-pod-overlay')?.classList.contains('open');
+          const challengeOpen = document.getElementById('create-challenge-overlay')?.classList.contains('open');
+          const editOpen      = document.getElementById('edit-profile-overlay')?.classList.contains('open');
+          if (podOpen && typeof submitCreatePod === 'function') submitCreatePod();
+          else if (challengeOpen && typeof submitCreateChallenge === 'function') submitCreateChallenge();
+          else if (editOpen && typeof submitEditProfile === 'function') submitEditProfile();
+          return;
+        }
+        const cancelBtn = tgt.closest('.comm-modal-cancel');
+        if (cancelBtn) {
+          ev.preventDefault();
+          const overlay = cancelBtn.closest('.comm-modal-overlay');
+          const id = overlay && overlay.id;
+          if (id === 'create-pod-overlay' && typeof closeCreatePod === 'function') closeCreatePod();
+          else if (id === 'create-challenge-overlay' && typeof closeCreateChallenge === 'function') closeCreateChallenge();
+          else if (id === 'edit-profile-overlay' && typeof closeEditProfile === 'function') closeEditProfile();
+          return;
+        }
+        const closeBtnGlobal = tgt.closest('.comm-modal-close');
+        if (closeBtnGlobal) {
+          ev.preventDefault();
+          const overlay = closeBtnGlobal.closest('.comm-modal-overlay');
+          const id = overlay && overlay.id;
+          if (id === 'create-pod-overlay' && typeof closeCreatePod === 'function') closeCreatePod();
+          else if (id === 'create-challenge-overlay' && typeof closeCreateChallenge === 'function') closeCreateChallenge();
+          else if (id === 'edit-profile-overlay' && typeof closeEditProfile === 'function') closeEditProfile();
+          return;
+        }
+      });
+    }
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(initBindings, 50);
-    });
+    document.addEventListener('DOMContentLoaded', () => setTimeout(function() {
+      bindTopNavTabs();
+      bindThemeControls();
+      bindCommunityControls();
+    }, 50));
   } else {
-    setTimeout(initBindings, 50);
+    setTimeout(function() {
+      bindTopNavTabs();
+      bindThemeControls();
+      bindCommunityControls();
+    }, 50);
   }
 })();
 </script>
@@ -8073,6 +6782,1367 @@ if (document.readyState !== 'loading') {
   </div>
 </div>
 
+<script>
+const SUPABASE_URL = 'https://ausgchpdxghtmrdzymmy.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1c2djaHBkeGdodG1yZHp5bW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1OTUwMDIsImV4cCI6MjA5MTE3MTAwMn0.8zXw7A4Xf4v7gi1UAhWaW1VvPpYJ3mJa3MTgVWAa3sw';
+
+// ── Supabase REST client (no CDN required) ──
+const _supabase = {
+  auth: {
+    async signUp({ email, password, options }) {
+      const r = await fetch(SUPABASE_URL+'/auth/v1/signup', {
+        method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},
+        body: JSON.stringify({ email, password, data: options?.data||{} })
+      });
+      const d = await r.json();
+      if (!r.ok) return { data:null, error:{message:d.msg||d.message||'Signup failed'} };
+      try { localStorage.setItem('pcc-sb-token', JSON.stringify({access_token:d.access_token,user:d.user})); } catch(e){}
+      return { data:{user:d.user||d}, error:null };
+    },
+    async signInWithPassword({ email, password }) {
+      const r = await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password', {
+        method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},
+        body: JSON.stringify({ email, password })
+      });
+      const d = await r.json();
+      if (!r.ok||d.error) return { data:null, error:{message:d.error_description||d.msg||'Invalid credentials'} };
+      try { localStorage.setItem('pcc-sb-token', JSON.stringify({access_token:d.access_token,refresh_token:d.refresh_token,user:d.user})); } catch(e){}
+      return { data:{user:d.user, session:d}, error:null };
+    },
+    async getSession() {
+      try {
+        const s = JSON.parse(localStorage.getItem('pcc-sb-token'));
+        if (s?.access_token) return { data:{session:{user:s.user,access_token:s.access_token}}, error:null };
+      } catch(e){}
+      return { data:{session:null}, error:null };
+    },
+    async signOut() {
+      try {
+        const s = JSON.parse(localStorage.getItem('pcc-sb-token'));
+        if (s?.access_token) await fetch(SUPABASE_URL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+s.access_token}});
+      } catch(e){}
+      try { localStorage.removeItem('pcc-sb-token'); } catch(e){}
+    },
+    async resetPasswordForEmail(email) {
+      const r = await fetch(SUPABASE_URL+'/auth/v1/recover',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({email})});
+      return r.ok?{error:null}:{error:{message:'Could not send reset email'}};
+    },
+    signInWithOAuth({provider,options}) {
+      window.location.href=SUPABASE_URL+'/auth/v1/authorize?provider='+provider+'&redirect_to='+encodeURIComponent(options?.redirectTo||window.location.origin);
+      return {error:null};
+    },
+    onAuthStateChange(cb) { return {data:{subscription:{unsubscribe:()=>{}}}}; }
+  },
+  from(table) {
+    const _f=[];let _s='*';
+    return {
+      select(c){_s=c||'*';return this;},
+      eq(c,v){_f.push({c,v});return this;},
+      async upsert(row) {
+        try {
+          const s=JSON.parse(localStorage.getItem('pcc-sb-token'));
+          if(!s?.access_token) return {error:{message:'Not authenticated'}};
+          const r=await fetch(SUPABASE_URL+'/rest/v1/'+table,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+s.access_token,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(row)});
+          return r.ok?{error:null}:{error:{message:'Save failed'}};
+        } catch(e){return {error:{message:e.message}};}
+      },
+      async single() {
+        try {
+          const s=JSON.parse(localStorage.getItem('pcc-sb-token'));
+          if(!s?.access_token) return {data:null,error:null};
+          let url=SUPABASE_URL+'/rest/v1/'+table+'?select='+_s;
+          _f.forEach(f=>{url+='&'+f.c+'=eq.'+encodeURIComponent(f.v);});
+          url+='&limit=1';
+          const r=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+s.access_token}});
+          const d=await r.json();
+          return {data:Array.isArray(d)?d[0]:d,error:null};
+        } catch(e){return {data:null,error:{message:e.message}};}
+      }
+    };
+  }
+};
+
+
+/* ════════════════════════════════════
+   THEME EDITOR
+   ════════════════════════════════════ */
+const THEME_KEY = 'pcc-user-theme';
+
+// Default theme
+const DEFAULT_THEME = {
+  name: "P's Command Center",
+  teal: "#0A7266",
+  tealMid: "#0D9488",
+  tealLight: "#14B8A6",
+  tealBorder: "rgba(10,114,102,0.18)",
+  bg: "marble",
+  font: "elegant",
+};
+
+let currentTheme = { ...DEFAULT_THEME };
+
+// ── Open / Close ──
+function openThemePanel() {
+  const panel = document.getElementById('theme-panel');
+  const overlay = document.getElementById('theme-overlay');
+  if (!panel || !overlay) return;
+  panel.classList.add('open');
+  overlay.classList.add('open');
+  try {
+    const saved = loadThemeFromStorage();
+    populatePanel(saved || DEFAULT_THEME);
+  } catch(e) {
+    console.warn('Theme panel populate error:', e);
+  }
+}
+
+function closeThemePanel() {
+  const panel = document.getElementById('theme-panel');
+  const overlay = document.getElementById('theme-overlay');
+  if (!panel || !overlay) return;
+
+  panel.classList.remove('open');
+  overlay.classList.remove('open');
+}
+
+// ── Apply color ──
+function applyColor(swatch) {
+  document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
+  swatch.classList.add('active');
+
+  const t = swatch.dataset.teal;
+  const m = swatch.dataset.mid;
+  const l = swatch.dataset.light;
+
+  setColorVars(t, m, l);
+  currentTheme.teal = t;
+  currentTheme.tealMid = m;
+  currentTheme.tealLight = l;
+
+  const picker = document.getElementById('theme-custom-picker');
+  const hex = document.getElementById('theme-custom-hex');
+  if (picker) picker.value = t;
+  if (hex) hex.value = t.toUpperCase();
+}
+
+function applyCustomColor(hex) {
+  document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
+
+  const hexInput = document.getElementById('theme-custom-hex');
+  if (hexInput) hexInput.value = hex.toUpperCase();
+
+  const mid = lightenHex(hex, 15);
+  const light = lightenHex(hex, 35);
+
+  setColorVars(hex, mid, light);
+  currentTheme.teal = hex;
+  currentTheme.tealMid = mid;
+  currentTheme.tealLight = light;
+}
+
+function applyHexInput(val) {
+  if (!/^#[0-9A-Fa-f]{6}$/.test(val)) return;
+
+  const picker = document.getElementById('theme-custom-picker');
+  if (picker) picker.value = val;
+
+  applyCustomColor(val);
+}
+
+function setColorVars(teal, mid, light) {
+  const r = document.documentElement;
+  const mode = r.getAttribute('data-theme') || 'light';
+
+  const borderAlpha = mode === 'dark' ? 0.28 : 0.18;
+  const pillAlpha   = mode === 'dark' ? 0.16 : 0.38;
+  const tintAlpha   = mode === 'dark' ? 0.10 : 0.20;
+  const hoverAlpha  = mode === 'dark' ? 0.18 : 0.45;
+  const orbAlpha    = mode === 'dark' ? 0.18 : 0.08;
+
+  const safeTeal  = teal || currentTheme.teal || DEFAULT_THEME.teal;
+  const safeMid   = mid || currentTheme.tealMid || DEFAULT_THEME.tealMid;
+  const safeLight = light || currentTheme.tealLight || DEFAULT_THEME.tealLight;
+
+  const red = parseInt(safeTeal.slice(1, 3), 16);
+  const green = parseInt(safeTeal.slice(3, 5), 16);
+  const blue = parseInt(safeTeal.slice(5, 7), 16);
+
+  r.style.setProperty('--teal', safeTeal);
+  r.style.setProperty('--teal-mid', safeMid);
+  r.style.setProperty('--teal-light', safeLight);
+  r.style.setProperty('--teal-rgb', `${red}, ${green}, ${blue}`);
+  r.style.setProperty('--teal-border', hexToRgba(safeTeal, borderAlpha));
+  r.style.setProperty('--pill-bg', hexToRgba(safeLight, pillAlpha));
+  r.style.setProperty('--tint', hexToRgba(safeLight, tintAlpha));
+  r.style.setProperty('--tint-hover', hexToRgba(safeLight, hoverAlpha));
+  r.style.setProperty('--orb-1', hexToRgba(safeTeal, orbAlpha));
+}
+
+// ── Apply background ──
+const BG_VARS = {
+  'marble': {
+    '--bg': '#F6F1E8',
+    '--surface': 'rgba(255,250,244,0.78)',
+    '--surface2': 'rgba(255,252,248,0.88)',
+    '--input-bg': 'rgba(255,252,248,0.72)',
+    '--ink': '#2C241E',
+    '--ink-mid': '#4A4038',
+    '--charcoal': '#655950',
+    '--page-texture':
+      "linear-gradient(rgba(246,241,232,0.82), rgba(246,241,232,0.82)), url('YOUR-IVORY-PAPER-TEXTURE-URL')",
+  },
+
+  'linen-cream': {
+    '--bg': '#F4EFE7',
+    '--surface': 'rgba(250,246,240,0.78)',
+    '--surface2': 'rgba(255,252,247,0.88)',
+    '--input-bg': 'rgba(255,252,247,0.72)',
+    '--ink': '#2A241D',
+    '--ink-mid': '#473E36',
+    '--charcoal': '#60554D',
+    '--page-texture':
+      "linear-gradient(rgba(244,239,231,0.80), rgba(244,239,231,0.80)), url('YOUR-LINEN-TEXTURE-URL')",
+  },
+
+  'stone-taupe': {
+    '--bg': '#EAE4DC',
+    '--surface': 'rgba(245,240,234,0.74)',
+    '--surface2': 'rgba(250,246,241,0.86)',
+    '--input-bg': 'rgba(250,246,241,0.68)',
+    '--ink': '#28231F',
+    '--ink-mid': '#433C37',
+    '--charcoal': '#5A524C',
+    '--page-texture':
+      "linear-gradient(rgba(234,228,220,0.78), rgba(234,228,220,0.78)), url('YOUR-STONE-TEXTURE-URL')",
+  },
+
+  'black-silk': {
+    '--bg': '#121212',
+    '--surface': 'rgba(27,27,27,0.78)',
+    '--surface2': 'rgba(34,34,34,0.90)',
+    '--input-bg': 'rgba(36,36,36,0.72)',
+    '--ink': '#F3EEE8',
+    '--ink-mid': '#D7CEC5',
+    '--charcoal': '#B3A79B',
+    '--page-texture':
+      "linear-gradient(rgba(18,18,18,0.74), rgba(18,18,18,0.74)), url('YOUR-BLACK-SILK-TEXTURE-URL')",
+  },
+
+  'parchment': {
+    '--bg': '#EFE4D2',
+    '--surface': 'rgba(250,242,230,0.76)',
+    '--surface2': 'rgba(255,248,238,0.88)',
+    '--input-bg': 'rgba(255,248,238,0.72)',
+    '--ink': '#33281E',
+    '--ink-mid': '#524538',
+    '--charcoal': '#6B5D4E',
+    '--page-texture':
+      "linear-gradient(rgba(239,228,210,0.78), rgba(239,228,210,0.78)), url('YOUR-PARCHMENT-TEXTURE-URL')",
+  },
+
+  'walnut-fabric': {
+    '--bg': '#2A211C',
+    '--surface': 'rgba(48,38,33,0.78)',
+    '--surface2': 'rgba(58,47,41,0.90)',
+    '--input-bg': 'rgba(60,49,43,0.72)',
+    '--ink': '#F4ECE3',
+    '--ink-mid': '#DCCFC2',
+    '--charcoal': '#B8AA9A',
+    '--page-texture':
+      "linear-gradient(rgba(42,33,28,0.74), rgba(42,33,28,0.74)), url('YOUR-WALNUT-FABRIC-TEXTURE-URL')",
+  },
+};
+
+function applyBackground(card) {
+  document.querySelectorAll('.theme-bg-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+
+  const bg = card.dataset.bg;
+  currentTheme.bg = bg;
+
+  const vars = BG_VARS[bg];
+  if (!vars) return;
+
+  const r = document.documentElement;
+  Object.entries(vars).forEach(([k, v]) => r.style.setProperty(k, v));
+}
+
+// ── Apply font ──
+const FONT_LINKS = {
+  elegant: null,
+  modern: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap',
+  classic: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Lato:wght@300;400&display=swap',
+  minimal: null,
+};
+
+const FONT_VARS = {
+  elegant: { display: "'Cormorant Garamond', serif", ui: "'DM Sans', sans-serif" },
+  modern:  { display: "'Inter', sans-serif", ui: "'Inter', sans-serif" },
+  classic: { display: "'Playfair Display', serif", ui: "'Lato', sans-serif" },
+  minimal: { display: "'Georgia', serif", ui: "system-ui, sans-serif" },
+};
+
+function applyFont(option) {
+  document.querySelectorAll('.theme-font-option').forEach(o => o.classList.remove('active'));
+  option.classList.add('active');
+  const font = option.dataset.font;
+  currentTheme.font = font;
+  const vars = FONT_VARS[font];
+  if (!vars) return;
+  const r = document.documentElement;
+  r.style.setProperty('--font-display', vars.display);
+  r.style.setProperty('--font-ui', vars.ui);
+  if (FONT_LINKS[font] && !document.querySelector('link[href="' + FONT_LINKS[font] + '"]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = FONT_LINKS[font];
+    document.head.appendChild(link);
+  }
+  document.querySelectorAll('h1,h2,.nav-brand,.pg-header h1,.auth-title,.rev-num,.shc-title,.vision-title,.para-stat-num,.home-leftover-big').forEach(el => {
+    el.style.fontFamily = vars.display;
+  });
+}
+
+// ── Preview dashboard name ──
+function previewName(val) {
+  const name = val || "P's Command Center";
+  document.querySelectorAll('.nav-brand').forEach(el => {
+    if (el.childNodes.length > 0) {
+      el.childNodes[0].textContent = name;
+    } else {
+      el.textContent = name;
+    }
+  });
+  currentTheme.name = name;
+}
+
+// ── Save / Load / Reset ──
+function saveTheme() {
+  try {
+    localStorage.setItem(THEME_KEY, JSON.stringify(currentTheme));
+  } catch (e) {
+    console.warn('Could not save theme:', e);
+  }
+
+  const btn = document.querySelector('.theme-save-btn');
+  if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = '✓ Saved!';
+    btn.style.background = '#15622D';
+
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = '';
+    }, 1800);
+  }
+
+  closeThemePanel();
+}
+
+function loadThemeFromStorage() {
+  try {
+    const raw = localStorage.getItem(THEME_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function populatePanel(theme) {
+  const nameInput = document.getElementById('theme-name-input');
+  if (nameInput && theme.name) nameInput.value = theme.name;
+
+  if (theme.teal) {
+    const picker = document.getElementById('theme-custom-picker');
+    const hex = document.getElementById('theme-custom-hex');
+    if (picker) picker.value = theme.teal;
+    if (hex) hex.value = theme.teal.toUpperCase();
+  }
+
+  if (theme.bg) {
+    document.querySelectorAll('.theme-bg-card').forEach(c => {
+      c.classList.toggle('active', c.dataset.bg === theme.bg);
+    });
+  }
+
+  if (theme.font) {
+    document.querySelectorAll('.theme-font-option').forEach(o => {
+      o.classList.toggle('active', o.dataset.font === theme.font);
+    });
+  }
+}
+
+function resetTheme() {
+  try {
+    localStorage.removeItem(THEME_KEY);
+  } catch (e) {}
+  location.reload();
+}
+
+// ── Apply saved theme on load (deferred until DOM ready) ──
+function applyStoredTheme() {
+
+  const saved = loadThemeFromStorage();
+  currentTheme = { ...DEFAULT_THEME, ...(saved || {}) };
+
+  setColorVars(
+    currentTheme.teal,
+    currentTheme.tealMid,
+    currentTheme.tealLight
+  );
+
+  if (currentTheme.bg && BG_VARS[currentTheme.bg]) {
+    const r = document.documentElement;
+    Object.entries(BG_VARS[currentTheme.bg]).forEach(([k, v]) => r.style.setProperty(k, v));
+  }
+
+  if (currentTheme.font && FONT_VARS[currentTheme.font]) {
+    const r = document.documentElement;
+    r.style.setProperty('--font-display', FONT_VARS[currentTheme.font].display);
+    r.style.setProperty('--font-ui', FONT_VARS[currentTheme.font].ui);
+  }
+
+  if (currentTheme.name) {
+    document.addEventListener('DOMContentLoaded', () => previewName(currentTheme.name));
+    setTimeout(() => previewName(currentTheme.name), 300);
+  }
+
+}
+document.addEventListener('DOMContentLoaded', applyStoredTheme);
+
+// ── Utility: hex color helpers ──
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function lightenHex(hex, pct) {
+  let r = parseInt(hex.slice(1, 3), 16);
+  let g = parseInt(hex.slice(3, 5), 16);
+  let b = parseInt(hex.slice(5, 7), 16);
+
+  r = Math.min(255, r + Math.round((255 - r) * (pct / 100)));
+  g = Math.min(255, g + Math.round((255 - g) * (pct / 100)));
+  b = Math.min(255, b + Math.round((255 - b) * (pct / 100)));
+
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+
+// ════════════════════════════════════════════════════════
+// SUPABASE DATA SYNC LAYER
+// Every section of the dashboard syncs to the cloud.
+// Sections: goals, notes, habits, life-board, calendar,
+//           home, streams, paralegal, theme, settings
+// ════════════════════════════════════════════════════════
+
+const DB_TABLE = 'user_data';
+
+// ── Get current user ID from session ──
+function getCurrentUserId() {
+  try {
+    const s = JSON.parse(localStorage.getItem('pcc-auth-session'));
+    return s?.id || null;
+  } catch(e) { return null; }
+}
+
+// ── Save a section to Supabase ──
+async function syncToCloud(section, data) {
+  const userId = getCurrentUserId();
+  if (!userId) return; // not logged in, localStorage only
+
+  try {
+    await _supabase.from(DB_TABLE).upsert({
+      user_id:    userId,
+      section:    section,
+      data:       data,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id,section' });
+  } catch(e) {
+    console.warn('Sync error for section:', section, e);
+  }
+}
+
+// ── Load a section from Supabase ──
+async function loadFromCloud(section) {
+  const userId = getCurrentUserId();
+  if (!userId) return null;
+
+  try {
+    const { data, error } = await _supabase
+      .from(DB_TABLE)
+      .select('data')
+      .eq('user_id', userId)
+      .eq('section', section)
+      .single();
+
+    if (error || !data) return null;
+    return data.data;
+  } catch(e) {
+    return null;
+  }
+}
+
+// ── Load ALL sections at once on login ──
+async function loadAllUserData() {
+  const userId = getCurrentUserId();
+  if (!userId) return;
+
+  try {
+    const { data: rows, error } = await _supabase
+      .from(DB_TABLE)
+      .select('section, data')
+      .eq('user_id', userId);
+
+    if (error || !rows || rows.length === 0) {
+      // New user — clear any leftover data from previous user
+      clearAllLocalData();
+      return;
+    }
+
+    // Map sections to localStorage keys and populate
+    const sectionMap = {
+      'home':        'pcc-home-v2',
+      'calendar':    'pcc-calendar-events',
+      'listing-notes': 'pcc-listing-notes',
+      'theme':       'pcc-user-theme',
+      'tab-order':   'pcc-tab-order',
+    };
+
+    rows.forEach(row => {
+      const lsKey = sectionMap[row.section];
+      if (lsKey && row.data) {
+        try {
+          localStorage.setItem(lsKey, JSON.stringify(row.data));
+        } catch(e) {}
+      }
+
+      // Handle special sections
+      if (row.section === 'goals' && row.data) {
+        // Goals are stored per month key
+        Object.entries(row.data).forEach(([key, val]) => {
+          try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+        });
+      }
+      if (row.section === 'notes' && row.data) {
+        // Notes array — store in memory
+        if (Array.isArray(row.data)) {
+          notes = row.data;
+          nextNoteId = notes.reduce((max,n) => Math.max(max, n.id||0), 0) + 1;
+        }
+      }
+      if (row.section === 'todos' && row.data) {
+        if (Array.isArray(row.data)) homeTodos = row.data;
+      }
+      if (row.section === 'apt-search' && row.data) {
+        if (Array.isArray(row.data)) aptSearchList = row.data;
+      }
+      if (row.section === 'habits' && row.data) {
+        try { localStorage.setItem('pcc-habits', JSON.stringify(row.data)); } catch(e) {}
+      }
+    });
+
+    // Re-render everything with loaded data
+    setTimeout(() => {
+      loadHomeData();
+      loadTabOrder();
+      initTabDrag();
+      renderNotesList();
+      if (notes.length > 0) loadNote(notes[0]);
+      renderBoard();
+      renderHomeTodos();
+      renderAptSearch();
+      // Apply saved theme
+      const savedTheme = rows.find(r => r.section === 'theme');
+      if (savedTheme?.data) {
+        currentTheme = { ...DEFAULT_THEME, ...savedTheme.data };
+        if (currentTheme.teal) setColorVars(currentTheme.teal, currentTheme.tealMid, currentTheme.tealLight);
+        if (currentTheme.bg && BG_VARS[currentTheme.bg]) {
+          Object.entries(BG_VARS[currentTheme.bg]).forEach(([k,v]) => document.documentElement.style.setProperty(k,v));
+        }
+        if (currentTheme.name) previewName(currentTheme.name);
+      }
+    }, 300);
+
+  } catch(e) {
+    console.warn('loadAllUserData error:', e);
+  }
+}
+
+// ── Clear all local data (new user or logout) ──
+function clearAllLocalData() {
+  const keys = [
+    'pcc-home-v2', 'pcc-calendar-events', 'pcc-listing-notes',
+    'pcc-user-theme', 'pcc-tab-order', 'pcc-habits'
+  ];
+  keys.forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
+  // Clear in-memory
+  notes = [];
+  homeTodos = [];
+  aptSearchList = [];
+  events = [];
+}
+
+// ══════════════════════════════════════════════
+// PATCH EXISTING SAVE FUNCTIONS TO DUAL-WRITE
+// ══════════════════════════════════════════════
+
+// Patch: saveHomeData
+const _origSaveHomeData = window.saveHomeData;
+window.saveHomeData = function() {
+  _origSaveHomeData && _origSaveHomeData();
+  // Also sync todos and apt search
+  try {
+    const raw = localStorage.getItem('pcc-home-v2');
+    if (raw) syncToCloud('home', JSON.parse(raw));
+    syncToCloud('todos', homeTodos);
+    syncToCloud('apt-search', aptSearchList);
+  } catch(e) {}
+};
+
+// Patch: saveEvents
+const _origSaveEvents = window.saveEvents;
+window.saveEvents = function() {
+  _origSaveEvents && _origSaveEvents();
+  syncToCloud('calendar', events);
+};
+
+// Patch: saveListingNote
+const _origSaveListingNote = window.saveListingNote;
+window.saveListingNote = function(id, text) {
+  _origSaveListingNote && _origSaveListingNote(id, text);
+  syncToCloud('listing-notes', listingNotes);
+};
+
+// Patch: saveNote (notes tab)
+const _origSaveNote = window.saveNote;
+window.saveNote = function() {
+  _origSaveNote && _origSaveNote();
+  syncToCloud('notes', notes);
+};
+
+// Patch: deleteNote
+const _origDeleteNote = window.deleteNote;
+window.deleteNote = function() {
+  _origDeleteNote && _origDeleteNote();
+  syncToCloud('notes', notes);
+};
+
+// Patch: saveTheme
+const _origSaveTheme = window.saveTheme;
+window.saveTheme = function() {
+  _origSaveTheme && _origSaveTheme();
+  syncToCloud('theme', currentTheme);
+};
+
+// Patch: saveTabOrder
+const _origSaveTabOrder = window.saveTabOrder;
+window.saveTabOrder = function() {
+  _origSaveTabOrder && _origSaveTabOrder();
+  try {
+    const order = JSON.parse(localStorage.getItem('pcc-tab-order'));
+    if (order) syncToCloud('tab-order', order);
+  } catch(e) {}
+};
+
+// Patch: goals — intercept goal saves
+const _origRenderGoals = window.renderGoals;
+window.renderGoals = function() {
+  _origRenderGoals && _origRenderGoals();
+  // Collect all goal data across months
+  setTimeout(() => {
+    const goalData = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.match(/^\d{4}-\d{2}$/)) {
+        try { goalData[key] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
+      }
+    }
+    if (Object.keys(goalData).length) syncToCloud('goals', goalData);
+  }, 500);
+};
+
+// ══════════════════════════════════════
+// HOOK INTO enterApp TO LOAD USER DATA
+// ══════════════════════════════════════
+const _origEnterApp = window.enterApp;
+window.enterApp = function(firstName) {
+  _origEnterApp && _origEnterApp(firstName);
+  // Load this user's data after entering
+  setTimeout(loadAllUserData, 600);
+};
+
+// Also load on auth state change (returning user)
+const _origOnAuthChange = _supabase.auth.onAuthStateChange;
+// Already set up above — loadAllUserData called when SIGNED_IN
+
+// ════════════════════════════════════════════════════════════
+// COMMUNITY HUB — Single authoritative JS block
+// ════════════════════════════════════════════════════════════
+
+// ── Storage keys ──
+const COMM_KEY           = 'pcc-community-posts';
+const COMM_CHALLENGE_KEY = 'pcc-challenge-joined';
+const PODS_KEY           = 'pcc-comm-pods';
+const CHALLENGES_KEY     = 'pcc-comm-challenges';
+const COMM_PROFILE_KEY   = 'pcc-comm-profile';
+
+// ── State ──
+let commPosts       = [];
+let commFilter      = 'all';
+let selectedPostType = 'update';
+let dmOpen          = false;
+let userPods        = [];
+let userChallenges  = [];
+let commProfile     = { name:'', handle:'', bio:'', color:'#0A7266' };
+
+// ── Helpers ──
+function getCurrentUserName() {
+  try {
+    const s = JSON.parse(localStorage.getItem('pcc-auth-session'));
+    return s?.firstName || 'You';
+  } catch(e) { return 'You'; }
+}
+
+// ── Safe toast (self-contained, no Block 2 dependency) ──
+function safeShowToast(msg) {
+  // Try Block 2's showToast first
+  if (typeof showToast === 'function') { showToast(msg); return; }
+  // Fallback: build our own minimal toast
+  let t = document.getElementById('_comm_toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_comm_toast';
+    t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--teal);color:#fff;padding:.65rem 1.4rem;border-radius:50px;font-family:"DM Sans",sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.06em;z-index:9999;opacity:0;transition:all .3s ease;pointer-events:none;white-space:nowrap;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 2800);
+}
+
+// ══════════════════════════════════
+// PROFILE
+// ══════════════════════════════════
+function loadCommProfile() {
+  try {
+    const s = JSON.parse(localStorage.getItem(COMM_PROFILE_KEY));
+    if (s) commProfile = { ...commProfile, ...s };
+  } catch(e) {}
+}
+
+function saveCommProfile() {
+  try { localStorage.setItem(COMM_PROFILE_KEY, JSON.stringify(commProfile)); } catch(e) {}
+}
+
+function updateCommProfile() {
+  loadCommProfile();
+  const name    = commProfile.name    || getCurrentUserName();
+  const handle  = commProfile.handle  || ('@' + (name||'you').toLowerCase().replace(/\s+/g,''));
+  const color   = commProfile.color   || '#0A7266';
+  const initial = name.charAt(0).toUpperCase();
+  const grad    = `linear-gradient(135deg,${color},${color}bb)`;
+
+  const av = document.getElementById('comm-avatar');
+  if (av) { av.textContent = initial; av.style.background = grad; }
+  const cAv = document.getElementById('comm-composer-av');
+  if (cAv) { cAv.textContent = initial; cAv.style.background = grad; }
+  const pn = document.getElementById('comm-profile-name');
+  if (pn) pn.textContent = name;
+  const ph = document.getElementById('comm-profile-handle');
+  if (ph) ph.textContent = handle;
+
+  // Bio
+  if (commProfile.bio) {
+    let bioEl = document.getElementById('comm-profile-bio');
+    if (!bioEl) {
+      bioEl = document.createElement('div');
+      bioEl.id = 'comm-profile-bio';
+      bioEl.style.cssText = 'font-size:.65rem;color:var(--muted);margin:.35rem 0;line-height:1.5;font-weight:400;';
+      const editBtn = document.querySelector('.comm-edit-profile-btn');
+      if (editBtn && editBtn.parentNode) editBtn.parentNode.insertBefore(bioEl, editBtn);
+    }
+    bioEl.textContent = commProfile.bio;
+  }
+
+  // Update post count stat
+  const cnt = document.getElementById('comm-posts-count');
+  if (cnt) cnt.textContent = commPosts.filter(p => p.author === name).length;
+}
+
+// Edit Profile modal
+function openEditProfile() {
+  loadCommProfile();
+  const name = commProfile.name || getCurrentUserName();
+  const el = (id) => document.getElementById(id);
+  if (el('edit-display-name')) el('edit-display-name').value = name;
+  if (el('edit-handle'))       el('edit-handle').value       = commProfile.handle || ('@'+name.toLowerCase().replace(/\s+/g,''));
+  if (el('edit-bio'))          el('edit-bio').value          = commProfile.bio || '';
+  document.querySelectorAll('.edit-color-swatch').forEach(s => {
+    s.classList.toggle('active', s.dataset.color === commProfile.color);
+  });
+  const prev = el('edit-avatar-preview');
+  if (prev) { prev.textContent = name.charAt(0).toUpperCase(); prev.style.background = `linear-gradient(135deg,${commProfile.color},${commProfile.color}bb)`; }
+  el('edit-profile-overlay')?.classList.add('open');
+}
+
+function closeEditProfile() {
+  document.getElementById('edit-profile-overlay')?.classList.remove('open');
+}
+
+function selectProfileColor(swatch) {
+  document.querySelectorAll('.edit-color-swatch').forEach(s => s.classList.remove('active'));
+  swatch.classList.add('active');
+  commProfile.color = swatch.dataset.color;
+  const prev = document.getElementById('edit-avatar-preview');
+  if (prev) prev.style.background = `linear-gradient(135deg,${commProfile.color},${commProfile.color}bb)`;
+}
+
+function submitEditProfile() {
+  const name   = document.getElementById('edit-display-name')?.value.trim();
+  const handle = document.getElementById('edit-handle')?.value.trim();
+  const bio    = document.getElementById('edit-bio')?.value.trim();
+  if (!name) { safeShowToast('Please enter a display name.'); return; }
+  commProfile = { name, handle: handle || ('@'+name.toLowerCase().replace(/\s+/g,'')), bio: bio||'', color: commProfile.color };
+  saveCommProfile();
+  closeEditProfile();
+  updateCommProfile();
+  safeShowToast('Profile updated! ✦');
+}
+
+// ══════════════════════════════════
+// POSTS — Feed
+// ══════════════════════════════════
+function loadCommPosts() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(COMM_KEY));
+    commPosts = saved && Array.isArray(saved) ? saved : [];
+  } catch(e) { commPosts = []; }
+}
+
+function saveCommPosts() {
+  try { localStorage.setItem(COMM_KEY, JSON.stringify(commPosts)); } catch(e) {}
+}
+
+function renderFeed() {
+  const feed = document.getElementById('comm-feed');
+  if (!feed) return;
+
+  const filtered = commFilter === 'all'
+    ? commPosts
+    : commPosts.filter(p => p.type === commFilter);
+
+  if (!filtered.length) {
+    feed.innerHTML = `<div style="text-align:center;padding:3rem 1rem;">
+      <div style="font-size:2rem;margin-bottom:.75rem;">✦</div>
+      <div style="font-size:.85rem;font-weight:600;color:var(--ink);margin-bottom:.35rem;">
+        ${commFilter === 'all' ? 'Nothing posted yet.' : 'No ' + commFilter + 's posted yet.'}
+      </div>
+      <div style="font-size:.72rem;color:var(--muted);">Be the first to share something with the community. 👑</div>
+    </div>`;
+    return;
+  }
+
+  const BADGES = {
+    win:      ['badge-win',      '🏆 Win'],
+    goal:     ['badge-goal',     '🎯 Goal'],
+    update:   ['badge-update',   '📢 Update'],
+    support:  ['badge-support',  '🌸 Support'],
+    question: ['badge-question', '💭 Question'],
+  };
+
+  feed.innerHTML = filtered.map((post, i) => {
+    const [bc, bl] = BADGES[post.type] || BADGES.update;
+    return `
+    <div class="comm-post" style="animation-delay:${i*.06}s">
+      <div class="comm-post-header">
+        <div class="comm-post-avatar" style="background:${post.color || 'linear-gradient(135deg,var(--teal),var(--teal-light))'}">
+          ${post.initials || '?'}
+        </div>
+        <div class="comm-post-meta">
+          <div class="comm-post-name">${post.author}
+            <span style="font-size:.58rem;color:var(--muted);font-weight:400;margin-left:.3rem;">${post.handle||''}</span>
+          </div>
+          <div class="comm-post-time">${post.time}</div>
+        </div>
+        <span class="comm-post-badge ${bc}">${bl}</span>
+      </div>
+      <div class="comm-post-body">${post.body}</div>
+      <div class="comm-post-actions">
+        <button class="comm-action-btn ${post.liked?'liked':''}" onclick="toggleLike('${post.id}',this)">
+          <span class="comm-action-icon">${post.liked?'♥':'♡'}</span> ${post.likes}
+        </button>
+        <button class="comm-action-btn">
+          <span class="comm-action-icon">💬</span> ${post.comments}
+        </button>
+        <button class="comm-action-btn" onclick="safeShowToast('Copied! Share the love 👑')">
+          <span class="comm-action-icon">↗</span> Share
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleLike(id, btn) {
+  const post = commPosts.find(p => p.id === id);
+  if (!post) return;
+  post.liked = !post.liked;
+  post.likes += post.liked ? 1 : -1;
+  saveCommPosts();
+  renderFeed();
+}
+
+function filterFeed(type, btn) {
+  commFilter = type;
+  document.querySelectorAll('.comm-feed-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderFeed();
+}
+
+function selectPostType(btn) {
+  document.querySelectorAll('.comm-type-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedPostType = btn.dataset.type;
+}
+
+function updateCharCount(ta) {
+  const cnt = document.getElementById('comm-char-count');
+  if (cnt) cnt.textContent = ta.value.length + ' / 500';
+}
+
+function submitPost() {
+  const text = document.getElementById('comm-compose-text')?.value.trim();
+  if (!text) return;
+  loadCommProfile();
+  const name   = commProfile.name || getCurrentUserName();
+  const color  = commProfile.color || '#0A7266';
+  const newPost = {
+    id:       'post-' + Date.now(),
+    author:   name,
+    handle:   commProfile.handle || ('@'+name.toLowerCase().replace(/\s+/g,'')),
+    initials: name.charAt(0).toUpperCase(),
+    color:    `linear-gradient(135deg,${color},${color}bb)`,
+    type:     selectedPostType,
+    body:     text,
+    time:     'just now',
+    likes:    0,
+    liked:    false,
+    comments: 0,
+  };
+  commPosts.unshift(newPost);
+  saveCommPosts();
+  document.getElementById('comm-compose-text').value = '';
+  const cnt = document.getElementById('comm-char-count');
+  if (cnt) cnt.textContent = '0 / 500';
+  renderFeed();
+  updateCommProfile();
+  safeShowToast('Posted! 👑');
+}
+
+// ══════════════════════════════════
+// NAV VIEWS — router
+// ══════════════════════════════════
+function switchCommView(view, navItem) {
+  // Update active nav
+  document.querySelectorAll('.comm-nav-item').forEach(el => el.classList.remove('active'));
+  if (navItem) navItem.classList.add('active');
+  else {
+    const idx = ['feed','pods','challenges','wins','messages'].indexOf(view);
+    const items = document.querySelectorAll('.comm-nav-item');
+    if (items[idx]) items[idx].classList.add('active');
+  }
+
+  const main = document.getElementById('comm-main');
+  if (!main) return;
+  main.dataset.view = view;
+
+  // Show/hide feed elements
+  const composer = document.querySelector('#page-community .comm-composer');
+  const feedTabs = document.querySelector('#page-community .comm-feed-tabs');
+  const feedDiv  = document.getElementById('comm-feed');
+  const isFeed   = view === 'feed';
+
+  if (composer) composer.style.display = isFeed ? '' : 'none';
+  if (feedTabs) feedTabs.style.display = isFeed ? '' : 'none';
+  if (feedDiv)  feedDiv.style.display  = isFeed ? '' : 'none';
+
+  // Remove old view panel
+  const old = document.getElementById('comm-view-panel-container');
+  if (old) old.remove();
+
+  if (isFeed) { renderFeed(); return; }
+
+  // Create fresh panel container
+  const vpCon = document.createElement('div');
+  vpCon.id = 'comm-view-panel-container';
+  main.appendChild(vpCon);
+
+  if (view === 'pods')       renderPodsView(vpCon);
+  if (view === 'challenges') renderChallengesView(vpCon);
+  if (view === 'wins')       renderWinsView(vpCon);
+  if (view === 'messages')   renderMessagesView(vpCon);
+}
+
+function commGoFeed() {
+  const firstNav = document.querySelector('.comm-nav-item');
+  if (firstNav) switchCommView('feed', firstNav);
+}
+
+// Back button HTML shared
+const BACK_BTN = `<button onclick="commGoFeed()" class="comm-back-btn">← Back to Feed</button>`;
+
+// ══════════════════════════════════
+// PODS VIEW
+// ══════════════════════════════════
+function loadPodsAndChallenges() {
+  try { userPods       = JSON.parse(localStorage.getItem(PODS_KEY)) || []; } catch(e) { userPods=[]; }
+  try { userChallenges = JSON.parse(localStorage.getItem(CHALLENGES_KEY)) || []; } catch(e) { userChallenges=[]; }
+}
+function savePodsAndChallenges() {
+  try { localStorage.setItem(PODS_KEY, JSON.stringify(userPods)); } catch(e) {}
+  try { localStorage.setItem(CHALLENGES_KEY, JSON.stringify(userChallenges)); } catch(e) {}
+}
+
+function renderPodsView(container) {
+  loadPodsAndChallenges();
+  const items = userPods.length
+    ? userPods.map(p => `
+        <div class="comm-pod-card">
+          <span style="font-size:1.4rem">${p.emoji}</span>
+          <div style="flex:1">
+            <div style="font-size:.78rem;font-weight:700;color:var(--ink)">${p.name}</div>
+            <div style="font-size:.65rem;color:var(--muted);margin-top:.15rem">${p.desc||''} · ${p.members} member${p.members!==1?'s':''}</div>
+          </div>
+          <button class="comm-pod-join" onclick="openDM('${p.name}','${p.emoji}')">Open →</button>
+        </div>`).join('')
+    : `<div class="comm-empty-state">
+        <div class="comm-empty-icon">🤝</div>
+        <div style="font-size:.82rem;font-weight:600;color:var(--ink);margin-bottom:.3rem">No pods yet</div>
+        <div>Use the "Create Pod" button on the left to start your first accountability group.</div>
+       </div>`;
+
+  container.innerHTML = `
+    <div class="comm-view-panel">
+      <div class="comm-view-title">🤝 Accountability Pods</div>
+      <div class="comm-view-sub">Small groups. Real accountability. Ride or die energy.</div>
+      ${items}
+    </div>
+    ${BACK_BTN}`;
+}
+
+// ══════════════════════════════════
+// CHALLENGES VIEW
+// ══════════════════════════════════
+function renderChallengesView(container) {
+  loadPodsAndChallenges();
+  const items = userChallenges.length
+    ? userChallenges.map(ch => {
+        const elapsed = Math.floor((Date.now() - new Date(ch.startDate)) / 86400000) + 1;
+        const days    = Math.min(ch.days, elapsed);
+        const pct     = Math.round(days / ch.days * 100);
+        return `
+        <div class="comm-challenge-item">
+          <div class="comm-challenge-item-title">${ch.name}
+            <span style="font-size:.58rem;color:var(--muted);font-weight:400"> · Day ${days} of ${ch.days}</span>
+          </div>
+          <div class="comm-challenge-item-desc">${ch.desc||''}</div>
+          <div class="comm-challenge-bar">
+            <div class="comm-challenge-bar-fill" style="width:${pct}%"></div>
+          </div>
+          <div style="font-size:.58rem;color:var(--muted);margin-top:.3rem">${pct}% complete · ${ch.members} member${ch.members!==1?'s':''}</div>
+        </div>`;
+      }).join('')
+    : `<div class="comm-empty-state">
+        <div class="comm-empty-icon">⚡</div>
+        <div style="font-size:.82rem;font-weight:600;color:var(--ink);margin-bottom:.3rem">No challenges yet</div>
+        <div>Use the "Create Challenge" button to launch your first community challenge.</div>
+       </div>`;
+
+  container.innerHTML = `
+    <div class="comm-view-panel">
+      <div class="comm-view-title">⚡ Challenges</div>
+      <div class="comm-view-sub">Set a goal. Track it daily. Win together.</div>
+      ${items}
+    </div>
+    ${BACK_BTN}`;
+}
+
+// ══════════════════════════════════
+// WIN WALL VIEW
+// ══════════════════════════════════
+function renderWinsView(container) {
+  const wins = commPosts.filter(p => p.type === 'win');
+  const items = wins.length
+    ? wins.map((p, i) => `
+        <div class="comm-post" style="animation-delay:${i*.06}s">
+          <div class="comm-post-header">
+            <div class="comm-post-avatar" style="background:${p.color||'linear-gradient(135deg,var(--teal),var(--teal-light))'}">
+              ${p.initials||'?'}
+            </div>
+            <div class="comm-post-meta">
+              <div class="comm-post-name">${p.author}</div>
+              <div class="comm-post-time">${p.time}</div>
+            </div>
+            <span class="comm-post-badge badge-win">🏆 Win</span>
+          </div>
+          <div class="comm-post-body">${p.body}</div>
+        </div>`).join('')
+    : `<div class="comm-empty-state">
+        <div class="comm-empty-icon">🏆</div>
+        <div style="font-size:.82rem;font-weight:600;color:var(--ink);margin-bottom:.3rem">No wins posted yet</div>
+        <div>Post a 🏆 Win in the feed and it'll show up here.</div>
+       </div>`;
+
+  container.innerHTML = `
+    <div class="comm-view-panel">
+      <div class="comm-view-title">🏆 Win Wall</div>
+      <div class="comm-view-sub">Every win counts — big and small. Celebrate here.</div>
+      ${items}
+    </div>
+    ${BACK_BTN}`;
+}
+
+// ══════════════════════════════════
+// MESSAGES VIEW
+// ══════════════════════════════════
+function renderMessagesView(container) {
+  container.innerHTML = `
+    <div class="comm-view-panel">
+      <div class="comm-view-title">💬 Messages</div>
+      <div class="comm-view-sub">Click any member in the Online Now panel to open a DM.</div>
+      <div class="comm-empty-state">
+        <div class="comm-empty-icon">💬</div>
+        <div style="font-size:.82rem;font-weight:600;color:var(--ink);margin-bottom:.3rem">Your DMs will live here</div>
+        <div>Click someone from the Online Now panel on the right to start a conversation.</div>
+      </div>
+    </div>
+    ${BACK_BTN}`;
+}
+
+// ══════════════════════════════════
+// CREATE POD MODAL
+// ══════════════════════════════════
+function openCreatePod() {
+  ['pod-name-input','pod-emoji-input','pod-desc-input'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('create-pod-overlay')?.classList.add('open');
+  document.getElementById('pod-name-input')?.focus();
+}
+
+function closeCreatePod() {
+  document.getElementById('create-pod-overlay')?.classList.remove('open');
+}
+
+function submitCreatePod() {
+  const name  = document.getElementById('pod-name-input')?.value.trim();
+  const emoji = document.getElementById('pod-emoji-input')?.value.trim() || '🤝';
+  const desc  = document.getElementById('pod-desc-input')?.value.trim() || '';
+  if (!name) { safeShowToast('Give your pod a name first!'); return; }
+  loadPodsAndChallenges();
+  userPods.push({ id:'pod-'+Date.now(), name, emoji, desc, members:1, createdAt:new Date().toISOString() });
+  savePodsAndChallenges();
+  closeCreatePod();
+  safeShowToast(`Pod "${name}" created! 🤝`);
+  // Refresh view if currently on pods
+  const main = document.getElementById('comm-main');
+  if (main?.dataset.view === 'pods') {
+    let vpCon = document.getElementById('comm-view-panel-container');
+    if (!vpCon) { vpCon=document.createElement('div'); vpCon.id='comm-view-panel-container'; main.appendChild(vpCon); }
+    renderPodsView(vpCon);
+  }
+}
+
+// ══════════════════════════════════
+// CREATE CHALLENGE MODAL
+// ══════════════════════════════════
+function openCreateChallenge() {
+  ['challenge-name-input','challenge-desc-input','challenge-days-input'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('create-challenge-overlay')?.classList.add('open');
+  document.getElementById('challenge-name-input')?.focus();
+}
+
+function closeCreateChallenge() {
+  document.getElementById('create-challenge-overlay')?.classList.remove('open');
+}
+
+function submitCreateChallenge() {
+  const name = document.getElementById('challenge-name-input')?.value.trim();
+  const desc = document.getElementById('challenge-desc-input')?.value.trim() || '';
+  const days = parseInt(document.getElementById('challenge-days-input')?.value) || 30;
+  if (!name) { safeShowToast('Give your challenge a name first!'); return; }
+  loadPodsAndChallenges();
+  userChallenges.push({ id:'ch-'+Date.now(), name, desc, days, members:1, joined:true, startDate:new Date().toISOString() });
+  savePodsAndChallenges();
+  closeCreateChallenge();
+  safeShowToast(`Challenge "${name}" launched! 🔥`);
+  const main = document.getElementById('comm-main');
+  if (main?.dataset.view === 'challenges') {
+    let vpCon = document.getElementById('comm-view-panel-container');
+    if (!vpCon) { vpCon=document.createElement('div'); vpCon.id='comm-view-panel-container'; main.appendChild(vpCon); }
+    renderChallengesView(vpCon);
+  }
+}
+
+// ══════════════════════════════════
+// DM PANEL
+// ══════════════════════════════════
+function openDM(name, emoji) {
+  const panel = document.getElementById('comm-dm-panel');
+  const nameEl = document.getElementById('dm-name');
+  const av     = document.getElementById('dm-avatar');
+  if (!panel) return;
+  if (nameEl) nameEl.textContent = (emoji||'') + ' ' + name;
+  if (av)     av.textContent     = name.charAt(0).toUpperCase();
+  panel.classList.add('open');
+  dmOpen = true;
+  document.getElementById('dm-input')?.focus();
+}
+
+function closeDM() {
+  document.getElementById('comm-dm-panel')?.classList.remove('open');
+  dmOpen = false;
+}
+
+function sendDM() {
+  const inp  = document.getElementById('dm-input');
+  const msgs = document.getElementById('dm-messages');
+  if (!inp||!msgs||!inp.value.trim()) return;
+  const div = document.createElement('div');
+  div.className = 'comm-dm-msg mine';
+  div.textContent = inp.value.trim();
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  inp.value = '';
+}
+
+// ══════════════════════════════════
+// 30-DAY CHALLENGE (right sidebar)
+// ══════════════════════════════════
+function joinChallenge() {
+  const btn       = document.getElementById('challenge-join-btn');
+  const membersEl = document.getElementById('challenge-members');
+  if (!btn || !btn.textContent.includes('Join')) return;
+  btn.textContent    = '✓ Joined!';
+  btn.style.background = 'rgba(255,255,255,0.35)';
+  if (membersEl) {
+    const cur = parseInt(membersEl.textContent) || 1;
+    membersEl.textContent = (cur + 1) + ' members joined';
+  }
+  try { localStorage.setItem(COMM_CHALLENGE_KEY, JSON.stringify({joined:true,day:1,startDate:new Date().toISOString()})); } catch(e) {}
+  safeShowToast("You're in! Day 1 starts now 🔥");
+}
+
+function loadChallengeState() {
+  try {
+    const s = JSON.parse(localStorage.getItem(COMM_CHALLENGE_KEY));
+    if (!s?.joined) return;
+    const days = Math.min(30, Math.floor((Date.now()-new Date(s.startDate))/86400000)+1);
+    const fill  = document.getElementById('challenge-fill');
+    const dayEl = document.getElementById('challenge-day');
+    const btn   = document.getElementById('challenge-join-btn');
+    if (fill)  fill.style.width       = (days/30*100) + '%';
+    if (dayEl) dayEl.textContent      = 'Day ' + days + ' of 30';
+    if (btn)   { btn.textContent      = '✓ You\'re In!'; btn.style.background = 'rgba(255,255,255,0.35)'; }
+  } catch(e) {}
+}
+
+function joinPod(name) { safeShowToast('Joined ' + name + '! 🤝'); }
+
+// ══════════════════════════════════
+// KEYBOARD / CLICK HANDLERS
+// ══════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeCreatePod(); closeCreateChallenge(); closeEditProfile(); closeDM(); }
+  if (e.key === 'Enter' && !e.shiftKey && dmOpen && document.activeElement?.id === 'dm-input') {
+    e.preventDefault(); sendDM();
+  }
+});
+
+document.addEventListener('click', e => {
+  if (e.target.id === 'create-pod-overlay')       closeCreatePod();
+  if (e.target.id === 'create-challenge-overlay') closeCreateChallenge();
+  if (e.target.id === 'edit-profile-overlay')     closeEditProfile();
+});
+
+// ══════════════════════════════════
+// INIT — called by showPage('community')
+// ══════════════════════════════════
+function initCommunity() {
+  loadCommPosts();
+  loadPodsAndChallenges();
+  loadCommProfile();
+  updateCommProfile();
+  loadChallengeState();
+  commFilter = 'all';
+
+  // Reset feed tab state
+  document.querySelectorAll('.comm-feed-tab').forEach((b,i) => b.classList.toggle('active',i===0));
+  // Reset nav state
+  document.querySelectorAll('.comm-nav-item').forEach((el,i) => el.classList.toggle('active',i===0));
+  // Show feed elements
+  const feedTabsRow = document.querySelector('.comm-feed-tabs');
+  const composerEl  = document.querySelector('.comm-composer');
+  const feedEl      = document.getElementById('comm-feed');
+  if (feedTabsRow) feedTabsRow.style.display = 'flex';
+  if (composerEl)  composerEl.style.display  = 'block';
+  if (feedEl)      feedEl.style.display      = 'block';
+  // Remove any leftover view panel
+  document.getElementById('comm-view-panel-container')?.remove();
+  // Render feed
+  renderFeed();
+}
+
+// ── DIRECT BUTTON BINDINGS (failsafe, runs after all functions are defined) ──
+window.openThemePanel    = openThemePanel;
+window.openCreatePod     = openCreatePod;
+window.openCreateChallenge = openCreateChallenge;
+
+(function directBindButtons() {
+  function bind() {
+    // ⚙ Customize theme button
+    var settingsBtn = document.getElementById('nav-settings-btn');
+    if (settingsBtn && !settingsBtn._pccBound) {
+      settingsBtn._pccBound = true;
+      settingsBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        openThemePanel();
+      });
+    }
+    // Create Pod + Create Challenge buttons
+    document.querySelectorAll('.comm-create-btn').forEach(function(btn) {
+      if (!btn._pccBound) {
+        btn._pccBound = true;
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (btn.classList.contains('comm-create-btn-secondary')) {
+            openCreateChallenge();
+          } else {
+            openCreatePod();
+          }
+        });
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bind);
+  } else {
+    bind();
+  }
+})();
+
+// Apply stored theme immediately (DOMContentLoaded already fired at this point)
+setTimeout(applyStoredTheme, 0);
+</script>
 </body>
 
 </html>
