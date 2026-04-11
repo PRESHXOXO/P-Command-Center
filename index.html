@@ -5235,6 +5235,9 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
   <button class="mobile-nav-btn" data-page="community" onclick="mobileNavGo('community',this)">
     <span class="mnb-icon">🌸</span> Community
   </button>
+  <button class="mobile-nav-btn" type="button" onclick="addHub(); closeMobileNav()">
+    <span class="mnb-icon">＋</span> New Hub
+  </button>
   <button class="mobile-nav-btn" id="mobile-logout-btn" onclick="logout()" style="display:none;color:#C0392B;">
     <span class="mnb-icon">↩</span> Log Out
   </button>
@@ -6385,6 +6388,9 @@ async function loadAllUserData() {
       rows = [];
     }
 
+    syncCurrentUserRole(undefined, rows);
+    applyRoleBasedNavigation();
+
     if (error || !rows || rows.length === 0) {
       // New user — clear any leftover data from previous user
       try { localStorage.setItem(LOCAL_DATA_OWNER_KEY, userId); } catch (e) {}
@@ -7369,18 +7375,120 @@ function getWeekStart() {
   return monday.toLocaleDateString('en-US',{month:'short',day:'numeric'});
 }
 
+const MEMBER_VISIBLE_PAGES = ['dashboard', 'calendar', 'vision', 'community'];
+const ADMIN_ONLY_PAGES = ['life-board', 'notes', 'streams', 'paralegal', 'home'];
+const ADMIN_DATA_SECTIONS = ['home', 'listing-notes', 'notes', 'goals', 'habits', 'todos', 'apt-search'];
+let currentUserIsAdmin = false;
+
+function parseConfigList(value) {
+  if (Array.isArray(value)) return value.map(v => String(v || '').trim().toLowerCase()).filter(Boolean);
+  return String(value || '')
+    .split(/[,\n;]/)
+    .map(v => v.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function getConfiguredAdminEmails() {
+  const envEmails = parseConfigList(PCC_RUNTIME_ENV.ADMIN_EMAILS || PCC_RUNTIME_ENV.ADMIN_EMAIL);
+  const configEmails = parseConfigList(PCC_RUNTIME_CONFIG.ADMIN_EMAILS || PCC_RUNTIME_CONFIG.ADMIN_EMAIL);
+  return Array.from(new Set([...envEmails, ...configEmails]));
+}
+
+function getStoredSupabaseUser() {
+  try {
+    return JSON.parse(localStorage.getItem('pcc-sb-token') || 'null')?.user || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function normalizeUserEmail(user) {
+  const email = user?.email || getSession()?.email || '';
+  return String(email || '').trim().toLowerCase();
+}
+
+function hasExplicitAdminRole(user) {
+  const sourceUser = user || getStoredSupabaseUser() || {};
+  const roles = [
+    sourceUser?.role,
+    sourceUser?.app_metadata?.role,
+    sourceUser?.user_metadata?.role
+  ]
+    .map(v => String(v || '').trim().toLowerCase())
+    .filter(Boolean);
+
+  if (roles.includes('admin')) return true;
+  if (sourceUser?.is_admin === true) return true;
+  if (sourceUser?.app_metadata?.is_admin === true) return true;
+  if (sourceUser?.user_metadata?.is_admin === true) return true;
+
+  const email = normalizeUserEmail(sourceUser);
+  if (email && getConfiguredAdminEmails().includes(email)) return true;
+  return false;
+}
+
+function inferAdminFromRows(rows) {
+  return Array.isArray(rows) && rows.some(row => ADMIN_DATA_SECTIONS.includes(String(row?.section || '').toLowerCase()));
+}
+
+function syncCurrentUserRole(user, rows) {
+  currentUserIsAdmin = hasExplicitAdminRole(user) || inferAdminFromRows(rows);
+  document.documentElement.setAttribute('data-user-role', currentUserIsAdmin ? 'admin' : 'member');
+  return currentUserIsAdmin;
+}
+
+function canAccessPage(pageId) {
+  const id = String(pageId || '').trim();
+  if (!id) return false;
+  if (id.startsWith('hub-')) return true;
+  if (MEMBER_VISIBLE_PAGES.includes(id)) return true;
+  return currentUserIsAdmin;
+}
+
+function applyRoleBasedNavigation() {
+  document.querySelectorAll('.nav-tabs .nav-tab[data-page]').forEach(tab => {
+    const allowed = canAccessPage(tab.dataset.page);
+    tab.style.display = allowed ? '' : 'none';
+    tab.setAttribute('aria-hidden', allowed ? 'false' : 'true');
+  });
+
+  const addBtn = document.querySelector('.nav-tabs .nav-tab-add');
+  if (addBtn) {
+    addBtn.style.display = '';
+    addBtn.setAttribute('aria-hidden', 'false');
+  }
+
+  document.querySelectorAll('.mobile-nav-btn[data-page]').forEach(btn => {
+    const allowed = canAccessPage(btn.dataset.page);
+    btn.style.display = allowed ? '' : 'none';
+    btn.setAttribute('aria-hidden', allowed ? 'false' : 'true');
+  });
+
+  const activePageEl = document.querySelector('.page.active');
+  const activePageId = activePageEl ? activePageEl.id.replace(/^page-/, '') : '';
+  if (activePageId && !canAccessPage(activePageId)) {
+    const dashboardTab = document.querySelector('.nav-tab[data-page="dashboard"]');
+    showPage('dashboard', dashboardTab);
+  }
+}
+
 // NAV
 function showPage(id, btn) {
+  const targetId = canAccessPage(id) ? id : 'dashboard';
+  const targetBtn = canAccessPage(id)
+    ? btn
+    : (document.querySelector('.nav-tab[data-page="dashboard"]') || btn);
   ensureLateHubPagesTopLevel();
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('on'));
-  const page = document.getElementById('page-' + id);
+  const page = document.getElementById('page-' + targetId);
   if (page) page.classList.add('active');
-  if (btn)  btn.classList.add('on');
+  if (targetBtn)  targetBtn.classList.add('on');
   normalizePageHeaderTitles(page || document);
-  if (id === 'life-board') renderBoard();
-  if (id === 'vision')     animateVision();
-  if (id === 'community')  setTimeout(initCommunity, 50);
+  if (targetId === 'life-board') renderBoard();
+  if (targetId === 'vision')     animateVision();
+  if (targetId === 'community')  setTimeout(initCommunity, 50);
+  return targetId;
 }
 
 // Live date in nav
@@ -8490,13 +8598,14 @@ function closeMobileNav() {
 
 function mobileNavGo(pageId, btn) {
   // Navigate
-  showPage(pageId, btn);
+  const resolvedPageId = showPage(pageId, btn);
   // Update active state in drawer
   document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  const activeBtn = document.querySelector(`.mobile-nav-btn[data-page="${resolvedPageId}"]`) || btn;
+  if (activeBtn) activeBtn.classList.add('active');
   // Also sync desktop tabs
   document.querySelectorAll('.nav-tab').forEach(t => {
-    t.classList.toggle('on', t.dataset.page === pageId);
+    t.classList.toggle('on', t.dataset.page === resolvedPageId);
   });
   // Close drawer
   closeMobileNav();
@@ -8505,11 +8614,12 @@ function mobileNavGo(pageId, btn) {
 // Sync mobile drawer active state when desktop tabs are clicked
 const _origShowPage = window.showPage;
 window.showPage = function(id, btn) {
-  _origShowPage && _origShowPage(id, btn);
+  const resolvedPageId = _origShowPage ? _origShowPage(id, btn) : id;
   // Sync mobile drawer
   document.querySelectorAll('.mobile-nav-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.page === id);
+    b.classList.toggle('active', b.dataset.page === resolvedPageId);
   });
+  return resolvedPageId;
 };
 
 // Close drawer on escape
@@ -9032,6 +9142,8 @@ function updateNavUser(firstName) {
   if (logoutBtn) logoutBtn.style.display = 'flex';
   const mobileLogout = document.getElementById('mobile-logout-btn');
   if (mobileLogout) mobileLogout.style.display = 'flex';
+  syncCurrentUserRole();
+  applyRoleBasedNavigation();
 }
 
 // ── LOGOUT ──
@@ -9040,6 +9152,9 @@ async function logout() {
   clearSession();
   clearRecoverySession();
   clearAllLocalData();
+  currentUserIsAdmin = false;
+  document.documentElement.setAttribute('data-user-role', 'member');
+  applyRoleBasedNavigation();
   // Hide logout button
   const logoutBtn = document.getElementById('nav-logout-btn');
   if (logoutBtn) logoutBtn.style.display = 'none';
@@ -9782,6 +9897,7 @@ function deleteHub(hubId) {
 function renderCustomHubs() {
   loadCustomHubs().forEach(createHubTabAndPage);
   initTabDrag();
+  applyRoleBasedNavigation();
 }
 
 function escapeHtml(str) {
@@ -9807,8 +9923,9 @@ if (document.readyState !== 'loading') {
   const originalShowPage = window.showPage;
   if (typeof originalShowPage === 'function') {
     window.showPage = function(id, btn) {
-      originalShowPage(id, btn);
+      const resolvedPageId = originalShowPage(id, btn);
       document.querySelectorAll('.nav-tab[data-page="custom"]').forEach(tab => tab.classList.add('on'));
+      return resolvedPageId;
     };
   }
 
