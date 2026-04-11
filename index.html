@@ -3185,8 +3185,8 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
 
     <!-- Login / Signup tabs -->
     <div class="auth-tabs">
-      <button class="auth-tab on" id="tab-login" onclick="switchAuthTab('login')">Log In</button>
-      <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
+      <button class="auth-tab on" id="tab-login" type="button" onclick="switchAuthTab('login')">Log In</button>
+      <button class="auth-tab" id="tab-signup" type="button" onclick="switchAuthTab('signup')">Sign Up</button>
     </div>
 
     <!-- Error message -->
@@ -3208,9 +3208,9 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
         </div>
         <div class="auth-forgot" style="display:flex;justify-content:space-between;align-items:center;">
           <button class="auth-forgot-link" onclick="switchAuthTab('signup')" style="color:var(--muted);">New here? Sign up →</button>
-          <button class="auth-forgot-link" onclick="showForgot()">Forgot password?</button>
+          <button class="auth-forgot-link" type="button" onclick="showForgot()">Forgot password?</button>
         </div>
-        <button class="auth-submit" id="login-btn" onclick="handleLogin()">Log In</button>
+        <button class="auth-submit" id="login-btn" type="button" onclick="handleLogin()">Log In</button>
         <div class="auth-divider">
           <div class="auth-divider-line"></div>
           <span class="auth-divider-text">or</span>
@@ -3258,7 +3258,7 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
           <label class="auth-field-label">Confirm Password</label>
           <input class="auth-input" id="signup-confirm" type="password" placeholder="Repeat password" autocomplete="new-password" />
         </div>
-        <button class="auth-submit" id="signup-btn" onclick="handleSignup()">Create Account</button>
+        <button class="auth-submit" id="signup-btn" type="button" onclick="handleSignup()">Create Account</button>
         <div class="auth-divider">
           <div class="auth-divider-line"></div>
           <span class="auth-divider-text">or</span>
@@ -3285,9 +3285,35 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
           <label class="auth-field-label">Email</label>
           <input class="auth-input" id="forgot-email" type="email" placeholder="your@email.com" />
         </div>
-        <button class="auth-submit" id="forgot-btn" onclick="handleForgot()">Send Reset Link</button>
+        <button class="auth-submit" id="forgot-btn" type="button" onclick="handleForgot()">Send Reset Link</button>
         <div id="forgot-status" style="display:none;font-size:.58rem;color:var(--teal);line-height:1.55;text-align:center;margin-top:.55rem;"></div>
         <button class="auth-tab" style="margin-top:.3rem;width:100%;padding:.5rem;" onclick="switchAuthTab('login')">← Back to Login</button>
+      </div>
+    </div>
+
+    <div id="form-reset" style="display:none;">
+      <div class="auth-form">
+        <div style="text-align:center;margin-bottom:.5rem;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--ink);margin-bottom:.3rem;">Choose a new password</div>
+          <div id="reset-email-hint" style="font-size:.62rem;color:var(--muted);line-height:1.5;">Your recovery link is active. Set a new password to finish.</div>
+        </div>
+        <div>
+          <label class="auth-field-label">New Password</label>
+          <div class="auth-pw-wrap">
+            <input class="auth-input" id="reset-password" type="password" placeholder="Min. 8 characters" autocomplete="new-password" oninput="checkPwStrength(this.value)" />
+            <button class="auth-pw-toggle" onclick="togglePw('reset-password',this)" tabindex="-1">ðŸ‘</button>
+          </div>
+        </div>
+        <div>
+          <label class="auth-field-label">Confirm New Password</label>
+          <div class="auth-pw-wrap">
+            <input class="auth-input" id="reset-confirm" type="password" placeholder="Repeat new password" autocomplete="new-password" />
+            <button class="auth-pw-toggle" onclick="togglePw('reset-confirm',this)" tabindex="-1">ðŸ‘</button>
+          </div>
+        </div>
+        <button class="auth-submit" id="reset-btn" type="button" onclick="handlePasswordReset()">Update Password</button>
+        <div id="reset-status" style="display:none;font-size:.58rem;color:var(--teal);line-height:1.55;text-align:center;margin-top:.55rem;"></div>
+        <button class="auth-tab" style="margin-top:.3rem;width:100%;padding:.5rem;" onclick="switchAuthTab('login')">â† Back to Login</button>
       </div>
     </div>
 
@@ -5524,13 +5550,30 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
 </div>
 
 <script>
-const SUPABASE_URL = 'https://ausgchpdxghtmrdzymmy.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1c2djaHBkeGdodG1yZHp5bW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1OTUwMDIsImV4cCI6MjA5MTE3MTAwMn0.8zXw7A4Xf4v7gi1UAhWaW1VvPpYJ3mJa3MTgVWAa3sw';
+const PCC_RUNTIME_ENV = (typeof process !== 'undefined' && process && process.env) ? process.env : {};
+const PCC_RUNTIME_CONFIG = (typeof window !== 'undefined' && window.__PCC_CONFIG__) ? window.__PCC_CONFIG__ : {};
+const SUPABASE_URL = PCC_RUNTIME_ENV.SUPABASE_URL
+  || PCC_RUNTIME_CONFIG.SUPABASE_URL
+  || '';
+const SUPABASE_KEY = PCC_RUNTIME_ENV.API_KEY
+  || PCC_RUNTIME_ENV.SUPABASE_ANON_KEY
+  || PCC_RUNTIME_CONFIG.API_KEY
+  || PCC_RUNTIME_CONFIG.SUPABASE_ANON_KEY
+  || '';
+
+function getSupabaseConfigError() {
+  if (SUPABASE_URL && SUPABASE_KEY) return null;
+  return {
+    message: 'Missing Supabase configuration. Set process.env.SUPABASE_URL and process.env.API_KEY, or define window.__PCC_CONFIG__ before the app script loads.'
+  };
+}
 
 // ── Supabase REST client (no CDN required) ──
 const _supabase = {
   auth: {
     async signUp({ email, password, options }) {
+      const configError = getSupabaseConfigError();
+      if (configError) return { data:null, error:configError };
       const r = await fetch(SUPABASE_URL+'/auth/v1/signup', {
         method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},
         body: JSON.stringify({ email, password, data: options?.data||{} })
@@ -5541,6 +5584,8 @@ const _supabase = {
       return { data:{user:d.user||d}, error:null };
     },
     async signInWithPassword({ email, password }) {
+      const configError = getSupabaseConfigError();
+      if (configError) return { data:null, error:configError };
       const r = await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password', {
         method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},
         body: JSON.stringify({ email, password })
@@ -5557,15 +5602,113 @@ const _supabase = {
       } catch(e){}
       return { data:{session:null}, error:null };
     },
+    async getUser(accessToken) {
+      try {
+        const configError = getSupabaseConfigError();
+        if (configError) return { data:{ user:null }, error:configError };
+        const token = accessToken || JSON.parse(localStorage.getItem('pcc-sb-token') || 'null')?.access_token;
+        if (!token) return { data:{ user:null }, error:{ message:'Missing access token' } };
+        const r = await fetch(SUPABASE_URL + '/auth/v1/user', {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + token
+          }
+        });
+        const d = await r.json();
+        if (!r.ok) {
+          return { data:{ user:null }, error:{ message:d.msg || d.message || d.error_description || 'Could not load user' } };
+        }
+        return { data:{ user:d }, error:null };
+      } catch (e) {
+        return { data:{ user:null }, error:{ message:e.message || 'Could not load user' } };
+      }
+    },
     async signOut() {
       try {
+        const configError = getSupabaseConfigError();
+        if (configError) {
+          try { localStorage.removeItem('pcc-sb-token'); } catch(e){}
+          return;
+        }
         const s = JSON.parse(localStorage.getItem('pcc-sb-token'));
         if (s?.access_token) await fetch(SUPABASE_URL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+s.access_token}});
       } catch(e){}
       try { localStorage.removeItem('pcc-sb-token'); } catch(e){}
     },
+    async updateUser(attributes = {}) {
+      try {
+        const configError = getSupabaseConfigError();
+        if (configError) return { data:null, error:configError };
+        const stored = JSON.parse(localStorage.getItem('pcc-sb-token') || 'null');
+        const token = stored?.access_token;
+        if (!token) return { data:null, error:{ message:'Missing recovery session' } };
+        const r = await fetch(SUPABASE_URL + '/auth/v1/user', {
+          method:'PUT',
+          headers:{
+            'Content-Type':'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization':'Bearer ' + token
+          },
+          body: JSON.stringify(attributes)
+        });
+        const d = await r.json();
+        if (!r.ok) {
+          return { data:null, error:{ message:d.msg || d.message || d.error_description || 'Could not update password' } };
+        }
+        try {
+          localStorage.setItem('pcc-sb-token', JSON.stringify({ ...stored, user:d.user || d }));
+        } catch (e) {}
+        return { data:d, error:null };
+      } catch (e) {
+        return { data:null, error:{ message:e.message || 'Could not update password' } };
+      }
+    },
+    async verifyOtp(params = {}) {
+      try {
+        const configError = getSupabaseConfigError();
+        if (configError) return { data:null, error:configError };
+        const payload = { type: params.type || 'recovery' };
+        if (params.token_hash) payload.token_hash = params.token_hash;
+        if (params.token) payload.token = params.token;
+        if (params.email) payload.email = params.email;
+        if (params.phone) payload.phone = params.phone;
+        const r = await fetch(SUPABASE_URL + '/auth/v1/verify', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},
+          body:JSON.stringify(payload)
+        });
+        let raw = '';
+        try { raw = await r.text(); } catch(e) {}
+        let d = {};
+        if (raw) {
+          try { d = JSON.parse(raw); } catch(e) { d = { raw }; }
+        }
+        if (!r.ok) {
+          const fallback = d.raw || raw || ('Could not verify recovery link (HTTP ' + r.status + ')');
+          return { data:null, error:{ message:d.msg || d.message || d.error_description || fallback } };
+        }
+        const session = d.session || d;
+        const user = d.user || session?.user || null;
+        const accessToken = d.access_token || session?.access_token || '';
+        const refreshToken = d.refresh_token || session?.refresh_token || '';
+        if (accessToken) {
+          try {
+            localStorage.setItem('pcc-sb-token', JSON.stringify({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+              user
+            }));
+          } catch (e) {}
+        }
+        return { data:{ session, user }, error:null };
+      } catch (e) {
+        return { data:null, error:{ message:e.message || 'Could not verify recovery link' } };
+      }
+    },
     async resetPasswordForEmail(email, options = {}) {
       try {
+        const configError = getSupabaseConfigError();
+        if (configError) return { data:null, error:configError };
         const payload = { email };
         if (options?.redirectTo) payload.redirect_to = options.redirectTo;
         const r = await fetch(SUPABASE_URL+'/auth/v1/recover', {
@@ -5573,10 +5716,15 @@ const _supabase = {
           headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},
           body:JSON.stringify(payload)
         });
+        let raw = '';
+        try { raw = await r.text(); } catch(e) {}
         let d = {};
-        try { d = await r.json(); } catch(e) {}
+        if (raw) {
+          try { d = JSON.parse(raw); } catch(e) { d = { raw }; }
+        }
         if (!r.ok) {
-          return { data:null, error:{ message:d.msg || d.message || d.error_description || 'Could not send reset email' } };
+          const fallback = d.raw || raw || ('Could not send reset email (HTTP ' + r.status + ')');
+          return { data:null, error:{ message:d.msg || d.message || d.error_description || fallback } };
         }
         return { data:d, error:null };
       } catch (e) {
@@ -5584,6 +5732,8 @@ const _supabase = {
       }
     },
     signInWithOAuth({provider,options}) {
+      const configError = getSupabaseConfigError();
+      if (configError) return {error:configError};
       window.location.href=SUPABASE_URL+'/auth/v1/authorize?provider='+provider+'&redirect_to='+encodeURIComponent(options?.redirectTo||window.location.origin);
       return {error:null};
     },
@@ -5596,6 +5746,8 @@ const _supabase = {
       eq(c,v){_f.push({c,v});return this;},
       async upsert(row) {
         try {
+          const configError = getSupabaseConfigError();
+          if (configError) return {error:configError};
           const s=JSON.parse(localStorage.getItem('pcc-sb-token'));
           if(!s?.access_token) return {error:{message:'Not authenticated'}};
           const r=await fetch(SUPABASE_URL+'/rest/v1/'+table,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+s.access_token,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(row)});
@@ -5604,6 +5756,8 @@ const _supabase = {
       },
       async single() {
         try {
+          const configError = getSupabaseConfigError();
+          if (configError) return {data:null,error:configError};
           const s=JSON.parse(localStorage.getItem('pcc-sb-token'));
           if(!s?.access_token) return {data:null,error:null};
           let url=SUPABASE_URL+'/rest/v1/'+table+'?select='+_s;
@@ -6139,6 +6293,7 @@ function lightenHex(hex, pct) {
 // ════════════════════════════════════════════════════════
 
 const DB_TABLE = 'user_data';
+const LOCAL_DATA_OWNER_KEY = 'pcc-local-data-owner';
 
 // ── Get current user ID from session ──
 function getCurrentUserId() {
@@ -6189,16 +6344,43 @@ async function loadFromCloud(section) {
 async function loadAllUserData() {
   const userId = getCurrentUserId();
   if (!userId) return;
+  const configError = getSupabaseConfigError();
+  if (configError) {
+    console.warn(configError.message);
+    return;
+  }
 
   try {
-    const { data: rows, error } = await _supabase
-      .from(DB_TABLE)
-      .select('section, data')
-      .eq('user_id', userId);
+    const localDataOwner = localStorage.getItem(LOCAL_DATA_OWNER_KEY);
+    if (localDataOwner && localDataOwner !== userId) {
+      clearAllLocalData({ includeTheme: true });
+    }
+
+    const session = JSON.parse(localStorage.getItem('pcc-sb-token') || 'null');
+    if (!session?.access_token) return;
+
+    const url = SUPABASE_URL + '/rest/v1/' + DB_TABLE
+      + '?select=section,data'
+      + '&user_id=eq.' + encodeURIComponent(userId);
+
+    const r = await fetch(url, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + session.access_token
+      }
+    });
+
+    let rows = [];
+    let error = null;
+    try { rows = await r.json(); } catch (e) { rows = []; }
+    if (!r.ok) {
+      error = { message: rows?.message || rows?.msg || 'Could not load user data' };
+      rows = [];
+    }
 
     if (error || !rows || rows.length === 0) {
       // New user — clear any leftover data from previous user
-      clearAllLocalData();
+      try { localStorage.setItem(LOCAL_DATA_OWNER_KEY, userId); } catch (e) {}
       return;
     }
 
@@ -6263,6 +6445,7 @@ async function loadAllUserData() {
         applyTheme(currentTheme.mode || getSavedThemeMode());
       }
     }, 300);
+    try { localStorage.setItem(LOCAL_DATA_OWNER_KEY, userId); } catch (e) {}
 
   } catch(e) {
     console.warn('loadAllUserData error:', e);
@@ -6270,17 +6453,92 @@ async function loadAllUserData() {
 }
 
 // ── Clear all local data (new user or logout) ──
-function clearAllLocalData() {
+function removeRenderedCustomHubs() {
+  document.querySelectorAll('.nav-tab[data-page]').forEach(tab => {
+    if ((tab.dataset.page || '').startsWith('hub-')) tab.remove();
+  });
+  document.querySelectorAll('.page[id^="page-hub-"]').forEach(page => page.remove());
+}
+
+function resetWorkspaceUi(options = {}) {
+  const includeTheme = !!options.includeTheme;
+
+  document.querySelectorAll('.page').forEach(page => {
+    page.querySelectorAll('textarea').forEach(el => { el.value = ''; });
+    page.querySelectorAll('input').forEach(el => {
+      const type = String(el.type || 'text').toLowerCase();
+      if (['button','submit','hidden','color','checkbox','radio','range'].includes(type)) return;
+      el.value = '';
+    });
+    page.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
+    page.querySelectorAll('[contenteditable="true"]').forEach(el => { el.textContent = ''; });
+  });
+
+  removeRenderedCustomHubs();
+
+  if (typeof goalsByMonth !== 'undefined') goalsByMonth = {};
+  if (typeof notes !== 'undefined') notes = [];
+  if (typeof activeNoteId !== 'undefined') activeNoteId = null;
+  if (typeof nextNoteId !== 'undefined') nextNoteId = 1;
+  if (typeof listingNotes !== 'undefined') listingNotes = {};
+  if (typeof homeTodos !== 'undefined') homeTodos = [];
+  if (typeof aptSearchList !== 'undefined') aptSearchList = [];
+  if (typeof events !== 'undefined') events = [];
+  if (typeof nextEvtId !== 'undefined') nextEvtId = 1;
+  if (typeof commPosts !== 'undefined') commPosts = [];
+  if (typeof userPods !== 'undefined') userPods = [];
+  if (typeof userChallenges !== 'undefined') userChallenges = [];
+  if (typeof commProfile !== 'undefined') commProfile = { name:'', handle:'', bio:'', color:'#0A7266' };
+
+  if (typeof newNote === 'function') newNote();
+  if (typeof renderNotesList === 'function') renderNotesList();
+  if (typeof renderGoals === 'function') renderGoals();
+  if (typeof updateGoalCount === 'function') updateGoalCount();
+  if (typeof renderBoard === 'function') renderBoard(typeof boardFilter !== 'undefined' ? boardFilter : undefined);
+  if (typeof renderHomeTodos === 'function') renderHomeTodos();
+  if (typeof renderAptSearch === 'function') renderAptSearch();
+  if (typeof updateHomeBudget === 'function') updateHomeBudget();
+  if (typeof renderCal === 'function') renderCal();
+  if (typeof updateCommProfile === 'function') updateCommProfile();
+  if (typeof switchCommView === 'function') switchCommView('feed');
+  else if (typeof renderFeed === 'function') renderFeed();
+
+  if (includeTheme) {
+    currentTheme = normalizeTheme(DEFAULT_THEME);
+    try {
+      localStorage.removeItem(THEME_KEY);
+      localStorage.removeItem('cc-theme');
+    } catch (e) {}
+    applyFontVars(currentTheme.font);
+    applyBackgroundByKey(currentTheme.bg);
+    setColorVars(currentTheme.teal, currentTheme.tealMid, currentTheme.tealLight);
+    previewName(currentTheme.name);
+    applyTheme(currentTheme.mode || DEFAULT_THEME.mode);
+  }
+}
+
+function clearAllLocalData(options = {}) {
+  const includeTheme = !!options.includeTheme;
   const keys = [
     'pcc-home-v2', 'pcc-calendar-events', 'pcc-listing-notes',
-    'pcc-tab-order', 'pcc-habits'
+    'pcc-tab-order', 'pcc-habits', 'pcc-community-posts',
+    'pcc-challenge-joined', 'pcc-comm-pods', 'pcc-comm-challenges',
+    'pcc-comm-profile', 'pcc-custom-hubs', 'pcc-comm-threads-v2',
+    'pcc-comm-thread-drafts-v1'
   ];
+  if (includeTheme) keys.push('pcc-user-theme', 'cc-theme');
   keys.forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
-  // Clear in-memory
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const key = localStorage.key(i);
+    if (key && /^\d{4}-\d{2}$/.test(key)) {
+      try { localStorage.removeItem(key); } catch (e) {}
+    }
+  }
   notes = [];
   homeTodos = [];
   aptSearchList = [];
   events = [];
+  resetWorkspaceUi({ includeTheme });
 }
 
 // ══════════════════════════════════════════════
@@ -8269,6 +8527,7 @@ document.addEventListener('keydown', e => {
 
 const AUTH_STORE_KEY = 'pcc-auth-users';
 const AUTH_SESSION_KEY = 'pcc-auth-session';
+const RECOVERY_SESSION_KEY = 'pcc-password-recovery';
 
 function getUsers() {
   try { return JSON.parse(localStorage.getItem(AUTH_STORE_KEY)) || {}; } catch(e) { return {}; }
@@ -8293,14 +8552,35 @@ function switchAuthTab(tab) {
   document.getElementById('form-login').style.display  = tab === 'login'  ? 'block' : 'none';
   document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
   document.getElementById('form-forgot').style.display = 'none';
+  document.getElementById('form-reset').style.display  = 'none';
   clearAuthError();
+  clearResetStatus();
 }
 
 function showForgot() {
   document.getElementById('form-login').style.display  = 'none';
   document.getElementById('form-signup').style.display = 'none';
   document.getElementById('form-forgot').style.display = 'block';
+  document.getElementById('form-reset').style.display  = 'none';
   clearForgotStatus();
+  clearAuthError();
+}
+
+function showResetPasswordForm(email) {
+  document.getElementById('tab-login').classList.remove('on');
+  document.getElementById('tab-signup').classList.remove('on');
+  document.getElementById('form-login').style.display  = 'none';
+  document.getElementById('form-signup').style.display = 'none';
+  document.getElementById('form-forgot').style.display = 'none';
+  document.getElementById('form-reset').style.display  = 'block';
+  const hint = document.getElementById('reset-email-hint');
+  if (hint) {
+    hint.textContent = email
+      ? `Create a new password for ${email}.`
+      : 'Your recovery link is active. Set a new password to finish.';
+  }
+  clearForgotStatus();
+  clearResetStatus();
   clearAuthError();
 }
 
@@ -8333,13 +8613,155 @@ function clearForgotStatus() {
   }
 }
 
+function normalizeResetEmailErrorMessage(msg) {
+  const text = String(msg || '').toLowerCase();
+  if (text.includes('rate limit') || text.includes('too many requests') || text.includes('email rate limit exceeded')) {
+    return 'Too many reset emails have been sent. Please wait about a minute before trying again. If it still fails, try again later.';
+  }
+  if (text.includes('redirect') || text.includes('redirect_to') || text.includes('allow list') || text.includes('not allowed')) {
+    return 'Password reset is blocked because the site URL is not allowed in your Supabase Auth redirect settings. Add your exact live URL to Supabase Redirect URLs and try again.';
+  }
+  if (text.includes('failed to fetch') || text.includes('networkerror') || text.includes('network request failed')) {
+    return 'The app could not reach Supabase to send the reset email. Check your connection and confirm the live site can reach Supabase.';
+  }
+  return msg || 'Could not send reset email. Please try again.';
+}
+
+function normalizeRecoveryLinkErrorMessage(msg) {
+  const text = String(msg || '').toLowerCase();
+  if (text.includes('expired')) {
+    return 'This reset link has expired. Please request a fresh password reset email.';
+  }
+  if (text.includes('invalid') || text.includes('otp') || text.includes('verify')) {
+    return 'This reset link is no longer valid. Please request a fresh password reset email.';
+  }
+  if (text.includes('failed to fetch') || text.includes('networkerror') || text.includes('network request failed')) {
+    return 'The app could not verify your reset link right now. Please check your connection and try again.';
+  }
+  return msg || 'Could not verify recovery link. Please request a new reset email.';
+}
+
+function showResetStatus(msg) {
+  const el = document.getElementById('reset-status');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.style.display = msg ? 'block' : 'none';
+}
+
+function clearResetStatus() {
+  showResetStatus('');
+  const btn = document.getElementById('reset-btn');
+  if (btn) {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.textContent = 'Update Password';
+  }
+}
+
+function getRecoverySession() {
+  try { return JSON.parse(localStorage.getItem(RECOVERY_SESSION_KEY)); } catch (e) { return null; }
+}
+
+function saveRecoverySession(data) {
+  try { localStorage.setItem(RECOVERY_SESSION_KEY, JSON.stringify(data || {})); } catch (e) {}
+}
+
+function clearRecoverySession() {
+  try { localStorage.removeItem(RECOVERY_SESSION_KEY); } catch (e) {}
+}
+
+let forgotRequestInFlight = false;
+let resetRequestInFlight = false;
+
+function getAuthParamsFromUrl() {
+  const readParams = (raw) => {
+    const text = String(raw || '').replace(/^[#?]/, '');
+    return new URLSearchParams(text);
+  };
+  const hashParams = readParams(window.location.hash);
+  const searchParams = readParams(window.location.search);
+  return {
+    access_token: hashParams.get('access_token') || searchParams.get('access_token') || '',
+    refresh_token: hashParams.get('refresh_token') || searchParams.get('refresh_token') || '',
+    token_hash: hashParams.get('token_hash') || searchParams.get('token_hash') || '',
+    token: hashParams.get('token') || searchParams.get('token') || '',
+    code: hashParams.get('code') || searchParams.get('code') || '',
+    email: hashParams.get('email') || searchParams.get('email') || '',
+    type: hashParams.get('type') || searchParams.get('type') || '',
+    error_description: hashParams.get('error_description') || searchParams.get('error_description') || '',
+  };
+}
+
+async function bootstrapRecoverySessionFromUrl() {
+  const params = getAuthParamsFromUrl();
+  if (params.error_description) {
+    showAuthError(normalizeRecoveryLinkErrorMessage(decodeURIComponent(params.error_description)));
+    return false;
+  }
+  if (params.type !== 'recovery') return false;
+
+  let accessToken = params.access_token || '';
+  let refreshToken = params.refresh_token || '';
+  let user = null;
+
+  if (accessToken) {
+    const { data, error } = await _supabase.auth.getUser(accessToken);
+    if (!error) user = data?.user || null;
+  } else if (params.token_hash || params.token) {
+    const { data, error } = await _supabase.auth.verifyOtp({
+      type: 'recovery',
+      token_hash: params.token_hash || params.token,
+      email: params.email || ''
+    });
+    if (error) {
+      showAuthError(normalizeRecoveryLinkErrorMessage(error.message));
+      return false;
+    }
+    const stored = JSON.parse(localStorage.getItem('pcc-sb-token') || 'null');
+    accessToken = data?.session?.access_token || stored?.access_token || '';
+    refreshToken = data?.session?.refresh_token || stored?.refresh_token || '';
+    user = data?.user || data?.session?.user || stored?.user || null;
+  } else {
+    return false;
+  }
+
+  if (!accessToken) {
+    showAuthError(normalizeRecoveryLinkErrorMessage('Could not verify recovery link. Please request a new reset email.'));
+    return false;
+  }
+
+  try {
+    localStorage.setItem('pcc-sb-token', JSON.stringify({
+      access_token: accessToken,
+      refresh_token: refreshToken || '',
+      user
+    }));
+  } catch (e) {}
+
+  saveRecoverySession({
+    email: user?.email || '',
+    startedAt: new Date().toISOString()
+  });
+  clearSession();
+
+  if (window.history?.replaceState) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  } else {
+    window.location.hash = '';
+  }
+  return true;
+}
+
 // ── Toast ──
-window._showToast = function showToast(msg) {
+function showToast(msg) {
   const t = document.getElementById('auth-toast');
+  if (!t) return;
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3200);
 }
+window.showToast = showToast;
+window._showToast = showToast;
 
 // ── Password visibility toggle ──
 function togglePw(inputId, btn) {
@@ -8414,6 +8836,7 @@ async function handleLogin() {
     }
 
     const firstName = data.user?.user_metadata?.first_name || '';
+    clearRecoverySession();
     saveSession({ email, firstName, id: data.user.id });
     btn.textContent = '✓';
     setTimeout(() => enterApp(firstName), 500);
@@ -8459,6 +8882,7 @@ async function handleSignup() {
     return;
   }
 
+  clearRecoverySession();
   saveSession({ email, firstName: first, lastName: last, id: data.user?.id });
   btn.textContent = '✓';
   setTimeout(() => enterApp(first), 500);
@@ -8468,9 +8892,11 @@ async function handleSignup() {
 async function handleForgot() {
   const email = document.getElementById('forgot-email')?.value.trim().toLowerCase();
   const btn = document.getElementById('forgot-btn');
+  if (forgotRequestInFlight) return;
   if (!email || !isValidEmail(email)) { showAuthError('Please enter a valid email address.'); return; }
   clearAuthError();
   clearForgotStatus();
+  forgotRequestInFlight = true;
 
   if (btn) {
     btn.disabled = true;
@@ -8488,7 +8914,7 @@ async function handleForgot() {
   try {
     const { error } = await _supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) {
-      showAuthError(error.message);
+      showAuthError(normalizeResetEmailErrorMessage(error.message));
       return;
     }
 
@@ -8496,8 +8922,9 @@ async function handleForgot() {
     if (btn) btn.textContent = 'Resend Reset Link';
     showToast('Reset link sent! Check your inbox. 📬');
   } catch (e) {
-    showAuthError('Could not send reset email. Please try again.');
+    showAuthError(normalizeResetEmailErrorMessage(e?.message));
   } finally {
+    forgotRequestInFlight = false;
     if (btn) {
       btn.disabled = false;
       btn.classList.remove('loading');
@@ -8507,6 +8934,63 @@ async function handleForgot() {
 }
 
 // ── GOOGLE (placeholder) ──
+async function handlePasswordReset() {
+  const pw = document.getElementById('reset-password')?.value || '';
+  const confirm = document.getElementById('reset-confirm')?.value || '';
+  const btn = document.getElementById('reset-btn');
+  const recovery = getRecoverySession();
+  const recoveryToken = JSON.parse(localStorage.getItem('pcc-sb-token') || 'null')?.access_token || '';
+  if (resetRequestInFlight) return;
+
+  if (!pw || !confirm) { showAuthError('Please fill in both password fields.'); return; }
+  if (pw.length < 8) { showAuthError('Password must be at least 8 characters.'); return; }
+  if (pw !== confirm) { showAuthError('Passwords do not match.'); return; }
+  if (!recoveryToken) { showAuthError('Your reset link is no longer active. Please open the newest reset email and try again.'); return; }
+
+  clearAuthError();
+  clearResetStatus();
+  resetRequestInFlight = true;
+
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add('loading');
+    btn.textContent = 'Updating...';
+  }
+
+  try {
+    const { error } = await _supabase.auth.updateUser({ password: pw });
+    if (error) {
+      showAuthError(normalizeRecoveryLinkErrorMessage(error.message || 'Could not update password. Please try the link again.'));
+      return;
+    }
+
+    showResetStatus('Password updated. You can log in with your new password now.');
+    showToast('Password updated successfully. âœ¨');
+    try { await _supabase.auth.signOut(); } catch (e) {}
+    clearSession();
+    clearRecoverySession();
+
+    const loginEmail = document.getElementById('login-email');
+    if (loginEmail && recovery?.email) loginEmail.value = recovery.email;
+
+    const resetPw = document.getElementById('reset-password');
+    const resetConfirm = document.getElementById('reset-confirm');
+    if (resetPw) resetPw.value = '';
+    if (resetConfirm) resetConfirm.value = '';
+
+    setTimeout(() => switchAuthTab('login'), 1200);
+  } catch (e) {
+    showAuthError(normalizeRecoveryLinkErrorMessage(e?.message || 'Could not update password. Please try the link again.'));
+  } finally {
+    resetRequestInFlight = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      if (btn.textContent === 'Updating...') btn.textContent = 'Update Password';
+    }
+  }
+}
+
 async function handleGoogle() {
   const { error } = await _supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -8547,6 +9031,7 @@ function updateNavUser(firstName) {
 async function logout() {
   await _supabase.auth.signOut();
   clearSession();
+  clearRecoverySession();
   clearAllLocalData();
   // Hide logout button
   const logoutBtn = document.getElementById('nav-logout-btn');
@@ -8575,8 +9060,10 @@ async function logout() {
 // ── ENTER KEY support ──
 document.addEventListener('keydown', function(e) {
   if (e.key !== 'Enter') return;
-  const activeForm = document.getElementById('form-login')?.style.display !== 'none' ? 'login' :
+  const activeForm = document.getElementById('form-reset')?.style.display !== 'none' ? 'reset' :
+                     document.getElementById('form-login')?.style.display !== 'none' ? 'login' :
                      document.getElementById('form-signup')?.style.display !== 'none' ? 'signup' : 'forgot';
+  if (activeForm === 'reset')  handlePasswordReset();
   if (activeForm === 'login')  handleLogin();
   if (activeForm === 'signup') handleSignup();
   if (activeForm === 'forgot') handleForgot();
@@ -8585,8 +9072,19 @@ document.addEventListener('keydown', function(e) {
 // ── CHECK SESSION ON LOAD ──
 (async function checkAuth() {
   try {
+    const startedRecovery = await bootstrapRecoverySessionFromUrl();
+    const recovery = getRecoverySession();
+    const recoveryToken = JSON.parse(localStorage.getItem('pcc-sb-token') || 'null')?.access_token;
+    if (startedRecovery || (recovery && recoveryToken && !getSession())) {
+      const screen = document.getElementById('auth-screen');
+      if (screen) screen.style.display = 'flex';
+      showResetPasswordForm(recovery?.email || '');
+      return;
+    }
+
     const { data: { session } } = await _supabase.auth.getSession();
     if (session && session.user) {
+      clearRecoverySession();
       const firstName = session.user.user_metadata?.first_name || '';
       const email = session.user.email;
       saveSession({ email, firstName, id: session.user.id });
@@ -8600,11 +9098,13 @@ document.addEventListener('keydown', function(e) {
     } else {
       const local = getSession();
       if (local && local.email) {
+        clearRecoverySession();
         const screen = document.getElementById('auth-screen');
         if (screen) screen.style.display = 'none';
         updateNavUser(local.firstName);
         const lb = document.getElementById('nav-logout-btn');
         if (lb) lb.style.display = 'flex';
+        setTimeout(loadAllUserData, 600);
       }
     }
   } catch(e) {
