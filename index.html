@@ -388,6 +388,264 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 .vp-pct{font-size:.42rem;font-weight:500;color:var(--teal);}
 .vp-bar{height:3px;background:var(--tint);border-radius:3px;overflow:hidden;}
 .vp-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-light));border-radius:3px;transition:width 1s ease;}
+.vision-board-shell{
+  position:relative;
+  margin:1.35rem 0 1.6rem;
+  padding:1.1rem 1.15rem 1.2rem;
+  background:var(--surface);
+  border:1px solid var(--teal-border);
+  border-radius:22px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.vision-board-shell::after{
+  content:'';
+  position:absolute;
+  top:0;left:14%;right:14%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(45,212,191,0.45),transparent);
+}
+.vision-board-top{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  align-items:flex-start;
+  margin-bottom:.7rem;
+}
+.vision-board-kicker{
+  font-size:.56rem;
+  font-weight:600;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--teal);
+  margin-bottom:.3rem;
+}
+.vision-board-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.85rem;
+  font-weight:400;
+  line-height:1;
+  color:var(--ink);
+  margin-bottom:.2rem;
+}
+.vision-board-copy{
+  font-size:.74rem;
+  line-height:1.65;
+  color:var(--charcoal);
+  max-width:62ch;
+}
+.vision-board-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.45rem;
+  justify-content:flex-end;
+}
+.vision-board-btn{
+  background:var(--tint);
+  border:1px solid var(--teal-border);
+  border-radius:999px;
+  color:var(--teal);
+  cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+  font-size:.58rem;
+  font-weight:600;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  padding:.58rem .9rem;
+  transition:all .18s;
+}
+.vision-board-btn:hover{
+  background:var(--tint-hover);
+  border-color:rgba(var(--teal-rgb),0.35);
+  transform:translateY(-1px);
+}
+.vision-board-btn.primary{
+  background:linear-gradient(135deg,var(--teal),var(--teal-light));
+  color:#fff;
+  border-color:transparent;
+}
+.vision-board-btn.danger{
+  color:#8B2020;
+  border-color:rgba(139,32,32,0.18);
+  background:rgba(200,60,60,0.06);
+}
+.vision-board-helper{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  flex-wrap:wrap;
+  font-size:.64rem;
+  color:var(--muted);
+  margin-bottom:.8rem;
+}
+.vision-board-canvas{
+  position:relative;
+  min-height:540px;
+  border-radius:26px;
+  overflow:hidden;
+  border:1px dashed rgba(var(--teal-rgb),0.24);
+  background:
+    radial-gradient(circle at 18% 22%, rgba(var(--teal-rgb),0.12), transparent 23%),
+    radial-gradient(circle at 82% 18%, rgba(var(--teal-rgb),0.09), transparent 20%),
+    radial-gradient(circle at 72% 72%, rgba(var(--teal-rgb),0.10), transparent 18%),
+    linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.04)),
+    repeating-linear-gradient(90deg, rgba(var(--teal-rgb),0.035) 0 1px, transparent 1px 74px),
+    repeating-linear-gradient(0deg, rgba(var(--teal-rgb),0.03) 0 1px, transparent 1px 74px);
+}
+[data-theme="dark"] .vision-board-canvas{
+  background:
+    radial-gradient(circle at 18% 22%, rgba(var(--teal-rgb),0.18), transparent 23%),
+    radial-gradient(circle at 82% 18%, rgba(var(--teal-rgb),0.13), transparent 20%),
+    radial-gradient(circle at 72% 72%, rgba(var(--teal-rgb),0.14), transparent 18%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)),
+    repeating-linear-gradient(90deg, rgba(var(--teal-rgb),0.06) 0 1px, transparent 1px 74px),
+    repeating-linear-gradient(0deg, rgba(var(--teal-rgb),0.05) 0 1px, transparent 1px 74px);
+}
+.vision-board-empty{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.45rem;
+  text-align:center;
+  color:var(--charcoal);
+  pointer-events:none;
+}
+.vision-board-empty-mark{
+  width:4rem;
+  height:4rem;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.5rem;
+  color:var(--teal);
+  border:1px solid rgba(var(--teal-rgb),0.18);
+  background:rgba(var(--teal-rgb),0.08);
+}
+.vision-board-empty-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.35rem;
+  color:var(--ink);
+}
+.vision-board-empty-copy{
+  font-size:.74rem;
+  color:var(--muted);
+  max-width:38ch;
+  line-height:1.65;
+}
+.vision-board-item{
+  position:absolute;
+  top:0;left:0;
+  border-radius:22px;
+  box-shadow:0 16px 32px rgba(20,18,16,0.12);
+  border:1px solid rgba(var(--teal-rgb),0.12);
+  backdrop-filter:blur(10px);
+  user-select:none;
+  touch-action:none;
+  cursor:grab;
+  overflow:hidden;
+}
+.vision-board-item.dragging{
+  cursor:grabbing;
+  box-shadow:0 20px 44px rgba(20,18,16,0.18);
+}
+.vision-board-item.note{
+  width:250px;
+  background:linear-gradient(180deg, rgba(255,249,212,0.96), rgba(255,244,184,0.92));
+}
+.vision-board-item.quote{
+  width:290px;
+  background:linear-gradient(160deg, rgba(255,255,255,0.92), rgba(232,248,245,0.86));
+}
+.vision-board-item.sticker{
+  width:172px;
+  border-radius:999px;
+  background:linear-gradient(135deg, rgba(var(--teal-rgb),0.16), rgba(var(--teal-rgb),0.08));
+}
+.vision-board-item.image{
+  width:230px;
+  background:rgba(255,255,255,0.92);
+}
+[data-theme="dark"] .vision-board-item.image{
+  background:rgba(15,15,15,0.92);
+}
+.vision-board-item-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.5rem;
+  padding:.55rem .7rem .35rem;
+}
+.vision-board-grip{
+  font-size:.48rem;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--teal);
+}
+.vision-board-delete{
+  width:1.6rem;
+  height:1.6rem;
+  border-radius:50%;
+  border:1px solid rgba(var(--teal-rgb),0.16);
+  background:rgba(255,255,255,0.56);
+  color:var(--charcoal);
+  cursor:pointer;
+  font-size:.78rem;
+  line-height:1;
+}
+[data-theme="dark"] .vision-board-delete{
+  background:rgba(0,0,0,0.35);
+  color:var(--ink);
+}
+.vision-board-textarea,
+.vision-board-input{
+  width:calc(100% - 1.2rem);
+  margin:0 .6rem .7rem;
+  border:none;
+  background:transparent;
+  color:var(--ink);
+  outline:none;
+  resize:none;
+}
+.vision-board-textarea{
+  min-height:120px;
+  font-family:'Cormorant Garamond',serif;
+  font-size:1rem;
+  line-height:1.65;
+}
+.vision-board-item.quote .vision-board-textarea{
+  min-height:134px;
+  font-style:italic;
+}
+.vision-board-item.sticker .vision-board-input{
+  margin:0 .85rem .85rem;
+  text-align:center;
+  font-family:'DM Sans',sans-serif;
+  font-size:.84rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.vision-board-image-wrap{
+  padding:0 .55rem .6rem;
+}
+.vision-board-image-wrap img{
+  width:100%;
+  display:block;
+  border-radius:18px;
+  object-fit:cover;
+}
+.vision-board-credit{
+  font-size:.46rem;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
 
 /* ═══ CALENDAR ═══ */
 .cal-layout{display:grid;grid-template-columns:1fr 340px;gap:1.2rem;}
@@ -476,11 +734,17 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   .notes-layout{grid-template-columns:1fr;}
   .cal-layout{grid-template-columns:1fr;}
   .vision-grid{grid-template-columns:repeat(2,1fr);}
+  .vision-board-top{flex-direction:column;}
+  .vision-board-actions{justify-content:flex-start;}
+  .vision-board-canvas{min-height:470px;}
   .quick-row{grid-template-columns:1fr;}
 }
 @media(max-width:580px){
   .board{grid-template-columns:1fr;}.weeks{grid-template-columns:1fr;}
   .vision-grid{grid-template-columns:1fr;}
+  .vision-board-title{font-size:1.45rem;}
+  .vision-board-canvas{min-height:410px;}
+  .vision-board-item{max-width:calc(100% - 24px);}
   .pg-header{flex-direction:column;gap:.65rem;}
   .mood-row{grid-template-columns:repeat(2,1fr);}
   .nav-tabs .nav-tab:nth-child(n+5){display:none;}
@@ -3736,6 +4000,28 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
     <div style="text-align:right;padding-bottom:.35rem;"><div class="sub">Where you're going — always</div></div>
   </div>
   <p class="vision-intro">This is the north star. Every habit, every goal, every decision on the dashboard feeds into what's mapped below. Review this when it gets hard. This is the why.</p>
+  <div class="vision-board-shell">
+    <div class="vision-board-top">
+      <div>
+        <div class="vision-board-kicker">Live Board</div>
+        <div class="vision-board-title">Build It Visually</div>
+        <div class="vision-board-copy">Paste or upload photos, drag them into place, and mix in notes, quotes, and little elements that make the future feel real while you are building toward it.</div>
+      </div>
+      <div class="vision-board-actions">
+        <button class="vision-board-btn primary" type="button" onclick="openVisionBoardUpload()">Upload Photos</button>
+        <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('note')">Add Note</button>
+        <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('quote')">Add Quote</button>
+        <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('sticker')">Add Sticker</button>
+        <button class="vision-board-btn danger" type="button" onclick="clearVisionBoard()">Clear Board</button>
+        <input id="vision-board-upload" type="file" accept="image/*" multiple hidden onchange="handleVisionBoardUpload(this)" />
+      </div>
+    </div>
+    <div class="vision-board-helper">
+      <span>Tip: paste an image straight from your clipboard while this page is open.</span>
+      <span>Everything on this board saves to your own account.</span>
+    </div>
+    <div class="vision-board-canvas" id="vision-board-canvas"></div>
+  </div>
   <div class="vision-grid">
     <div class="vision-card"><div class="vision-color-bar vc-teal"></div><div class="vision-body"><div class="vision-category">Financial</div><div class="vision-title">6-Figure Life by End of 2026</div><div class="vision-desc">Multiple streams, compounding. Voya as foundation, BrandingByBella as the main event, travel commissions stacking monthly.</div><div class="vision-items"><div class="vi">$85K from BrandingByBella</div><div class="vi">$20K+ in travel commissions</div><div class="vi">Party In Ink bulk order revenue</div></div><div class="vision-progress"><div class="vp-label"><span class="vp-name">Progress</span><span class="vp-pct">28%</span></div><div class="vp-bar"><div class="vp-fill" style="width:28%"></div></div></div></div></div>
     <div class="vision-card"><div class="vision-color-bar vc-amber"></div><div class="vision-body"><div class="vision-category">Creative Empire</div><div class="vision-title">Gold Coast Health — Sold</div><div class="vision-desc">A prestige medical drama centered on five Black women running a Miami hospital. Scripts are written. The pitch is ready. The market needs this.</div><div class="vision-items"><div class="vi">4 scripts complete</div><div class="vi">Pitch deck produced</div><div class="vi">Production company outreach active</div></div><div class="vision-progress"><div class="vp-label"><span class="vp-name">Development</span><span class="vp-pct">55%</span></div><div class="vp-bar"><div class="vp-fill" style="width:55%"></div></div></div></div></div>
@@ -6403,6 +6689,7 @@ async function loadAllUserData() {
     const sectionMap = {
       'home':        'pcc-home-v2',
       'calendar':    'pcc-calendar-events',
+      'vision-board':'pcc-vision-board',
       'listing-notes': 'pcc-listing-notes',
       'theme':       'pcc-user-theme',
       'tab-order':   'pcc-tab-order',
@@ -6449,6 +6736,7 @@ async function loadAllUserData() {
       renderNotesList();
       if (notes.length > 0) loadNote(notes[0]);
       renderBoard();
+      initVisionBoard();
       renderHomeTodos();
       renderAptSearch();
       // Apply saved theme
@@ -6539,6 +6827,7 @@ function clearAllLocalData(options = {}) {
     'pcc-tab-order', 'pcc-habits', 'pcc-community-posts',
     'pcc-challenge-joined', 'pcc-comm-pods', 'pcc-comm-challenges',
     'pcc-comm-profile', 'pcc-custom-hubs', 'pcc-comm-threads-v2',
+    'pcc-vision-board',
     'pcc-comm-thread-drafts-v1'
   ];
   if (includeTheme) keys.push('pcc-user-theme', 'cc-theme');
@@ -6553,6 +6842,7 @@ function clearAllLocalData(options = {}) {
   homeTodos = [];
   aptSearchList = [];
   events = [];
+  if (typeof visionBoardItems !== 'undefined') visionBoardItems = [];
   resetWorkspaceUi({ includeTheme });
 }
 
@@ -7488,7 +7778,10 @@ function showPage(id, btn) {
   if (targetBtn)  targetBtn.classList.add('on');
   normalizePageHeaderTitles(page || document);
   if (targetId === 'life-board') renderBoard();
-  if (targetId === 'vision')     animateVision();
+  if (targetId === 'vision') {
+    animateVision();
+    setTimeout(initVisionBoard, 50);
+  }
   if (targetId === 'community')  setTimeout(initCommunity, 50);
   return targetId;
 }
@@ -7998,6 +8291,324 @@ function addEvent(){
 // VISION progress bars
 function animateVision(){
   document.querySelectorAll('.vp-fill').forEach(f=>{const w=f.style.width;f.style.width='0';setTimeout(()=>f.style.width=w,100);});
+}
+
+// LIVE VISION BOARD
+const VISION_BOARD_KEY = 'pcc-vision-board';
+const VISION_BOARD_MAX_ITEMS = 24;
+const VISION_BOARD_PRESETS = {
+  note:   { w: 250, content: 'Add a dream, reminder, or intention here.' },
+  quote:  { w: 290, content: 'Write a line that pulls you back into the future you are building.' },
+  sticker:{ w: 172, content: 'Dream Big' },
+  image:  { w: 230, content: '' }
+};
+let visionBoardItems = [];
+let visionBoardSeed = 1;
+let visionBoardZSeed = 1;
+let visionBoardSaveTimer = null;
+let visionBoardEventsBound = false;
+let visionBoardDrag = null;
+
+function normalizeVisionBoardNumber(value, fallback) {
+  return Number.isFinite(Number(value)) ? Number(value) : fallback;
+}
+
+function syncVisionBoardSeeds() {
+  visionBoardSeed = visionBoardItems.reduce((max, item) => Math.max(max, Number(String(item.id || '').replace(/\D/g, '')) || 0), 0) + 1;
+  visionBoardZSeed = visionBoardItems.reduce((max, item) => Math.max(max, Number(item.z) || 0), 0) + 1;
+}
+
+function createVisionBoardItem(type, extra = {}) {
+  const preset = VISION_BOARD_PRESETS[type] || VISION_BOARD_PRESETS.note;
+  const offset = visionBoardItems.length % 6;
+  return {
+    id: 'vb-' + visionBoardSeed++,
+    type,
+    x: normalizeVisionBoardNumber(extra.x, 26 + ((offset % 3) * 78)),
+    y: normalizeVisionBoardNumber(extra.y, 28 + (Math.floor(offset / 3) * 72)),
+    w: normalizeVisionBoardNumber(extra.w, preset.w),
+    z: normalizeVisionBoardNumber(extra.z, visionBoardZSeed++),
+    content: typeof extra.content === 'string' ? extra.content : preset.content,
+    src: typeof extra.src === 'string' ? extra.src : ''
+  };
+}
+
+function normalizeVisionBoardItem(raw) {
+  if (!raw || !raw.id) return null;
+  const type = VISION_BOARD_PRESETS[raw.type] ? raw.type : 'note';
+  const item = createVisionBoardItem(type, raw);
+  item.id = String(raw.id);
+  item.content = typeof raw.content === 'string' ? raw.content : item.content;
+  item.src = typeof raw.src === 'string' ? raw.src : '';
+  return item;
+}
+
+function loadVisionBoardState() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(VISION_BOARD_KEY) || '[]');
+    visionBoardItems = Array.isArray(parsed) ? parsed.map(normalizeVisionBoardItem).filter(Boolean) : [];
+  } catch (e) {
+    visionBoardItems = [];
+  }
+  syncVisionBoardSeeds();
+}
+
+function queueVisionBoardSave() {
+  try {
+    localStorage.setItem(VISION_BOARD_KEY, JSON.stringify(visionBoardItems));
+  } catch (e) {}
+  clearTimeout(visionBoardSaveTimer);
+  visionBoardSaveTimer = setTimeout(() => {
+    syncToCloud('vision-board', visionBoardItems);
+  }, 320);
+}
+
+function getVisionBoardCanvas() {
+  return document.getElementById('vision-board-canvas');
+}
+
+function renderVisionBoard() {
+  const canvas = getVisionBoardCanvas();
+  if (!canvas) return;
+
+  canvas.innerHTML = '';
+  if (!visionBoardItems.length) {
+    const empty = document.createElement('div');
+    empty.className = 'vision-board-empty';
+    empty.innerHTML = `
+      <div class="vision-board-empty-mark">✦</div>
+      <div class="vision-board-empty-title">Start With One Image</div>
+      <div class="vision-board-empty-copy">Upload photos, paste screenshots, and add little pieces of language that make the destination feel close enough to touch.</div>
+    `;
+    canvas.appendChild(empty);
+    return;
+  }
+
+  visionBoardItems
+    .slice()
+    .sort((a, b) => (a.z || 0) - (b.z || 0))
+    .forEach((item) => {
+      const node = document.createElement('div');
+      node.className = 'vision-board-item ' + item.type;
+      node.dataset.id = item.id;
+      node.style.left = item.x + 'px';
+      node.style.top = item.y + 'px';
+      node.style.width = item.w + 'px';
+      node.style.zIndex = item.z;
+
+      if (item.type === 'image') {
+        node.innerHTML = `
+          <div class="vision-board-item-bar">
+            <div class="vision-board-grip">Drag</div>
+            <button class="vision-board-delete" type="button" onclick="deleteVisionBoardItem('${item.id}')">×</button>
+          </div>
+          <div class="vision-board-image-wrap">
+            <img src="${escapeHtmlAttr(item.src)}" alt="Vision board upload" />
+          </div>
+        `;
+      } else if (item.type === 'quote') {
+        node.innerHTML = `
+          <div class="vision-board-item-bar">
+            <div class="vision-board-grip">Quote</div>
+            <button class="vision-board-delete" type="button" onclick="deleteVisionBoardItem('${item.id}')">×</button>
+          </div>
+          <textarea class="vision-board-textarea" placeholder="A line that keeps you aligned..." oninput="updateVisionBoardItemContent('${item.id}', this.value)">${escapeHtml(item.content || '')}</textarea>
+        `;
+      } else if (item.type === 'sticker') {
+        node.innerHTML = `
+          <div class="vision-board-item-bar">
+            <div class="vision-board-credit">Sticker</div>
+            <button class="vision-board-delete" type="button" onclick="deleteVisionBoardItem('${item.id}')">×</button>
+          </div>
+          <input class="vision-board-input" type="text" value="${escapeHtmlAttr(item.content || '')}" placeholder="Power word" oninput="updateVisionBoardItemContent('${item.id}', this.value)" />
+        `;
+      } else {
+        node.innerHTML = `
+          <div class="vision-board-item-bar">
+            <div class="vision-board-grip">Note</div>
+            <button class="vision-board-delete" type="button" onclick="deleteVisionBoardItem('${item.id}')">×</button>
+          </div>
+          <textarea class="vision-board-textarea" placeholder="What belongs on this board?" oninput="updateVisionBoardItemContent('${item.id}', this.value)">${escapeHtml(item.content || '')}</textarea>
+        `;
+      }
+
+      node.addEventListener('pointerdown', (event) => startVisionBoardDrag(event, item.id));
+      canvas.appendChild(node);
+    });
+}
+
+function initVisionBoard() {
+  loadVisionBoardState();
+  renderVisionBoard();
+  if (visionBoardEventsBound) return;
+  visionBoardEventsBound = true;
+  document.addEventListener('pointermove', handleVisionBoardPointerMove);
+  document.addEventListener('pointerup', stopVisionBoardDrag);
+  document.addEventListener('paste', handleVisionBoardPaste);
+}
+
+function bumpVisionBoardItem(itemId) {
+  const item = visionBoardItems.find(entry => entry.id === itemId);
+  if (!item) return;
+  item.z = visionBoardZSeed++;
+}
+
+function startVisionBoardDrag(event, itemId) {
+  if (event.button !== 0) return;
+  if (event.target.closest('textarea,input,button')) return;
+  const canvas = getVisionBoardCanvas();
+  const node = event.currentTarget;
+  if (!canvas || !node) return;
+  bumpVisionBoardItem(itemId);
+  node.style.zIndex = visionBoardZSeed;
+  const canvasRect = canvas.getBoundingClientRect();
+  const item = visionBoardItems.find(entry => entry.id === itemId);
+  if (!item) return;
+  node.classList.add('dragging');
+  visionBoardDrag = {
+    id: itemId,
+    canvas,
+    node,
+    width: node.offsetWidth,
+    height: node.offsetHeight,
+    offsetX: event.clientX - canvasRect.left - item.x,
+    offsetY: event.clientY - canvasRect.top - item.y
+  };
+  event.preventDefault();
+}
+
+function handleVisionBoardPointerMove(event) {
+  if (!visionBoardDrag) return;
+  const item = visionBoardItems.find(entry => entry.id === visionBoardDrag.id);
+  if (!item) return;
+  const rect = visionBoardDrag.canvas.getBoundingClientRect();
+  const maxX = Math.max(12, rect.width - visionBoardDrag.width - 12);
+  const maxY = Math.max(12, rect.height - visionBoardDrag.height - 12);
+  item.x = Math.min(maxX, Math.max(12, event.clientX - rect.left - visionBoardDrag.offsetX));
+  item.y = Math.min(maxY, Math.max(12, event.clientY - rect.top - visionBoardDrag.offsetY));
+  visionBoardDrag.node.style.left = item.x + 'px';
+  visionBoardDrag.node.style.top = item.y + 'px';
+}
+
+function stopVisionBoardDrag() {
+  if (!visionBoardDrag) return;
+  visionBoardDrag.node.classList.remove('dragging');
+  visionBoardDrag = null;
+  queueVisionBoardSave();
+}
+
+function updateVisionBoardItemContent(itemId, value) {
+  const item = visionBoardItems.find(entry => entry.id === itemId);
+  if (!item) return;
+  item.content = value;
+  queueVisionBoardSave();
+}
+
+function deleteVisionBoardItem(itemId) {
+  visionBoardItems = visionBoardItems.filter(entry => entry.id !== itemId);
+  syncVisionBoardSeeds();
+  queueVisionBoardSave();
+  renderVisionBoard();
+}
+
+function addVisionBoardElement(type) {
+  if (visionBoardItems.length >= VISION_BOARD_MAX_ITEMS) {
+    if (typeof showToast === 'function') showToast('Vision board is full for now. Remove something before adding more.');
+    return;
+  }
+  visionBoardItems.push(createVisionBoardItem(type));
+  queueVisionBoardSave();
+  renderVisionBoard();
+}
+
+function openVisionBoardUpload() {
+  document.getElementById('vision-board-upload')?.click();
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function compressVisionBoardImage(file) {
+  if (!file || !String(file.type || '').startsWith('image/')) return null;
+  if (file.type === 'image/gif') return readFileAsDataUrl(file);
+  const dataUrl = await readFileAsDataUrl(file);
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const maxDim = 1200;
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(img.width * scale));
+      canvas.height = Math.max(1, Math.round(img.height * scale));
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+      resolve(canvas.toDataURL(outputType, 0.86));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+async function addVisionBoardImages(files) {
+  const list = Array.from(files || []).filter(file => String(file.type || '').startsWith('image/'));
+  if (!list.length) return;
+  const roomLeft = Math.max(0, VISION_BOARD_MAX_ITEMS - visionBoardItems.length);
+  const accepted = list.slice(0, roomLeft);
+  for (const file of accepted) {
+    const src = await compressVisionBoardImage(file);
+    if (!src) continue;
+    visionBoardItems.push(createVisionBoardItem('image', { src }));
+  }
+  syncVisionBoardSeeds();
+  queueVisionBoardSave();
+  renderVisionBoard();
+}
+
+async function handleVisionBoardUpload(input) {
+  await addVisionBoardImages(input?.files || []);
+  if (input) input.value = '';
+}
+
+function isVisionBoardActiveForPaste(event) {
+  const page = document.getElementById('page-vision');
+  if (!page || !page.classList.contains('active')) return false;
+  const target = event.target;
+  if (target && !target.closest('.vision-board-item') && target.closest('input,textarea,[contenteditable="true"]')) return false;
+  return true;
+}
+
+async function handleVisionBoardPaste(event) {
+  if (!isVisionBoardActiveForPaste(event)) return;
+  const items = Array.from(event.clipboardData?.items || []);
+  const files = items
+    .filter(item => String(item.type || '').startsWith('image/'))
+    .map(item => item.getAsFile())
+    .filter(Boolean);
+  if (!files.length) return;
+  event.preventDefault();
+  await addVisionBoardImages(files);
+}
+
+function clearVisionBoard() {
+  if (!visionBoardItems.length) return;
+  const ok = confirm('Clear every photo and element from this vision board?');
+  if (!ok) return;
+  visionBoardItems = [];
+  syncVisionBoardSeeds();
+  queueVisionBoardSave();
+  renderVisionBoard();
+}
+
+document.addEventListener('DOMContentLoaded', initVisionBoard);
+if (document.readyState !== 'loading') {
+  setTimeout(initVisionBoard, 220);
 }
 
 // ═══ REVENUE PROGRESS ═══
