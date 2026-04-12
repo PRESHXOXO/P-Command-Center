@@ -1280,3 +1280,1131 @@
     setTimeout(window.initCommunity, 30);
   }
 })();
+
+(function () {
+  if (window.__pccCommunityLiveOverride) return;
+  window.__pccCommunityLiveOverride = true;
+
+  const LIVE_TABLES = {
+    profiles: 'community_profiles',
+    presence: 'community_presence',
+    posts: 'community_posts',
+    pods: 'community_pods',
+    podMembers: 'community_pod_members',
+    challenges: 'community_challenges',
+    challengeMembers: 'community_challenge_members'
+  };
+
+  const LIVE_POLL_MS = 15000;
+  const PRESENCE_BEAT_MS = 25000;
+  const ONLINE_WINDOW_MS = 90000;
+  const RECENT_WINDOW_MS = 15 * 60 * 1000;
+  const LIKED_POSTS_KEY = 'pcc-community-liked-posts-v2';
+  const BACK_BTN_HTML = '<button onclick="commGoFeed()" class="comm-back-btn">Back to Feed</button>';
+
+  const liveCommunity = {
+    enabled: null,
+    error: '',
+    pollTimer: null,
+    presenceTimer: null,
+    profiles: [],
+    presence: [],
+    posts: [],
+    pods: [],
+    podMembers: [],
+    challenges: [],
+    challengeMembers: [],
+    loading: null
+  };
+
+  let likedPosts = {};
+
+  function esc(text) {
+    if (typeof escapeHtml === 'function') return escapeHtml(text || '');
+    return String(text || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function escAttr(text) {
+    if (typeof escapeHtmlAttr === 'function') return escapeHtmlAttr(text || '');
+    return esc(text || '');
+  }
+
+  function fmtText(text) {
+    return esc(text).replace(/\n/g, '<br>');
+  }
+
+  function relTime(value) {
+    const time = new Date(value).getTime();
+    if (!time) return 'just now';
+    const diff = Date.now() - time;
+    if (diff < 60000) return 'just now';
+    if (diff < 3600000) return Math.max(1, Math.round(diff / 60000)) + 'm ago';
+    if (diff < 86400000) return Math.max(1, Math.round(diff / 3600000)) + 'h ago';
+    return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+
+  function getJson(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (error) {
+      return fallback;
+    }
+  }
+
+  function toast(message) {
+    if (typeof showToast === 'function') {
+      showToast(message);
+      return;
+    }
+    if (typeof safeShowToast === 'function') {
+      safeShowToast(message);
+      return;
+    }
+    console.log('[Community]', message);
+  }
+
+  function currentAuth() {
+    return getJson('pcc-auth-session', null) || {};
+  }
+
+  function currentToken() {
+    return getJson('pcc-sb-token', null) || {};
+  }
+
+  function currentUserId() {
+    return currentAuth().id || currentToken().user?.id || '';
+  }
+
+  function currentUserName() {
+    if (typeof getCurrentUserName === 'function') return getCurrentUserName();
+    return currentAuth().firstName || currentToken().user?.user_metadata?.first_name || 'You';
+  }
+
+  function currentUserHandle() {
+    const profile = typeof commProfile !== 'undefined' ? commProfile : {};
+    const name = currentUserName();
+    return profile.handle || ('@' + String(name || 'you').toLowerCase().replace(/\s+/g, ''));
+  }
+
+  function normalizeColor(value) {
+    return /^#[0-9A-Fa-f]{6}$/.test(value || '') ? value : '#0A7266';
+  }
+
+  function initials(name) {
+    const clean = String(name || '').trim();
+    if (!clean) return 'U';
+    const parts = clean.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  function liveProfile(userId) {
+    return liveCommunity.profiles.find((row) => row.user_id === userId) || null;
+  }
+
+  function livePresence(userId) {
+    return liveCommunity.presence.find((row) => row.user_id === userId) || null;
+  }
+
+  function isPresenceOnline(row) {
+    const seen = new Date(row?.last_seen || '').getTime();
+    return !!seen && (Date.now() - seen) <= ONLINE_WINDOW_MS;
+  }
+
+  function isPresenceRecent(row) {
+    const seen = new Date(row?.last_seen || '').getTime();
+    return !!seen && (Date.now() - seen) <= RECENT_WINDOW_MS;
+  }
+
+  function currentPresencePage() {
+    const main = document.getElementById('comm-main');
+    const view = main?.dataset?.view || 'feed';
+    const labels = {
+      feed: 'Community Feed',
+      pods: 'Community Pods',
+      challenges: 'Challenges',
+      wins: 'Win Wall',
+      messages: 'Messages'
+    };
+    return labels[view] || 'Community';
+  }
+
+  function podMembers(podId) {
+    return liveCommunity.podMembers.filter((row) => row.pod_id === podId);
+  }
+
+  function podMemberCount(podId) {
+    return podMembers(podId).length;
+  }
+
+  function podOnlineCount(podId) {
+    return podMembers(podId).filter((row) => isPresenceOnline(livePresence(row.user_id))).length;
+  }
+
+  function currentUserJoinedPod(podId) {
+    return !!podMembers(podId).find((row) => row.user_id === currentUserId());
+  }
+
+  function challengeMembers(challengeId) {
+    return liveCommunity.challengeMembers.filter((row) => row.challenge_id === challengeId);
+  }
+
+  function challengeMemberCount(challengeId) {
+    return challengeMembers(challengeId).length;
+  }
+
+  function currentUserChallenge(challengeId) {
+    return challengeMembers(challengeId).find((row) => row.user_id === currentUserId()) || null;
+  }
+
+  function selectedPostGifFromDom() {
+    const card = document.querySelector('#comm-post-gif-preview .comm-gif-preview-card');
+    if (!card) return null;
+    const image = card.querySelector('img');
+    const title = card.querySelector('.comm-gif-preview-title');
+    if (!image?.src) return null;
+    return {
+      url: image.src,
+      title: title?.textContent?.trim() || 'GIF'
+    };
+  }
+
+  function loadLikedPosts() {
+    likedPosts = getJson(LIKED_POSTS_KEY, {}) || {};
+  }
+
+  function saveLikedPosts() {
+    try {
+      localStorage.setItem(LIKED_POSTS_KEY, JSON.stringify(likedPosts));
+    } catch (error) {}
+  }
+
+  function ensureLiveStyles() {
+    if (document.getElementById('pcc-community-live-layout-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'pcc-community-live-layout-styles';
+    style.textContent = `
+      #page-community.page{max-width:1400px;padding-top:7.45rem;}
+      #page-community .community-layout{grid-template-columns:minmax(250px,280px) minmax(0,1.55fr) minmax(300px,340px);gap:1.25rem;}
+      #page-community .comm-main,#page-community .comm-right,#page-community .comm-sidebar{min-width:0;}
+      #page-community .comm-composer,
+      #page-community .comm-feed-tabs,
+      #page-community .comm-post,
+      #page-community .comm-view-panel,
+      #page-community .comm-challenge-card,
+      #page-community .comm-pods-card,
+      #page-community .comm-online-card{padding:1.15rem 1.2rem;}
+      #page-community #comm-feed{display:flex;flex-direction:column;gap:1rem;}
+      .comm-live-pill{display:inline-flex;align-items:center;gap:.32rem;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:.16rem .52rem;font-size:.46rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:inherit;}
+      .comm-live-pill.light{background:var(--tint);border-color:var(--teal-border);color:var(--teal);}
+      .comm-live-mini{font-size:.54rem;color:rgba(255,255,255,.82);margin-top:.6rem;line-height:1.5;}
+      .comm-live-mini.light{color:var(--muted);}
+      .comm-right-head{display:flex;align-items:center;justify-content:space-between;gap:.55rem;margin-bottom:.65rem;}
+      .comm-pod-stack,.comm-member-stack,.comm-view-grid{display:grid;gap:.6rem;}
+      .comm-mini-empty{padding:.85rem .95rem;border-radius:12px;background:var(--tint);border:1px dashed var(--teal-border);font-size:.68rem;color:var(--charcoal);line-height:1.55;}
+      .comm-pod.is-joined{border-color:rgba(var(--teal-rgb),0.32);}
+      .comm-pod-count-dot,.comm-presence-dot{width:7px;height:7px;border-radius:50%;background:#22C55E;display:inline-block;flex-shrink:0;}
+      .comm-pod-count-dot.away,.comm-presence-dot.away{background:#F59E0B;}
+      .comm-online-count{display:inline-flex;align-items:center;justify-content:center;min-width:1.4rem;height:1.4rem;border-radius:999px;background:rgba(var(--teal-rgb),.12);color:var(--teal);font-size:.56rem;font-weight:700;padding:0 .28rem;}
+      .comm-member{justify-content:space-between;gap:.65rem;padding:.52rem .12rem;border-bottom:1px solid rgba(var(--teal-rgb),0.08);}
+      .comm-member:last-child{border-bottom:none;}
+      .comm-member-main{display:flex;align-items:center;gap:.55rem;min-width:0;flex:1;}
+      .comm-member-copy{min-width:0;flex:1;}
+      .comm-member-name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+      .comm-member-status{display:block;font-size:.5rem;line-height:1.45;}
+      .comm-member-presence{display:inline-flex;align-items:center;gap:.34rem;padding:.18rem .42rem;border-radius:999px;background:var(--tint);border:1px solid var(--teal-border);font-size:.45rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--charcoal);white-space:nowrap;}
+      .comm-view-actions{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:.9rem;}
+      .comm-view-actions .comm-create-btn{width:auto;margin-top:0;padding:.58rem .92rem;}
+      @media(max-width:1220px){
+        #page-community.page{max-width:1280px;}
+        #page-community .community-layout{grid-template-columns:minmax(240px,260px) minmax(0,1.35fr) minmax(280px,320px);}
+      }
+      @media(max-width:960px){
+        #page-community.page{max-width:1160px;}
+        #page-community .community-layout{grid-template-columns:1fr;}
+        #page-community .comm-sidebar,#page-community .comm-right{position:static;}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  async function communityRequest(path, options) {
+    const token = currentToken().access_token || '';
+    if (!token) throw new Error('Missing session token.');
+    const response = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+      method: options?.method || 'GET',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: 'Bearer ' + token,
+        Accept: 'application/json',
+        ...(options?.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(options?.headers || {})
+      },
+      body: options?.body ? JSON.stringify(options.body) : undefined
+    });
+    const contentType = response.headers.get('content-type') || '';
+    const payload = contentType.includes('application/json')
+      ? await response.json().catch(() => null)
+      : await response.text().catch(() => '');
+    if (!response.ok) {
+      const message = payload?.message || payload?.hint || payload?.details || payload || ('Community request failed (' + response.status + ')');
+      throw new Error(String(message));
+    }
+    return payload;
+  }
+
+  async function communityUpsert(table, row) {
+    return communityRequest(table + '?on_conflict=user_id', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+      body: row
+    });
+  }
+
+  async function ensureLiveMode() {
+    if (!currentUserId()) {
+      liveCommunity.enabled = null;
+      return false;
+    }
+    if (liveCommunity.enabled !== null) return liveCommunity.enabled;
+    try {
+      await communityRequest(LIVE_TABLES.profiles + '?select=user_id&limit=1');
+      liveCommunity.enabled = true;
+      liveCommunity.error = '';
+      return true;
+    } catch (error) {
+      liveCommunity.enabled = false;
+      liveCommunity.error = error.message || 'Community live tables are not ready.';
+      return false;
+    }
+  }
+
+  async function syncLiveProfile() {
+    if (!(await ensureLiveMode())) return false;
+    const profile = typeof commProfile !== 'undefined' ? commProfile : {};
+    const name = currentUserName();
+    await communityUpsert(LIVE_TABLES.profiles, {
+      user_id: currentUserId(),
+      display_name: name,
+      handle: currentUserHandle(),
+      bio: profile.bio || '',
+      color: normalizeColor(profile.color),
+      avatar_text: initials(name),
+      updated_at: new Date().toISOString()
+    });
+    return true;
+  }
+
+  async function heartbeatPresence(status) {
+    if (!(await ensureLiveMode())) return false;
+    await syncLiveProfile();
+    await communityUpsert(LIVE_TABLES.presence, {
+      user_id: currentUserId(),
+      display_name: currentUserName(),
+      handle: currentUserHandle(),
+      color: normalizeColor((typeof commProfile !== 'undefined' ? commProfile.color : '') || ''),
+      current_page: currentPresencePage(),
+      status: status || 'online',
+      last_seen: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
+    return true;
+  }
+
+  async function refreshLiveState(force) {
+    if (liveCommunity.loading && !force) return liveCommunity.loading;
+    liveCommunity.loading = (async function () {
+      if (await ensureLiveMode()) {
+        const [profiles, presence, posts, pods, podMembers, challenges, challengeMembers] = await Promise.all([
+          communityRequest(LIVE_TABLES.profiles + '?select=user_id,display_name,handle,bio,color,avatar_text,updated_at&limit=200'),
+          communityRequest(LIVE_TABLES.presence + '?select=user_id,display_name,handle,color,current_page,status,last_seen,updated_at&limit=200'),
+          communityRequest(LIVE_TABLES.posts + '?select=id,user_id,author_name,handle,color,post_type,body,gif_url,gif_title,created_at&order=created_at.desc&limit=120'),
+          communityRequest(LIVE_TABLES.pods + '?select=id,name,emoji,description,created_by,created_at&order=created_at.desc&limit=80'),
+          communityRequest(LIVE_TABLES.podMembers + '?select=pod_id,user_id,joined_at&limit=500'),
+          communityRequest(LIVE_TABLES.challenges + '?select=id,name,description,days,created_by,created_at&order=created_at.desc&limit=80'),
+          communityRequest(LIVE_TABLES.challengeMembers + '?select=challenge_id,user_id,joined_at&limit=500')
+        ]);
+
+        liveCommunity.profiles = Array.isArray(profiles) ? profiles : [];
+        liveCommunity.presence = Array.isArray(presence) ? presence.filter(isPresenceRecent) : [];
+        liveCommunity.posts = Array.isArray(posts) ? posts : [];
+        liveCommunity.pods = Array.isArray(pods) ? pods : [];
+        liveCommunity.podMembers = Array.isArray(podMembers) ? podMembers : [];
+        liveCommunity.challenges = Array.isArray(challenges) ? challenges : [];
+        liveCommunity.challengeMembers = Array.isArray(challengeMembers) ? challengeMembers : [];
+      } else {
+        liveCommunity.profiles = [];
+        liveCommunity.presence = currentUserId() ? [{
+          user_id: currentUserId(),
+          display_name: currentUserName(),
+          handle: currentUserHandle(),
+          color: normalizeColor((typeof commProfile !== 'undefined' ? commProfile.color : '') || ''),
+          current_page: currentPresencePage(),
+          status: 'online',
+          last_seen: new Date().toISOString()
+        }] : [];
+        liveCommunity.posts = [];
+        liveCommunity.pods = [];
+        liveCommunity.podMembers = [];
+        liveCommunity.challenges = [];
+        liveCommunity.challengeMembers = [];
+      }
+    })().finally(() => {
+      liveCommunity.loading = null;
+    });
+    return liveCommunity.loading;
+  }
+
+  function hydrateCommunityState() {
+    const sourcePosts = liveCommunity.enabled
+      ? liveCommunity.posts
+      : (getJson(typeof COMM_KEY !== 'undefined' ? COMM_KEY : 'pcc-community-posts', []) || []);
+    commPosts = sourcePosts.map((post) => ({
+      id: String(post.id || ('post-' + Date.now())),
+      userId: post.user_id || post.userId || '',
+      author: post.author_name || post.author || currentUserName(),
+      handle: post.handle || '',
+      color: post.color || '#0A7266',
+      type: post.post_type || post.type || 'update',
+      body: post.body || '',
+      gif: post.gif_url || post.gif || '',
+      title: post.gif_title || post.title || '',
+      createdAt: post.created_at || post.createdAt || new Date().toISOString()
+    }));
+
+    const allPods = liveCommunity.enabled
+      ? liveCommunity.pods
+      : (getJson(typeof PODS_KEY !== 'undefined' ? PODS_KEY : 'pcc-comm-pods', []) || []).map((pod) => ({
+          id: pod.id || pod.name,
+          name: pod.name,
+          emoji: pod.emoji || 'POD',
+          description: pod.desc || '',
+          created_by: currentUserId(),
+          created_at: pod.createdAt || new Date().toISOString()
+        }));
+
+    userPods = allPods
+      .filter((pod) => liveCommunity.enabled ? currentUserJoinedPod(pod.id) : true)
+      .map((pod) => ({
+        id: String(pod.id),
+        name: pod.name,
+        emoji: pod.emoji || 'POD',
+        desc: pod.description || pod.desc || '',
+        members: liveCommunity.enabled ? podMemberCount(pod.id) : 1,
+        createdAt: pod.created_at || pod.createdAt || new Date().toISOString()
+      }));
+
+    const allChallenges = liveCommunity.enabled
+      ? liveCommunity.challenges
+      : (getJson(typeof CHALLENGES_KEY !== 'undefined' ? CHALLENGES_KEY : 'pcc-comm-challenges', []) || []).map((challenge) => ({
+          id: challenge.id || challenge.name,
+          name: challenge.name,
+          description: challenge.desc || '',
+          days: Number(challenge.days) || 30,
+          created_by: currentUserId(),
+          created_at: challenge.startDate || new Date().toISOString()
+        }));
+
+    userChallenges = allChallenges
+      .filter((challenge) => liveCommunity.enabled ? !!currentUserChallenge(challenge.id) : true)
+      .map((challenge) => ({
+        id: String(challenge.id),
+        name: challenge.name,
+        desc: challenge.description || challenge.desc || '',
+        days: Number(challenge.days) || 30,
+        members: liveCommunity.enabled ? challengeMemberCount(challenge.id) : 1,
+        startDate: currentUserChallenge(challenge.id)?.joined_at || challenge.created_at || new Date().toISOString(),
+        joined: true
+      }));
+  }
+
+  function postStreak() {
+    const daySet = new Set(
+      commPosts
+        .filter((post) => post.userId === currentUserId())
+        .map((post) => new Date(post.createdAt).toISOString().slice(0, 10))
+    );
+    let streak = 0;
+    const cursor = new Date();
+    while (daySet.has(cursor.toISOString().slice(0, 10))) {
+      streak += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    return streak;
+  }
+
+  function updateProfileCard() {
+    const name = currentUserName();
+    const handle = currentUserHandle();
+    const color = normalizeColor((typeof commProfile !== 'undefined' ? commProfile.color : '') || '');
+    const gradient = 'linear-gradient(135deg,' + color + ',' + color + 'bb)';
+    const avatar = document.getElementById('comm-avatar');
+    const composerAvatar = document.getElementById('comm-composer-av');
+    const profileName = document.getElementById('comm-profile-name');
+    const profileHandle = document.getElementById('comm-profile-handle');
+    const postsCount = document.getElementById('comm-posts-count');
+    const streak = document.getElementById('comm-streak');
+    const podStat = document.querySelector('.comm-stats .comm-stat:nth-child(2) .comm-stat-n');
+    if (avatar) {
+      avatar.textContent = initials(name).slice(0, 1);
+      avatar.style.background = gradient;
+    }
+    if (composerAvatar) {
+      composerAvatar.textContent = initials(name).slice(0, 1);
+      composerAvatar.style.background = gradient;
+    }
+    if (profileName) profileName.textContent = name;
+    if (profileHandle) profileHandle.textContent = handle;
+    if (postsCount) postsCount.textContent = String(commPosts.filter((post) => post.userId === currentUserId()).length);
+    if (podStat) {
+      podStat.id = 'comm-pods-count';
+      podStat.textContent = String(userPods.length);
+    }
+    if (streak) streak.textContent = String(postStreak());
+  }
+
+  function challengeProgress(challenge) {
+    const joined = currentUserChallenge(challenge.id);
+    if (!joined) return { joined: false, pct: 8, label: (Number(challenge.days) || 30) + '-day challenge' };
+    const start = new Date(joined.joined_at).getTime();
+    const elapsed = start ? Math.max(1, Math.floor((Date.now() - start) / 86400000) + 1) : 1;
+    const total = Number(challenge.days) || 30;
+    const day = Math.min(total, elapsed);
+    return {
+      joined: true,
+      pct: Math.max(8, Math.round((day / total) * 100)),
+      label: 'Day ' + day + ' of ' + total
+    };
+  }
+
+  function renderRightRail() {
+    const challengeCard = document.querySelector('#page-community .comm-challenge-card');
+    const podsCard = document.querySelector('#page-community .comm-pods-card');
+    const onlineCard = document.querySelector('#page-community .comm-online-card');
+    const leadChallenge = liveCommunity.challenges[0] || null;
+
+    if (challengeCard) {
+      if (leadChallenge) {
+        const progress = challengeProgress(leadChallenge);
+        challengeCard.innerHTML = `
+          <div class="comm-challenge-label">Active Challenge</div>
+          <div class="comm-right-head">
+            <div class="comm-challenge-title">${esc(leadChallenge.name)}</div>
+            <span class="comm-live-pill">Live</span>
+          </div>
+          <div class="comm-challenge-desc">${esc(leadChallenge.description || 'A shared challenge is live right now.')}</div>
+          <div class="comm-challenge-progress"><div class="comm-challenge-fill" style="width:${progress.pct}%"></div></div>
+          <div class="comm-challenge-meta">
+            <span>${esc(progress.label)}</span>
+            <span>${challengeMemberCount(leadChallenge.id)} members in</span>
+          </div>
+          <button class="comm-join-btn" type="button" onclick="joinChallenge('${leadChallenge.id}')">${progress.joined ? 'Joined' : 'Join Challenge ->'}</button>
+          <div class="comm-live-mini">${progress.joined ? 'You are in. Keep the streak alive.' : 'Anyone in the community can join this live challenge.'}</div>
+        `;
+      } else {
+        challengeCard.innerHTML = `
+          <div class="comm-challenge-label">Active Challenge</div>
+          <div class="comm-challenge-title">No challenge is live yet</div>
+          <div class="comm-challenge-desc">Create the first challenge and it will appear here for every member.</div>
+          <button class="comm-join-btn" type="button" onclick="openCreateChallenge()">Create Challenge</button>
+          <div class="comm-live-mini">Live challenge stats will show here once the room starts one.</div>
+        `;
+      }
+    }
+
+    if (podsCard) {
+      const visiblePods = (liveCommunity.enabled ? liveCommunity.pods : userPods).slice(0, 5);
+      podsCard.innerHTML = `
+        <div class="comm-right-head">
+          <div class="comm-pods-label">Accountability Pods</div>
+          <span class="comm-live-pill light">${liveCommunity.enabled ? 'Live' : 'Local'}</span>
+        </div>
+        <div class="comm-pod-stack">
+          ${visiblePods.length ? visiblePods.map((pod) => {
+            const joined = liveCommunity.enabled ? currentUserJoinedPod(pod.id) : userPods.some((row) => row.id === pod.id || row.name === pod.name);
+            const members = liveCommunity.enabled ? podMemberCount(pod.id) : (pod.members || 1);
+            const online = liveCommunity.enabled ? podOnlineCount(pod.id) : 1;
+            return `
+              <div class="comm-pod ${joined ? 'is-joined' : ''}">
+                <span class="comm-pod-emoji">${esc(pod.emoji || 'POD')}</span>
+                <span class="comm-pod-name">${esc(pod.name)}</span>
+                <span class="comm-pod-count"><span class="comm-pod-count-dot ${online ? '' : 'away'}"></span>${members} members</span>
+                <button class="comm-pod-join" type="button" onclick="${joined ? "openDM('" + escAttr(pod.name) + "','" + escAttr(pod.emoji || initials(pod.name)) + "')" : "joinPod('" + escAttr(pod.id || pod.name) + "')"}">${joined ? 'Open' : 'Join'}</button>
+              </div>
+            `;
+          }).join('') : '<div class="comm-mini-empty">No pods yet. Create the first one and it will show here.</div>'}
+        </div>
+        <div class="comm-live-mini light">${liveCommunity.enabled ? 'Member counts and activity update automatically.' : 'Shared live pod stats turn on after the Community SQL setup is added.'}</div>
+      `;
+    }
+
+    if (onlineCard) {
+      const recent = liveCommunity.presence
+        .slice()
+        .sort((a, b) => new Date(b.last_seen || 0) - new Date(a.last_seen || 0))
+        .slice(0, 6);
+      const liveCount = liveCommunity.presence.filter(isPresenceOnline).length;
+      onlineCard.innerHTML = `
+        <div class="comm-right-head">
+          <div class="comm-online-label"><div class="online-dot"></div> Online Now</div>
+          <span class="comm-online-count">${liveCount}</span>
+        </div>
+        <div class="comm-member-stack">
+          ${recent.length ? recent.map((member) => {
+            const online = isPresenceOnline(member);
+            const avatarText = liveProfile(member.user_id)?.avatar_text || initials(member.display_name);
+            return `
+              <div class="comm-member" onclick="openDM('${escAttr(member.display_name)}','${escAttr(avatarText)}')">
+                <div class="comm-member-main">
+                  <div class="comm-member-av" style="background:linear-gradient(135deg,${normalizeColor(member.color)},${normalizeColor(member.color)}bb);">${esc(avatarText.slice(0, 2))}</div>
+                  <div class="comm-member-copy">
+                    <span class="comm-member-name">${esc(member.display_name)}</span>
+                    <span class="comm-member-status">${esc(online ? (member.current_page || 'Community') : ('Seen ' + relTime(member.last_seen)))}</span>
+                  </div>
+                </div>
+                <span class="comm-member-presence"><span class="comm-presence-dot ${online ? '' : 'away'}"></span>${online ? 'Live' : 'Recent'}</span>
+              </div>
+            `;
+          }).join('') : '<div class="comm-mini-empty">Nobody is active right now. People show up here automatically while they are in the Community.</div>'}
+        </div>
+        <div class="comm-live-mini light">${liveCommunity.enabled ? 'Presence updates automatically while members are active.' : 'Live online indicators turn on after the Community SQL setup is added.'}</div>
+      `;
+    }
+  }
+
+  function renderLiveFeed() {
+    const feed = document.getElementById('comm-feed');
+    if (!feed) return;
+    const filtered = commFilter === 'all' ? commPosts : commPosts.filter((post) => post.type === commFilter);
+    if (!filtered.length) {
+      feed.innerHTML = `
+        <div class="comm-empty-state">
+          <div class="comm-empty-icon">+</div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:.3rem;">Nothing is live yet</div>
+          <div>Post a win, goal, or update and it will show up here for the whole community.</div>
+        </div>
+      `;
+      return;
+    }
+    feed.innerHTML = filtered.map((post, index) => {
+      const badgeMap = {
+        win: ['badge-win', 'Win'],
+        goal: ['badge-goal', 'Goal'],
+        update: ['badge-update', 'Update'],
+        support: ['badge-support', 'Support'],
+        question: ['badge-question', 'Question']
+      };
+      const badge = badgeMap[post.type] || badgeMap.update;
+      const liked = !!likedPosts[post.id];
+      return `
+        <div class="comm-post" style="animation-delay:${(index * 0.04).toFixed(2)}s">
+          <div class="comm-post-header">
+            <div class="comm-post-avatar" style="background:linear-gradient(135deg,${normalizeColor(post.color)},${normalizeColor(post.color)}bb)">${esc(initials(post.author).slice(0, 2))}</div>
+            <div class="comm-post-meta">
+              <div class="comm-post-name">${esc(post.author)}<span style="font-size:.58rem;color:var(--muted);font-weight:400;margin-left:.3rem;">${esc(post.handle || '')}</span></div>
+              <div class="comm-post-time">${esc(relTime(post.createdAt))}</div>
+            </div>
+            <span class="comm-post-badge ${badge[0]}">${badge[1]}</span>
+          </div>
+          <div class="comm-post-body">${fmtText(post.body)}</div>
+          ${post.gif ? `<div class="comm-post-media"><img src="${post.gif}" alt="${esc(post.title || 'GIF')}" /></div>` : ''}
+          <div class="comm-post-actions">
+            <button class="comm-action-btn ${liked ? 'liked' : ''}" type="button" onclick="toggleLike('${post.id}')">${liked ? 'Liked' : 'Like'}</button>
+            <button class="comm-action-btn" type="button" onclick="openDM('${escAttr(post.author)}','${escAttr(initials(post.author))}')">Message</button>
+            <button class="comm-action-btn" type="button" onclick="copyCommunityPostLink('${post.id}')">Copy Link</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderPodsViewOverride(container) {
+    const joined = userPods.slice();
+    const discover = liveCommunity.enabled
+      ? liveCommunity.pods.filter((pod) => !currentUserJoinedPod(pod.id))
+      : [];
+    container.innerHTML = `
+      <div class="comm-view-panel">
+        <div class="comm-view-title">My Pods</div>
+        <div class="comm-view-sub">Keep your accountability circles close and your next pod one click away.</div>
+        <div class="comm-section-label">Your pods</div>
+        <div class="comm-view-grid">
+          ${joined.length ? joined.map((pod) => `
+            <div class="comm-pod-card">
+              <span style="font-size:1.3rem">${esc(pod.emoji || 'POD')}</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:.8rem;font-weight:700;color:var(--ink)">${esc(pod.name)}</div>
+                <div style="font-size:.64rem;color:var(--charcoal);margin-top:.18rem;line-height:1.55;">${esc(pod.desc || 'Community pod')}</div>
+                <div style="font-size:.56rem;color:var(--muted);margin-top:.34rem;">${pod.members} members | ${liveCommunity.enabled ? podOnlineCount(pod.id) : 1} online now</div>
+              </div>
+              <button class="comm-pod-join" type="button" onclick="openDM('${escAttr(pod.name)}','${escAttr(pod.emoji || initials(pod.name))}')">Open</button>
+            </div>
+          `).join('') : '<div class="comm-empty-state"><div class="comm-empty-icon">P</div><div style="font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:.3rem;">No joined pods yet</div><div>Join one from the live list below or create your own pod.</div></div>'}
+        </div>
+        ${discover.length ? `
+          <div class="comm-section-label">Discover more</div>
+          <div class="comm-view-grid">
+            ${discover.map((pod) => `
+              <div class="comm-pod-card">
+                <span style="font-size:1.3rem">${esc(pod.emoji || 'POD')}</span>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:.8rem;font-weight:700;color:var(--ink)">${esc(pod.name)}</div>
+                  <div style="font-size:.64rem;color:var(--charcoal);margin-top:.18rem;line-height:1.55;">${esc(pod.description || 'Community pod')}</div>
+                  <div style="font-size:.56rem;color:var(--muted);margin-top:.34rem;">${podMemberCount(pod.id)} members | ${podOnlineCount(pod.id)} online now</div>
+                </div>
+                <button class="comm-pod-join" type="button" onclick="joinPod('${escAttr(pod.id)}')">Join</button>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+        <div class="comm-view-actions">
+          <button class="comm-create-btn" type="button" onclick="openCreatePod()">Create Pod</button>
+        </div>
+      </div>
+      ${BACK_BTN_HTML}
+    `;
+  }
+
+  function renderChallengesViewOverride(container) {
+    container.innerHTML = `
+      <div class="comm-view-panel">
+        <div class="comm-view-title">Challenges</div>
+        <div class="comm-view-sub">Join the shared sprints that are live right now, or launch the next one.</div>
+        <div class="comm-view-grid">
+          ${liveCommunity.challenges.length ? liveCommunity.challenges.map((challenge) => {
+            const progress = challengeProgress(challenge);
+            return `
+              <div class="comm-challenge-item">
+                <div class="comm-challenge-item-title">${esc(challenge.name)}<span style="font-size:.56rem;color:var(--muted);font-weight:500;margin-left:.35rem;">${progress.label}</span></div>
+                <div class="comm-challenge-item-desc">${esc(challenge.description || 'A shared challenge is running right now.')}</div>
+                <div class="comm-challenge-bar"><div class="comm-challenge-bar-fill" style="width:${progress.pct}%"></div></div>
+                <div style="display:flex;justify-content:space-between;gap:.75rem;align-items:center;font-size:.56rem;color:var(--muted);margin-top:.36rem;">
+                  <span>${challengeMemberCount(challenge.id)} members</span>
+                  <button class="comm-pod-join" type="button" onclick="joinChallenge('${escAttr(challenge.id)}')">${progress.joined ? 'Joined' : 'Join'}</button>
+                </div>
+              </div>
+            `;
+          }).join('') : '<div class="comm-empty-state"><div class="comm-empty-icon">!</div><div style="font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:.3rem;">No live challenges yet</div><div>Create the first challenge and it will show up here for everyone.</div></div>'}
+        </div>
+        <div class="comm-view-actions">
+          <button class="comm-create-btn" type="button" onclick="openCreateChallenge()">Create Challenge</button>
+        </div>
+      </div>
+      ${BACK_BTN_HTML}
+    `;
+  }
+
+  function renderWinsViewOverride(container) {
+    const wins = commPosts.filter((post) => post.type === 'win');
+    container.innerHTML = `
+      <div class="comm-view-panel">
+        <div class="comm-view-title">Win Wall</div>
+        <div class="comm-view-sub">Every win posted to the feed lands here so momentum stays visible.</div>
+        ${wins.length ? wins.map((post, index) => `
+          <div class="comm-post" style="animation-delay:${(index * 0.04).toFixed(2)}s">
+            <div class="comm-post-header">
+              <div class="comm-post-avatar" style="background:linear-gradient(135deg,${normalizeColor(post.color)},${normalizeColor(post.color)}bb)">${esc(initials(post.author).slice(0, 2))}</div>
+              <div class="comm-post-meta">
+                <div class="comm-post-name">${esc(post.author)}</div>
+                <div class="comm-post-time">${esc(relTime(post.createdAt))}</div>
+              </div>
+              <span class="comm-post-badge badge-win">Win</span>
+            </div>
+            <div class="comm-post-body">${fmtText(post.body)}</div>
+            ${post.gif ? `<div class="comm-post-media"><img src="${post.gif}" alt="${esc(post.title || 'GIF')}" /></div>` : ''}
+          </div>
+        `).join('') : '<div class="comm-empty-state"><div class="comm-empty-icon">W</div><div style="font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:.3rem;">No wins posted yet</div><div>Post a win in the feed and it will show up here live.</div></div>'}
+      </div>
+      ${BACK_BTN_HTML}
+    `;
+  }
+
+  function renderCurrentCommunityView() {
+    updateProfileCard();
+    renderRightRail();
+    const main = document.getElementById('comm-main');
+    const currentView = main?.dataset?.view || 'feed';
+    if (currentView === 'feed') {
+      renderLiveFeed();
+      return;
+    }
+    const container = document.getElementById('comm-view-panel-container');
+    if (!container) return;
+    if (currentView === 'pods') renderPodsViewOverride(container);
+    if (currentView === 'challenges') renderChallengesViewOverride(container);
+    if (currentView === 'wins') renderWinsViewOverride(container);
+  }
+
+  function startLiveLoops() {
+    if (liveCommunity.pollTimer) clearInterval(liveCommunity.pollTimer);
+    if (liveCommunity.presenceTimer) clearInterval(liveCommunity.presenceTimer);
+    liveCommunity.pollTimer = window.setInterval(() => {
+      if (!document.querySelector('#page-community.page.active')) return;
+      refreshCommunityState(false).catch(() => {});
+    }, LIVE_POLL_MS);
+    liveCommunity.presenceTimer = window.setInterval(() => {
+      if (!document.querySelector('#page-community.page.active')) return;
+      heartbeatPresence('online').catch(() => {});
+    }, PRESENCE_BEAT_MS);
+  }
+
+  function stopLiveLoops() {
+    if (liveCommunity.pollTimer) clearInterval(liveCommunity.pollTimer);
+    if (liveCommunity.presenceTimer) clearInterval(liveCommunity.presenceTimer);
+    liveCommunity.pollTimer = null;
+    liveCommunity.presenceTimer = null;
+  }
+
+  async function refreshCommunityState(force) {
+    await refreshLiveState(force);
+    hydrateCommunityState();
+    loadLikedPosts();
+    renderCurrentCommunityView();
+  }
+
+  window.copyCommunityPostLink = async function (postId) {
+    const url = (window.location.origin && /^https?:/i.test(window.location.origin))
+      ? window.location.origin + window.location.pathname + '#community-post-' + postId
+      : ('#community-post-' + postId);
+    try {
+      await navigator.clipboard.writeText(url);
+      toast('Community post link copied.');
+    } catch (error) {
+      toast('Copy failed. Try again.');
+    }
+  };
+
+  window.toggleLike = function (postId) {
+    loadLikedPosts();
+    likedPosts[postId] = !likedPosts[postId];
+    if (!likedPosts[postId]) delete likedPosts[postId];
+    saveLikedPosts();
+    renderLiveFeed();
+  };
+
+  window.filterFeed = function (type, btn) {
+    commFilter = type || 'all';
+    document.querySelectorAll('.comm-feed-tab').forEach((button) => button.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderLiveFeed();
+  };
+
+  window.updateCharCount = function (textarea) {
+    const count = document.getElementById('comm-char-count');
+    if (count) count.textContent = String((textarea?.value || '').length) + ' / 500';
+  };
+
+  window.renderFeed = renderLiveFeed;
+  window.renderPodsView = renderPodsViewOverride;
+  window.renderChallengesView = renderChallengesViewOverride;
+  window.renderWinsView = renderWinsViewOverride;
+
+  window.loadCommPosts = async function () {
+    await refreshCommunityState(false);
+    return commPosts;
+  };
+
+  window.loadPodsAndChallenges = async function () {
+    await refreshCommunityState(false);
+    return { userPods, userChallenges };
+  };
+
+  window.saveCommPosts = function () {
+    if (liveCommunity.enabled) return;
+    try {
+      localStorage.setItem(typeof COMM_KEY !== 'undefined' ? COMM_KEY : 'pcc-community-posts', JSON.stringify(commPosts));
+    } catch (error) {}
+  };
+
+  window.savePodsAndChallenges = function () {
+    if (liveCommunity.enabled) return;
+    try {
+      localStorage.setItem(typeof PODS_KEY !== 'undefined' ? PODS_KEY : 'pcc-comm-pods', JSON.stringify(userPods));
+      localStorage.setItem(typeof CHALLENGES_KEY !== 'undefined' ? CHALLENGES_KEY : 'pcc-comm-challenges', JSON.stringify(userChallenges));
+    } catch (error) {}
+  };
+
+  window.submitPost = async function () {
+    const text = document.getElementById('comm-compose-text')?.value.trim() || '';
+    const gif = selectedPostGifFromDom();
+    if (!text && !gif?.url) return;
+    const row = {
+      user_id: currentUserId(),
+      author_name: currentUserName(),
+      handle: currentUserHandle(),
+      color: normalizeColor((typeof commProfile !== 'undefined' ? commProfile.color : '') || ''),
+      post_type: selectedPostType || 'update',
+      body: text,
+      gif_url: gif?.url || '',
+      gif_title: gif?.title || '',
+      created_at: new Date().toISOString()
+    };
+    if (await ensureLiveMode()) {
+      try {
+        await syncLiveProfile();
+        await communityRequest(LIVE_TABLES.posts, {
+          method: 'POST',
+          headers: { Prefer: 'return=representation' },
+          body: row
+        });
+      } catch (error) {
+        toast('Could not post live: ' + error.message);
+        return;
+      }
+    } else {
+      commPosts.unshift({
+        id: 'post-' + Date.now(),
+        userId: row.user_id,
+        author: row.author_name,
+        handle: row.handle,
+        color: row.color,
+        type: row.post_type,
+        body: row.body,
+        gif: row.gif_url,
+        title: row.gif_title,
+        createdAt: row.created_at
+      });
+      window.saveCommPosts();
+    }
+    const composer = document.getElementById('comm-compose-text');
+    if (composer) composer.value = '';
+    const count = document.getElementById('comm-char-count');
+    if (count) count.textContent = '0 / 500';
+    if (typeof clearPostGif === 'function') clearPostGif();
+    await refreshCommunityState(true);
+    toast('Posted to the Community.');
+  };
+
+  window.joinPod = async function (podRef) {
+    const pod = liveCommunity.pods.find((row) => row.id === podRef || row.name === podRef);
+    if (!pod && liveCommunity.enabled) {
+      toast('That pod is not available right now.');
+      return;
+    }
+    if (await ensureLiveMode()) {
+      try {
+        await communityRequest(LIVE_TABLES.podMembers, {
+          method: 'POST',
+          headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+          body: {
+            pod_id: pod.id,
+            user_id: currentUserId(),
+            joined_at: new Date().toISOString()
+          }
+        });
+      } catch (error) {
+        toast('Could not join pod: ' + error.message);
+        return;
+      }
+    } else if (pod && !userPods.some((row) => row.id === pod.id || row.name === pod.name)) {
+      userPods.unshift({
+        id: pod.id,
+        name: pod.name,
+        emoji: pod.emoji || 'POD',
+        desc: pod.description || '',
+        members: 1,
+        createdAt: pod.created_at || new Date().toISOString()
+      });
+      window.savePodsAndChallenges();
+    }
+    await refreshCommunityState(true);
+    toast('Joined ' + (pod?.name || 'the pod') + '.');
+  };
+
+  window.submitCreatePod = async function () {
+    const name = document.getElementById('pod-name-input')?.value.trim();
+    const emoji = document.getElementById('pod-emoji-input')?.value.trim() || 'POD';
+    const desc = document.getElementById('pod-desc-input')?.value.trim() || '';
+    if (!name) {
+      toast('Give your pod a name first.');
+      return;
+    }
+    if (await ensureLiveMode()) {
+      try {
+        await syncLiveProfile();
+        const createdRows = await communityRequest(LIVE_TABLES.pods, {
+          method: 'POST',
+          headers: { Prefer: 'return=representation' },
+          body: {
+            created_by: currentUserId(),
+            name,
+            emoji,
+            description: desc,
+            created_at: new Date().toISOString()
+          }
+        });
+        const created = Array.isArray(createdRows) ? createdRows[0] : createdRows;
+        if (created?.id) {
+          await communityRequest(LIVE_TABLES.podMembers, {
+            method: 'POST',
+            headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+            body: {
+              pod_id: created.id,
+              user_id: currentUserId(),
+              joined_at: new Date().toISOString()
+            }
+          });
+        }
+      } catch (error) {
+        toast('Could not create pod: ' + error.message);
+        return;
+      }
+    } else {
+      userPods.unshift({
+        id: 'pod-' + Date.now(),
+        name,
+        emoji,
+        desc,
+        members: 1,
+        createdAt: new Date().toISOString()
+      });
+      window.savePodsAndChallenges();
+    }
+    if (typeof closeCreatePod === 'function') closeCreatePod();
+    await refreshCommunityState(true);
+    toast('Pod created.');
+    if (typeof switchCommView === 'function') switchCommView('pods');
+  };
+
+  window.joinChallenge = async function (challengeRef) {
+    const challenge = challengeRef
+      ? liveCommunity.challenges.find((row) => row.id === challengeRef || row.name === challengeRef)
+      : liveCommunity.challenges[0];
+    if (!challenge && liveCommunity.enabled) {
+      toast('No live challenge is available yet.');
+      return;
+    }
+    if (await ensureLiveMode()) {
+      try {
+        await communityRequest(LIVE_TABLES.challengeMembers, {
+          method: 'POST',
+          headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+          body: {
+            challenge_id: challenge.id,
+            user_id: currentUserId(),
+            joined_at: new Date().toISOString()
+          }
+        });
+      } catch (error) {
+        toast('Could not join challenge: ' + error.message);
+        return;
+      }
+    } else if (challenge && !userChallenges.some((row) => row.id === challenge.id || row.name === challenge.name)) {
+      userChallenges.unshift({
+        id: challenge.id,
+        name: challenge.name,
+        desc: challenge.description || '',
+        days: Number(challenge.days) || 30,
+        members: 1,
+        joined: true,
+        startDate: new Date().toISOString()
+      });
+      window.savePodsAndChallenges();
+    }
+    await refreshCommunityState(true);
+    toast('Joined ' + (challenge?.name || 'the challenge') + '.');
+  };
+
+  window.submitCreateChallenge = async function () {
+    const name = document.getElementById('challenge-name-input')?.value.trim();
+    const desc = document.getElementById('challenge-desc-input')?.value.trim() || '';
+    const days = Math.max(1, Math.min(365, parseInt(document.getElementById('challenge-days-input')?.value, 10) || 30));
+    if (!name) {
+      toast('Give your challenge a name first.');
+      return;
+    }
+    if (await ensureLiveMode()) {
+      try {
+        await syncLiveProfile();
+        const createdRows = await communityRequest(LIVE_TABLES.challenges, {
+          method: 'POST',
+          headers: { Prefer: 'return=representation' },
+          body: {
+            created_by: currentUserId(),
+            name,
+            description: desc,
+            days,
+            created_at: new Date().toISOString()
+          }
+        });
+        const created = Array.isArray(createdRows) ? createdRows[0] : createdRows;
+        if (created?.id) {
+          await communityRequest(LIVE_TABLES.challengeMembers, {
+            method: 'POST',
+            headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+            body: {
+              challenge_id: created.id,
+              user_id: currentUserId(),
+              joined_at: new Date().toISOString()
+            }
+          });
+        }
+      } catch (error) {
+        toast('Could not create challenge: ' + error.message);
+        return;
+      }
+    } else {
+      userChallenges.unshift({
+        id: 'challenge-' + Date.now(),
+        name,
+        desc,
+        days,
+        members: 1,
+        joined: true,
+        startDate: new Date().toISOString()
+      });
+      window.savePodsAndChallenges();
+    }
+    if (typeof closeCreateChallenge === 'function') closeCreateChallenge();
+    await refreshCommunityState(true);
+    toast('Challenge launched.');
+    if (typeof switchCommView === 'function') switchCommView('challenges');
+  };
+
+  const originalUpdateCommProfile = window.updateCommProfile;
+  window.updateCommProfile = function () {
+    if (typeof originalUpdateCommProfile === 'function') originalUpdateCommProfile();
+    syncLiveProfile().then(() => refreshCommunityState(true)).catch(() => {});
+  };
+
+  const originalInitCommunity = window.initCommunity;
+  window.initCommunity = async function () {
+    ensureLiveStyles();
+    if (typeof originalInitCommunity === 'function') originalInitCommunity();
+    await refreshCommunityState(true);
+    if (await ensureLiveMode()) {
+      startLiveLoops();
+      heartbeatPresence('online').catch(() => {});
+    } else {
+      stopLiveLoops();
+    }
+  };
+
+  window.loadChallengeState = function () {
+    renderRightRail();
+  };
+
+  document.addEventListener('visibilitychange', () => {
+    if (liveCommunity.enabled !== true) return;
+    if (document.visibilityState === 'hidden') {
+      heartbeatPresence('away').catch(() => {});
+    } else if (document.querySelector('#page-community.page.active')) {
+      heartbeatPresence('online').catch(() => {});
+      refreshCommunityState(true).catch(() => {});
+    }
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => window.initCommunity && window.initCommunity(), 80);
+    });
+  } else {
+    setTimeout(() => window.initCommunity && window.initCommunity(), 80);
+  }
+})();
