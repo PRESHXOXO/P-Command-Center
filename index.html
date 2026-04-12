@@ -6390,6 +6390,7 @@ async function loadAllUserData() {
 
     syncCurrentUserRole(undefined, rows);
     applyRoleBasedNavigation();
+    applyRoleBasedContent(rows);
 
     if (error || !rows || rows.length === 0) {
       // New user — clear any leftover data from previous user
@@ -7503,6 +7504,136 @@ let ai=0;
 setInterval(()=>{const el=document.getElementById('aff-text');if(!el)return;el.style.opacity='0';setTimeout(()=>{ai=(ai+1)%AFFS.length;el.textContent=AFFS[ai];el.style.opacity='1';},450);},8000);
 
 // WEEKLY THEMES — dynamic per month
+const MEMBER_AFFIRMATIONS = [
+  'I am allowed to build this at my own pace and still take myself seriously.',
+  'Small consistent action still counts as real momentum.',
+  'My schedule can stay simple and still support a big life.',
+  'I do not need perfect clarity to take the next honest step.',
+  'My vision gets stronger every time I return to it.',
+  'Community is part of the work, not a distraction from it.'
+];
+
+const MEMBER_DEFAULT_GOALS = [
+  { text:'Set one clear goal for this month', tag:'Focus', done:false },
+  { text:'Add one event to your schedule', tag:'Plan', done:false },
+  { text:'Write down one vision milestone', tag:'Vision', done:false }
+];
+
+const MEMBER_VISION_CARDS = [
+  { bar:'vc-teal', category:'Career', title:'A Clear Next Step', desc:'Use this space to define what you are moving toward right now, even if it is still taking shape.', items:['A target role or lane','One short-term win','A reason it matters'], pct:'15%', width:'15%' },
+  { bar:'vc-amber', category:'Learning', title:'A Skill Worth Growing', desc:'Pick one capability to deepen this season and let this card hold the markers of progress.', items:['A class or course','Practice time each week','One measurable checkpoint'], pct:'20%', width:'20%' },
+  { bar:'vc-rose', category:'Lifestyle', title:'A Life That Fits', desc:'Describe the rhythm, space, and feeling you want daily life to have as things come together.', items:['A calmer routine','A healthier boundary','A place that feels like home'], pct:'18%', width:'18%' },
+  { bar:'vc-slate', category:'Money', title:'A Stronger Foundation', desc:'Keep the financial picture visible without making it scary. The point is clarity, not pressure.', items:['A savings target','One cleaner money habit','A monthly check-in'], pct:'12%', width:'12%' },
+  { bar:'vc-sage', category:'Wellness', title:'More Energy, Less Noise', desc:'Your future is easier to reach when your mind and body are supported in the present.', items:['Better sleep rhythm','Regular movement','Protected quiet time'], pct:'24%', width:'24%' },
+  { bar:'vc-warm', category:'Community', title:'People In Your Corner', desc:'Use this card to remember that support, friendship, and accountability all belong in the picture too.', items:['One person to check in with','One conversation to start','One community win to celebrate'], pct:'10%', width:'10%' }
+];
+
+let originalRoleContentSnapshot = null;
+
+function captureOriginalRoleContentSnapshot() {
+  if (originalRoleContentSnapshot) return originalRoleContentSnapshot;
+  const visionGrid = document.querySelector('#page-vision .vision-grid');
+  const focusWord = document.getElementById('focus-word');
+  const focusIntention = document.getElementById('focus-intention');
+  const affText = document.getElementById('aff-text');
+  originalRoleContentSnapshot = {
+    affs: AFFS.slice(),
+    focusWord: focusWord ? focusWord.textContent : '',
+    focusIntention: focusIntention ? focusIntention.value : '',
+    affText: affText ? affText.textContent : '',
+    visionHtml: visionGrid ? visionGrid.innerHTML : ''
+  };
+  return originalRoleContentSnapshot;
+}
+
+function renderVisionCards(cards) {
+  const grid = document.querySelector('#page-vision .vision-grid');
+  if (!grid) return;
+  grid.innerHTML = (cards || []).map(card => `
+    <div class="vision-card">
+      <div class="vision-color-bar ${card.bar}"></div>
+      <div class="vision-body">
+        <div class="vision-category">${escapeHtml(card.category)}</div>
+        <div class="vision-title">${escapeHtml(card.title)}</div>
+        <div class="vision-desc">${escapeHtml(card.desc)}</div>
+        <div class="vision-items">
+          ${(card.items || []).map(item => `<div class="vi">${escapeHtml(item)}</div>`).join('')}
+        </div>
+        <div class="vision-progress">
+          <div class="vp-label"><span class="vp-name">Progress</span><span class="vp-pct">${escapeHtml(card.pct)}</span></div>
+          <div class="vp-bar"><div class="vp-fill" style="width:${escapeHtmlAttr(card.width)}"></div></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function hasSavedMemberSection(section, rows) {
+  if (Array.isArray(rows) && rows.some(row => row && row.section === section)) return true;
+  const keyMap = {
+    calendar: 'pcc-calendar-events',
+    community: 'pcc-community-posts',
+    profile: 'pcc-comm-profile'
+  };
+  const key = keyMap[section];
+  if (!key) return false;
+  try { return !!localStorage.getItem(key); } catch (e) { return false; }
+}
+
+function applyMemberStarterContent(rows) {
+  captureOriginalRoleContentSnapshot();
+
+  const focusWord = document.getElementById('focus-word');
+  if (focusWord) focusWord.textContent = 'Momentum';
+
+  const focusIntention = document.getElementById('focus-intention');
+  if (focusIntention) focusIntention.value = 'Use this space to define what matters most this month. Keep it clear, kind, and realistic.';
+
+  AFFS.splice(0, AFFS.length, ...MEMBER_AFFIRMATIONS);
+  ai = 0;
+  const affText = document.getElementById('aff-text');
+  if (affText) affText.textContent = AFFS[0];
+
+  const goalsStoredLocally = (() => {
+    try { return localStorage.getItem(monthKey()) !== null; } catch (e) { return false; }
+  })();
+  const goalsLoadedFromCloud = Array.isArray(rows) && rows.some(row => row && row.section === 'goals');
+  if (!goalsStoredLocally && !goalsLoadedFromCloud) {
+    goalsByMonth[monthKey()] = MEMBER_DEFAULT_GOALS.map(goal => ({ ...goal }));
+    renderGoals();
+  }
+
+  if (!hasSavedMemberSection('calendar', rows)) {
+    events = [];
+    nextEvtId = 1;
+    renderCal();
+  }
+
+  renderVisionCards(MEMBER_VISION_CARDS);
+  if (typeof updateCommProfile === 'function') updateCommProfile();
+}
+
+function restoreAdminStarterContent() {
+  const snapshot = captureOriginalRoleContentSnapshot();
+  const focusWord = document.getElementById('focus-word');
+  if (focusWord) focusWord.textContent = snapshot.focusWord;
+  const focusIntention = document.getElementById('focus-intention');
+  if (focusIntention) focusIntention.value = snapshot.focusIntention;
+  AFFS.splice(0, AFFS.length, ...snapshot.affs);
+  ai = 0;
+  const affText = document.getElementById('aff-text');
+  if (affText) affText.textContent = snapshot.affText || AFFS[0] || '';
+  const visionGrid = document.querySelector('#page-vision .vision-grid');
+  if (visionGrid) visionGrid.innerHTML = snapshot.visionHtml;
+  if (typeof updateCommProfile === 'function') updateCommProfile();
+}
+
+function applyRoleBasedContent(rows) {
+  captureOriginalRoleContentSnapshot();
+  if (currentUserIsAdmin) restoreAdminStarterContent();
+  else applyMemberStarterContent(rows);
+}
+
 function buildWeeks() {
   const grid = document.getElementById('weeks-grid'); if(!grid) return;
   grid.innerHTML = '';
@@ -9144,6 +9275,8 @@ function updateNavUser(firstName) {
   if (mobileLogout) mobileLogout.style.display = 'flex';
   syncCurrentUserRole();
   applyRoleBasedNavigation();
+  applyRoleBasedContent();
+  renderCustomHubs();
 }
 
 // ── LOGOUT ──
@@ -9155,6 +9288,7 @@ async function logout() {
   currentUserIsAdmin = false;
   document.documentElement.setAttribute('data-user-role', 'member');
   applyRoleBasedNavigation();
+  applyRoleBasedContent();
   // Hide logout button
   const logoutBtn = document.getElementById('nav-logout-btn');
   if (logoutBtn) logoutBtn.style.display = 'none';
@@ -9324,6 +9458,73 @@ function createDefaultHubData(templateKey, hubTitle) {
   return { content: '' };
 }
 
+function createBlankHubData(templateKey) {
+  if (templateKey === 'planner') {
+    return {
+      vision: '',
+      mantra: '',
+      priorities: '',
+      milestones: '',
+      notes: '',
+    };
+  }
+  if (templateKey === 'tracker') {
+    return {
+      metric: '',
+      cadence: '',
+      current: '',
+      target: '',
+      streak: '',
+      focus: '',
+      log: '',
+      wins: '',
+      insight: '',
+    };
+  }
+  return { content: '' };
+}
+
+function getHubSeedData(templateKey, hubTitle) {
+  return currentUserIsAdmin
+    ? createDefaultHubData(templateKey, hubTitle)
+    : createBlankHubData(templateKey);
+}
+
+function sanitizeMemberHubData(templateKey, hubTitle, data) {
+  if (currentUserIsAdmin || !data || typeof data !== 'object') return { ...(data || {}) };
+  const seeded = createDefaultHubData(templateKey, hubTitle);
+  const blank = createBlankHubData(templateKey);
+  const cleaned = { ...data };
+  Object.keys(blank).forEach((key) => {
+    const currentValue = typeof cleaned[key] === 'string' ? cleaned[key].trim() : cleaned[key];
+    const seededValue = typeof seeded[key] === 'string' ? seeded[key].trim() : seeded[key];
+    if (currentValue === seededValue) cleaned[key] = blank[key];
+  });
+  return cleaned;
+}
+
+function getCurrentHubOwnerId() {
+  const currentUserId = getCurrentUserId();
+  if (currentUserId) return currentUserId;
+  try {
+    return localStorage.getItem(LOCAL_DATA_OWNER_KEY) || '';
+  } catch (e) {
+    return '';
+  }
+}
+
+function isHubOwnedByCurrentUser(hub) {
+  const currentUserId = getCurrentUserId();
+  if (!currentUserId) return false;
+  const ownerId = hub?.ownerId || hub?.userId || hub?.user_id || '';
+  if (ownerId) return ownerId === currentUserId;
+  try {
+    return localStorage.getItem(LOCAL_DATA_OWNER_KEY) === currentUserId;
+  } catch (e) {
+    return false;
+  }
+}
+
 function normalizeCustomHub(hub) {
   if (!hub) return hub;
   const template = HUB_TEMPLATES[hub.template] ? hub.template : 'blank';
@@ -9338,8 +9539,12 @@ function normalizeCustomHub(hub) {
     return normalized;
   }
 
-  const defaults = createDefaultHubData(template, normalized.title || 'Your Hub');
-  const existingData = normalized.data && typeof normalized.data === 'object' ? normalized.data : {};
+  const defaults = getHubSeedData(template, normalized.title || 'Your Hub');
+  const existingData = sanitizeMemberHubData(
+    template,
+    normalized.title || 'Your Hub',
+    normalized.data && typeof normalized.data === 'object' ? normalized.data : {}
+  );
   normalized.data = { ...defaults, ...existingData };
   if (!normalized.data.notes && typeof normalized.content === 'string' && normalized.content.trim()) {
     normalized.data.notes = normalized.content;
@@ -9350,14 +9555,18 @@ function normalizeCustomHub(hub) {
 function loadCustomHubs() {
   try {
     const raw = JSON.parse(localStorage.getItem(CUSTOM_HUBS_KEY)) || [];
-    return Array.isArray(raw) ? raw.map(normalizeCustomHub) : [];
+    return Array.isArray(raw) ? raw.filter(isHubOwnedByCurrentUser).map(normalizeCustomHub) : [];
   } catch (e) {
     return [];
   }
 }
 
 function saveCustomHubs(hubs) {
-  localStorage.setItem(CUSTOM_HUBS_KEY, JSON.stringify((hubs || []).map(normalizeCustomHub)));
+  const ownerId = getCurrentHubOwnerId();
+  localStorage.setItem(CUSTOM_HUBS_KEY, JSON.stringify((hubs || []).map((hub) => {
+    const normalized = normalizeCustomHub(hub);
+    return ownerId ? { ...normalized, ownerId } : normalized;
+  })));
 }
 
 function getHubTemplate(templateKey) {
@@ -9523,7 +9732,8 @@ function submitHubCreate() {
     id: pageId,
     title: cleanName,
     template: selectedHubTemplate,
-    data: createDefaultHubData(selectedHubTemplate, cleanName),
+    ownerId: getCurrentHubOwnerId() || null,
+    data: getHubSeedData(selectedHubTemplate, cleanName),
   };
   if (selectedHubTemplate === 'blank') hub.content = hub.data.content;
   hubs.push(hub);
@@ -9812,7 +10022,7 @@ function updateHubTitle(hubId, value) {
 
   hub.title = (value && value.trim()) || 'Untitled Hub';
   if (hub.template && hub.template !== 'blank') {
-    hub.data = { ...createDefaultHubData(hub.template, hub.title), ...(hub.data || {}) };
+    hub.data = { ...getHubSeedData(hub.template, hub.title), ...(hub.data || {}) };
   }
   saveCustomHubs(hubs);
 
@@ -9895,6 +10105,7 @@ function deleteHub(hubId) {
 }
 
 function renderCustomHubs() {
+  removeRenderedCustomHubs();
   loadCustomHubs().forEach(createHubTabAndPage);
   initTabDrag();
   applyRoleBasedNavigation();
