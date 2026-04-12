@@ -565,6 +565,25 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   border-radius:999px;
   background:linear-gradient(135deg, rgba(var(--teal-rgb),0.16), rgba(var(--teal-rgb),0.08));
 }
+.vision-board-item.mantra{
+  width:300px;
+  background:linear-gradient(145deg, rgba(var(--teal-rgb),0.18), rgba(255,255,255,0.92));
+}
+.vision-board-item.goal{
+  width:250px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,240,255,0.92));
+}
+.vision-board-item.crown,
+.vision-board-item.spark{
+  width:152px;
+  border-radius:28px;
+}
+.vision-board-item.crown{
+  background:linear-gradient(135deg, rgba(245,158,11,0.18), rgba(255,247,214,0.96));
+}
+.vision-board-item.spark{
+  background:linear-gradient(135deg, rgba(var(--teal-rgb),0.22), rgba(255,255,255,0.92));
+}
 .vision-board-item.image{
   width:230px;
   background:rgba(255,255,255,0.92);
@@ -621,6 +640,19 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   min-height:134px;
   font-style:italic;
 }
+.vision-board-item.mantra .vision-board-textarea{
+  min-height:140px;
+  text-align:center;
+  font-style:italic;
+  font-size:1.08rem;
+}
+.vision-board-item.goal .vision-board-textarea{
+  min-height:112px;
+  font-family:'DM Sans',sans-serif;
+  font-size:.9rem;
+  font-weight:500;
+  line-height:1.7;
+}
 .vision-board-item.sticker .vision-board-input{
   margin:0 .85rem .85rem;
   text-align:center;
@@ -629,6 +661,15 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   font-weight:700;
   letter-spacing:.08em;
   text-transform:uppercase;
+}
+.vision-board-item.crown .vision-board-input,
+.vision-board-item.spark .vision-board-input{
+  margin:0 .85rem .95rem;
+  text-align:center;
+  font-family:'DM Sans',sans-serif;
+  font-size:1.4rem;
+  font-weight:700;
+  letter-spacing:.04em;
 }
 .vision-board-image-wrap{
   padding:0 .55rem .6rem;
@@ -4011,7 +4052,11 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
         <button class="vision-board-btn primary" type="button" onclick="openVisionBoardUpload()">Upload Photos</button>
         <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('note')">Add Note</button>
         <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('quote')">Add Quote</button>
+        <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('mantra')">Add Mantra</button>
+        <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('goal')">Add Goal Card</button>
         <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('sticker')">Add Sticker</button>
+        <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('crown')">Add Crown</button>
+        <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('spark')">Add Spark</button>
         <button class="vision-board-btn danger" type="button" onclick="clearVisionBoard()">Clear Board</button>
         <input id="vision-board-upload" type="file" accept="image/*" multiple hidden onchange="handleVisionBoardUpload(this)" />
       </div>
@@ -8297,11 +8342,15 @@ function animateVision(){
 
 // LIVE VISION BOARD
 const VISION_BOARD_KEY = 'pcc-vision-board';
-const VISION_BOARD_MAX_ITEMS = 24;
+const VISION_BOARD_MAX_ITEMS = 36;
 const VISION_BOARD_PRESETS = {
   note:   { w: 250, content: 'Add a dream, reminder, or intention here.' },
   quote:  { w: 290, content: 'Write a line that pulls you back into the future you are building.' },
+  mantra: { w: 300, content: 'I am already becoming the version of me who lives this fully.' },
+  goal:   { w: 250, content: 'Name the next vivid thing you are claiming and moving toward.' },
   sticker:{ w: 172, content: 'Dream Big' },
+  crown:  { w: 152, content: '👑' },
+  spark:  { w: 152, content: '✦' },
   image:  { w: 230, content: '' }
 };
 let visionBoardItems = [];
@@ -8416,6 +8465,22 @@ function renderVisionBoard() {
           </div>
           <textarea class="vision-board-textarea" placeholder="A line that keeps you aligned..." oninput="updateVisionBoardItemContent('${item.id}', this.value)">${escapeHtml(item.content || '')}</textarea>
         `;
+      } else if (item.type === 'mantra') {
+        node.innerHTML = `
+          <div class="vision-board-item-bar">
+            <div class="vision-board-grip">Mantra</div>
+            <button class="vision-board-delete" type="button" onclick="deleteVisionBoardItem('${item.id}')">×</button>
+          </div>
+          <textarea class="vision-board-textarea" placeholder="What are you calling in?" oninput="updateVisionBoardItemContent('${item.id}', this.value)">${escapeHtml(item.content || '')}</textarea>
+        `;
+      } else if (item.type === 'goal') {
+        node.innerHTML = `
+          <div class="vision-board-item-bar">
+            <div class="vision-board-grip">Goal Card</div>
+            <button class="vision-board-delete" type="button" onclick="deleteVisionBoardItem('${item.id}')">×</button>
+          </div>
+          <textarea class="vision-board-textarea" placeholder="Write one specific next milestone..." oninput="updateVisionBoardItemContent('${item.id}', this.value)">${escapeHtml(item.content || '')}</textarea>
+        `;
       } else if (item.type === 'sticker') {
         node.innerHTML = `
           <div class="vision-board-item-bar">
@@ -8423,6 +8488,14 @@ function renderVisionBoard() {
             <button class="vision-board-delete" type="button" onclick="deleteVisionBoardItem('${item.id}')">×</button>
           </div>
           <input class="vision-board-input" type="text" value="${escapeHtmlAttr(item.content || '')}" placeholder="Power word" oninput="updateVisionBoardItemContent('${item.id}', this.value)" />
+        `;
+      } else if (item.type === 'crown' || item.type === 'spark') {
+        node.innerHTML = `
+          <div class="vision-board-item-bar">
+            <div class="vision-board-credit">${item.type === 'crown' ? 'Crown' : 'Spark'}</div>
+            <button class="vision-board-delete" type="button" onclick="deleteVisionBoardItem('${item.id}')">×</button>
+          </div>
+          <input class="vision-board-input" type="text" value="${escapeHtmlAttr(item.content || '')}" placeholder="${item.type === 'crown' ? '👑' : '✦'}" oninput="updateVisionBoardItemContent('${item.id}', this.value)" />
         `;
       } else {
         node.innerHTML = `
@@ -10955,6 +11028,7 @@ if (document.readyState !== 'loading') {
 </script>
 <script src="./pcc-hub-upgrade.js"></script>
 <script src="./pcc-community-upgrade.js"></script>
+<script src="./pcc-community-social-upgrade.js"></script>
 <style id="hub-editable-style">
 .hub-editable-block,
 .hub-inline-edit,
