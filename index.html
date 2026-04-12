@@ -517,6 +517,24 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   display:grid;
   gap:.6rem;
 }
+.vision-board-library-section{
+  display:grid;
+  gap:.45rem;
+}
+.vision-board-library-label{
+  font-size:.5rem;
+  font-weight:700;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--teal);
+  opacity:.9;
+  padding:.1rem .2rem;
+}
+.vision-board-asset-grid-2{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:.55rem;
+}
 .vision-board-asset{
   width:100%;
   text-align:left;
@@ -548,6 +566,7 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   color:var(--ink);
   border:1px solid rgba(var(--teal-rgb),0.12);
   background:linear-gradient(135deg, rgba(var(--teal-rgb),0.12), rgba(255,255,255,0.88));
+  overflow:hidden;
 }
 .vision-board-asset.note .vision-board-asset-preview{
   background:linear-gradient(180deg, rgba(255,249,212,0.98), rgba(255,244,184,0.9));
@@ -581,6 +600,44 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   background:linear-gradient(135deg, rgba(var(--teal-rgb),0.22), rgba(255,255,255,0.92));
   font-size:1.45rem;
 }
+.vision-board-asset.clipart{
+  grid-template-columns:1fr;
+  padding:.62rem;
+  text-align:center;
+  gap:.45rem;
+}
+.vision-board-asset.clipart .vision-board-asset-preview{
+  height:82px;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(var(--teal-rgb),0.18), transparent 35%),
+    linear-gradient(160deg, rgba(255,255,255,0.96), rgba(var(--teal-rgb),0.08));
+}
+.vision-board-asset.clipart .vision-board-asset-label{
+  margin-bottom:0;
+  text-align:center;
+  font-size:.64rem;
+}
+.vision-board-clipart{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--teal);
+}
+.vision-board-clipart svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+.vision-board-clipart.bow{color:#d36c98;}
+.vision-board-clipart.butterfly{color:#7d73e6;}
+.vision-board-clipart.heart{color:#ec6b88;}
+.vision-board-clipart.gem{color:#5d9bd6;}
+.vision-board-clipart.starburst{color:#f0a54a;}
+.vision-board-clipart.crown{color:#d99a25;}
+.vision-board-clipart.spark{color:var(--teal);}
 .vision-board-asset-label{
   display:block;
   font-size:.72rem;
@@ -597,6 +654,28 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 }
 .vision-board-stage{
   min-width:0;
+}
+.vision-board-art-wrap{
+  padding:.35rem .7rem .8rem;
+}
+.vision-board-art-frame{
+  min-height:96px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 22% 20%, rgba(var(--teal-rgb),0.16), transparent 34%),
+    linear-gradient(165deg, rgba(255,255,255,0.88), rgba(255,255,255,0.42));
+}
+[data-theme="dark"] .vision-board-art-frame{
+  background:
+    radial-gradient(circle at 22% 20%, rgba(var(--teal-rgb),0.24), transparent 34%),
+    linear-gradient(165deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+}
+.vision-board-art-frame .vision-board-clipart{
+  width:84%;
+  height:84%;
 }
 .vision-board-canvas{
   position:relative;
@@ -698,6 +777,15 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   width:152px;
   border-radius:28px;
 }
+.vision-board-item.bow,
+.vision-board-item.butterfly,
+.vision-board-item.heart,
+.vision-board-item.gem,
+.vision-board-item.starburst{
+  width:176px;
+  border-radius:28px;
+  background:linear-gradient(165deg, rgba(255,255,255,0.88), rgba(255,255,255,0.48));
+}
 .vision-board-item.crown{
   background:linear-gradient(135deg, rgba(245,158,11,0.18), rgba(255,247,214,0.96));
 }
@@ -710,6 +798,15 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 }
 [data-theme="dark"] .vision-board-item.image{
   background:rgba(15,15,15,0.92);
+}
+[data-theme="dark"] .vision-board-item.crown,
+[data-theme="dark"] .vision-board-item.spark,
+[data-theme="dark"] .vision-board-item.bow,
+[data-theme="dark"] .vision-board-item.butterfly,
+[data-theme="dark"] .vision-board-item.heart,
+[data-theme="dark"] .vision-board-item.gem,
+[data-theme="dark"] .vision-board-item.starburst{
+  background:linear-gradient(165deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
 }
 .vision-board-item-bar{
   display:flex;
@@ -791,6 +888,11 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   font-weight:700;
   letter-spacing:.04em;
 }
+.vision-board-item.bow .vision-board-art-frame{box-shadow:inset 0 0 0 1px rgba(211,108,152,0.12);}
+.vision-board-item.butterfly .vision-board-art-frame{box-shadow:inset 0 0 0 1px rgba(125,115,230,0.14);}
+.vision-board-item.heart .vision-board-art-frame{box-shadow:inset 0 0 0 1px rgba(236,107,136,0.12);}
+.vision-board-item.gem .vision-board-art-frame{box-shadow:inset 0 0 0 1px rgba(93,155,214,0.14);}
+.vision-board-item.starburst .vision-board-art-frame{box-shadow:inset 0 0 0 1px rgba(240,165,74,0.14);}
 .vision-board-image-wrap{
   padding:0 .55rem .6rem;
 }
@@ -900,6 +1002,8 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   .vision-board-workspace{grid-template-columns:1fr;}
   .vision-board-library{min-height:auto;}
   .vision-board-canvas{min-height:470px;}
+  .stream-row{grid-template-columns:minmax(0,1fr) auto auto auto;}
+  .stream-bar-wrap{grid-column:1 / -1;}
   .quick-row{grid-template-columns:1fr;}
 }
 @media(max-width:580px){
@@ -908,8 +1012,16 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   .vision-board-title{font-size:1.45rem;}
   .vision-board-asset{grid-template-columns:42px minmax(0,1fr);padding:.65rem;}
   .vision-board-asset-preview{height:42px;}
+  .vision-board-asset.clipart{grid-template-columns:1fr;padding:.55rem;}
+  .vision-board-asset.clipart .vision-board-asset-preview{height:70px;}
   .vision-board-canvas{min-height:410px;}
   .vision-board-item{max-width:calc(100% - 24px);}
+  .stream-tools{align-items:flex-start;}
+  .stream-action-btn{width:100%;justify-content:center;}
+  .stream-row{grid-template-columns:1fr auto;gap:.6rem;}
+  .stream-name{grid-column:1 / -1;}
+  .stream-bar-wrap{grid-column:1 / -1;}
+  .stream-tag{justify-self:start;}
   .pg-header{flex-direction:column;gap:.65rem;}
   .mood-row{grid-template-columns:repeat(2,1fr);}
   .nav-tabs .nav-tab:nth-child(n+5){display:none;}
@@ -1006,16 +1118,111 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 .rev-progress-track{background:rgba(10,114,102,0.1);border-radius:50px;height:8px;position:relative;overflow:hidden;}
 .rev-progress-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-light));border-radius:50px;transition:width .8s cubic-bezier(.22,.68,0,1.1);}
 .rev-progress-label{position:absolute;right:.6rem;top:50%;transform:translateY(-50%);font-size:.56rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);}
-.stream-breakdown{display:flex;flex-direction:column;gap:.5rem;}
-.stream-row{display:flex;align-items:center;gap:.75rem;padding:.45rem .6rem;border-radius:8px;background:var(--tint);border:1px solid rgba(10,114,102,0.08);transition:background .2s;}
-.stream-row:hover{background:var(--tint-hover);}
-.stream-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0;}
-.stream-name{font-size:.74rem;font-weight:400;color:var(--charcoal);width:180px;flex-shrink:0;display:flex;align-items:center;gap:.45rem;}
-.stream-bar-wrap{flex:1;height:4px;background:rgba(10,114,102,0.1);border-radius:50px;overflow:hidden;}
+.stream-tools{display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;margin:.85rem 0 .65rem;}
+.stream-tools-copy{font-size:.66rem;line-height:1.6;color:var(--charcoal);max-width:44ch;}
+.stream-action-btn,
+.stream-remove-btn{
+  border:none;
+  cursor:pointer;
+  transition:transform .18s ease,background .18s ease,border-color .18s ease,opacity .18s ease;
+}
+.stream-action-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.42rem;
+  padding:.55rem .95rem;
+  border-radius:999px;
+  background:linear-gradient(135deg,var(--teal),var(--teal-light));
+  color:#fff;
+  font-size:.62rem;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  box-shadow:0 12px 24px rgba(var(--teal-rgb),0.18);
+}
+.stream-action-btn:hover,
+.stream-remove-btn:hover{transform:translateY(-1px);}
+.stream-breakdown{display:flex;flex-direction:column;gap:.58rem;}
+.stream-row{
+  display:grid;
+  grid-template-columns:minmax(0,220px) minmax(120px,1fr) auto auto auto;
+  align-items:center;
+  gap:.75rem;
+  padding:.58rem .72rem;
+  border-radius:12px;
+  background:var(--tint);
+  border:1px solid rgba(10,114,102,0.08);
+  transition:background .2s,border-color .2s,box-shadow .2s;
+}
+.stream-row:hover{background:var(--tint-hover);border-color:rgba(var(--teal-rgb),0.2);box-shadow:0 10px 24px rgba(var(--teal-rgb),0.08);}
+.stream-dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  flex-shrink:0;
+  background:radial-gradient(circle at 35% 35%, rgba(255,255,255,0.95), rgba(255,255,255,0.12) 28%), linear-gradient(135deg,var(--teal-light),var(--teal));
+  box-shadow:0 0 0 3px rgba(var(--teal-rgb),0.1);
+}
+.stream-name{
+  min-width:0;
+  font-size:.74rem;
+  font-weight:400;
+  color:var(--charcoal);
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+}
+.stream-name .hub-inline-edit{
+  min-width:0;
+  width:100%;
+}
+.stream-name-text{
+  display:inline-block;
+  min-width:0;
+  width:100%;
+}
+.stream-bar-wrap{height:6px;background:rgba(10,114,102,0.1);border-radius:50px;overflow:hidden;}
 .stream-bar-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-light));border-radius:50px;transition:width .8s ease;}
-.stream-amount{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:300;color:var(--teal);min-width:55px;text-align:right;cursor:text;}
+.stream-amount{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.08rem;
+  font-weight:400;
+  color:var(--teal);
+  min-width:72px;
+  text-align:right;
+  cursor:text;
+}
 .stream-amount:focus{outline:none;border-bottom:1px dashed var(--teal);}
-.stream-tag{font-size:.52rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);border:1px solid var(--teal-border);padding:.16rem .52rem;border-radius:3px;white-space:nowrap;}
+.stream-tag{
+  display:inline-block;
+  min-width:5.4rem;
+  font-size:.52rem;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--teal);
+  border:1px solid var(--teal-border);
+  padding:.28rem .62rem;
+  border-radius:999px;
+  white-space:nowrap;
+  text-align:center;
+}
+.stream-remove-btn{
+  padding:.38rem .68rem;
+  border-radius:999px;
+  font-size:.52rem;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#8B2020;
+  background:rgba(200,60,60,0.08);
+  border:1px solid rgba(139,32,32,0.12);
+}
+.stream-remove-btn:disabled{
+  opacity:.42;
+  cursor:not-allowed;
+  transform:none;
+}
 .rev-botanical-left,.rev-botanical-right{position:absolute;pointer-events:none;opacity:.06;z-index:0;}
 .rev-botanical-left{bottom:-10px;left:-10px;width:100px;}
 .rev-botanical-right{top:-10px;right:-10px;width:80px;}
@@ -4021,12 +4228,12 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
         <div class="rev-big-cell">
           <div class="rev-label">Monthly Target</div>
           <span class="rev-num rev-editable" contenteditable="true" title="Click to edit">$8,500</span>
-          <div class="rev-sub">Across all 6 streams</div>
+          <div class="rev-sub" id="rev-target-sub">Across your active streams</div>
         </div>
         <div class="rev-big-cell">
           <div class="rev-label">Earned So Far</div>
-          <span class="rev-num rev-editable" id="rev-earned" contenteditable="true" title="Click to edit">$0</span>
-          <div class="rev-sub">Click to update</div>
+          <span class="rev-num" id="rev-earned">$0</span>
+          <div class="rev-sub">Auto-calculated from the stream list</div>
         </div>
         <div class="rev-big-cell">
           <div class="rev-label">Remaining</div>
@@ -4049,48 +4256,15 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
       </div>
 
       <!-- STREAM BREAKDOWN -->
-      <div class="stream-breakdown">
-        <div class="stream-row">
-          <div class="stream-name"><span class="stream-dot"></span>Voya Financial</div>
-          <div class="stream-bar-wrap"><div class="stream-bar-fill" style="width:100%"></div></div>
-          <span class="stream-amount rev-editable" contenteditable="true" title="Click to edit">$3,200</span>
-          <span class="stream-tag">Salary</span>
-        </div>
-        <div class="stream-row">
-          <div class="stream-name"><span class="stream-dot"></span>BrandingByBella</div>
-          <div class="stream-bar-wrap"><div class="stream-bar-fill" style="width:0%"></div></div>
-          <span class="stream-amount rev-editable" contenteditable="true" title="Click to edit">$0</span>
-          <span class="stream-tag">Brand</span>
-        </div>
-        <div class="stream-row">
-          <div class="stream-name"><span class="stream-dot"></span>Party In Ink</div>
-          <div class="stream-bar-wrap"><div class="stream-bar-fill" style="width:0%"></div></div>
-          <span class="stream-amount rev-editable" contenteditable="true" title="Click to edit">$0</span>
-          <span class="stream-tag">Stationery</span>
-        </div>
-        <div class="stream-row">
-          <div class="stream-name"><span class="stream-dot"></span>Celebrate SZN</div>
-          <div class="stream-bar-wrap"><div class="stream-bar-fill" style="width:0%"></div></div>
-          <span class="stream-amount rev-editable" contenteditable="true" title="Click to edit">$0</span>
-          <span class="stream-tag">Etsy</span>
-        </div>
-        <div class="stream-row">
-          <div class="stream-name"><span class="stream-dot"></span>Travel (Outside Agents)</div>
-          <div class="stream-bar-wrap"><div class="stream-bar-fill" style="width:0%"></div></div>
-          <span class="stream-amount rev-editable" contenteditable="true" title="Click to edit">$0</span>
-          <span class="stream-tag">Travel</span>
-        </div>
-        <div class="stream-row">
-          <div class="stream-name"><span class="stream-dot"></span>Creative Direction</div>
-          <div class="stream-bar-wrap"><div class="stream-bar-fill" style="width:0%"></div></div>
-          <span class="stream-amount rev-editable" contenteditable="true" title="Click to edit">$0</span>
-          <span class="stream-tag">CD Work</span>
-        </div>
+      <div class="stream-tools">
+        <div class="stream-tools-copy">Build this snapshot around the streams you actually have. Add, rename, edit, or remove rows whenever your income mix changes.</div>
+        <button class="stream-action-btn" type="button" onclick="addRevenueStreamRow()">+ Add Stream</button>
       </div>
+      <div class="stream-breakdown" id="stream-breakdown"></div>
 
       <div class="stats-row" style="margin-top:.85rem;">
         <div class="stat-pill"><span class="s-n" id="goals-done">0</span><div class="s-l">Goals Done</div></div>
-        <div class="stat-pill"><span class="s-n">6</span><div class="s-l">Streams Active</div></div>
+        <div class="stat-pill"><span class="s-n" id="streams-active-pill">0</span><div class="s-l">Streams Active</div></div>
         <div class="stat-pill"><span class="s-n" id="habit-pct">0%</span><div class="s-l">Habit Rate</div></div>
         <div class="stat-pill"><span class="s-n" id="rev-pct-pill">0%</span><div class="s-l">Revenue Progress</div></div>
       </div>
@@ -4189,55 +4363,73 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
           <div class="vision-board-library-copy">Pick a piece from the tray and it drops straight onto the board like a little stack of clip art.</div>
         </div>
         <div class="vision-board-library-grid">
-          <button class="vision-board-asset note" type="button" onclick="addVisionBoardElement('note')">
-            <span class="vision-board-asset-preview">✎</span>
-            <span>
-              <span class="vision-board-asset-label">Sticky Note</span>
-              <span class="vision-board-asset-copy">Short reminder, affirmation, or next move.</span>
-            </span>
-          </button>
-          <button class="vision-board-asset quote" type="button" onclick="addVisionBoardElement('quote')">
-            <span class="vision-board-asset-preview">“”</span>
-            <span>
-              <span class="vision-board-asset-label">Quote</span>
-              <span class="vision-board-asset-copy">A line that keeps the mood and mission in focus.</span>
-            </span>
-          </button>
-          <button class="vision-board-asset mantra" type="button" onclick="addVisionBoardElement('mantra')">
-            <span class="vision-board-asset-preview">✦</span>
-            <span>
-              <span class="vision-board-asset-label">Mantra</span>
-              <span class="vision-board-asset-copy">Big energy, center stage, full intention.</span>
-            </span>
-          </button>
-          <button class="vision-board-asset goal" type="button" onclick="addVisionBoardElement('goal')">
-            <span class="vision-board-asset-preview">Goal</span>
-            <span>
-              <span class="vision-board-asset-label">Goal Card</span>
-              <span class="vision-board-asset-copy">A vivid milestone you want staring back at you.</span>
-            </span>
-          </button>
-          <button class="vision-board-asset sticker" type="button" onclick="addVisionBoardElement('sticker')">
-            <span class="vision-board-asset-preview">Dream</span>
-            <span>
-              <span class="vision-board-asset-label">Sticker</span>
-              <span class="vision-board-asset-copy">Fun label energy for names, themes, and moods.</span>
-            </span>
-          </button>
-          <button class="vision-board-asset crown" type="button" onclick="addVisionBoardElement('crown')">
-            <span class="vision-board-asset-preview">👑</span>
-            <span>
-              <span class="vision-board-asset-label">Crown</span>
-              <span class="vision-board-asset-copy">A bold icon for ownership, luxury, and confidence.</span>
-            </span>
-          </button>
-          <button class="vision-board-asset spark" type="button" onclick="addVisionBoardElement('spark')">
-            <span class="vision-board-asset-preview">✦</span>
-            <span>
-              <span class="vision-board-asset-label">Spark</span>
-              <span class="vision-board-asset-copy">A little accent piece for motion, magic, and glow.</span>
-            </span>
-          </button>
+          <div class="vision-board-library-section">
+            <div class="vision-board-library-label">Words & Cards</div>
+            <button class="vision-board-asset note" type="button" onclick="addVisionBoardElement('note')">
+              <span class="vision-board-asset-preview">✎</span>
+              <span>
+                <span class="vision-board-asset-label">Sticky Note</span>
+                <span class="vision-board-asset-copy">Short reminder, affirmation, or next move.</span>
+              </span>
+            </button>
+            <button class="vision-board-asset quote" type="button" onclick="addVisionBoardElement('quote')">
+              <span class="vision-board-asset-preview">“”</span>
+              <span>
+                <span class="vision-board-asset-label">Quote</span>
+                <span class="vision-board-asset-copy">A line that keeps the mood and mission in focus.</span>
+              </span>
+            </button>
+            <button class="vision-board-asset mantra" type="button" onclick="addVisionBoardElement('mantra')">
+              <span class="vision-board-asset-preview">✦</span>
+              <span>
+                <span class="vision-board-asset-label">Mantra</span>
+                <span class="vision-board-asset-copy">Big energy, center stage, full intention.</span>
+              </span>
+            </button>
+            <button class="vision-board-asset goal" type="button" onclick="addVisionBoardElement('goal')">
+              <span class="vision-board-asset-preview">Goal</span>
+              <span>
+                <span class="vision-board-asset-label">Goal Card</span>
+                <span class="vision-board-asset-copy">A vivid milestone you want staring back at you.</span>
+              </span>
+            </button>
+            <button class="vision-board-asset sticker" type="button" onclick="addVisionBoardElement('sticker')">
+              <span class="vision-board-asset-preview">Dream</span>
+              <span>
+                <span class="vision-board-asset-label">Sticker</span>
+                <span class="vision-board-asset-copy">Fun label energy for names, themes, and moods.</span>
+              </span>
+            </button>
+          </div>
+          <div class="vision-board-library-section">
+            <div class="vision-board-library-label">Clip Art</div>
+            <div class="vision-board-asset-grid-2">
+              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('bow')">
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart bow"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 48C40 30 18 20 10 28c-8 8 4 28 28 34-5 7-3 15 6 18 8 2 14-2 16-11 2 9 8 13 16 11 9-3 11-11 6-18 24-6 36-26 28-34-8-8-30 2-50 20z" fill="currentColor"/><circle cx="60" cy="48" r="10" fill="#fff" opacity=".92"/></svg></span></span>
+                <span class="vision-board-asset-label">Bow</span>
+              </button>
+              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('butterfly')">
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart butterfly"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M57 44C44 24 21 12 10 20c-10 8-2 31 22 36-17 5-24 20-16 28 9 9 29 1 41-18z" fill="currentColor"/><path d="M63 44c13-20 36-32 47-24 10 8 2 31-22 36 17 5 24 20 16 28-9 9-29 1-41-18z" fill="currentColor" opacity=".88"/><rect x="57" y="26" width="6" height="36" rx="3" fill="#2c2420"/><path d="M60 26c4-7 9-10 15-11M60 26c-4-7-9-10-15-11" stroke="#2c2420" stroke-width="3" stroke-linecap="round"/></svg></span></span>
+                <span class="vision-board-asset-label">Butterfly</span>
+              </button>
+              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('heart')">
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart heart"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 73C28 54 16 38 16 24c0-10 8-18 18-18 10 0 16 6 20 13 4-7 10-13 20-13 10 0 18 8 18 18 0 14-12 30-44 49z" fill="currentColor"/><path d="M60 73C28 54 16 38 16 24c0-10 8-18 18-18 10 0 16 6 20 13 4-7 10-13 20-13 10 0 18 8 18 18 0 14-12 30-44 49z" fill="#fff" opacity=".14"/></svg></span></span>
+                <span class="vision-board-asset-label">Heart</span>
+              </button>
+              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('gem')">
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart gem"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M26 28h68l-34 40z" fill="currentColor" opacity=".92"/><path d="M40 14h40l14 14H26z" fill="currentColor"/><path d="M60 14l-8 14 8 40 8-40z" fill="#fff" opacity=".34"/><path d="M40 14l12 14M80 14L68 28" stroke="#fff" stroke-opacity=".55" stroke-width="3"/></svg></span></span>
+                <span class="vision-board-asset-label">Gem</span>
+              </button>
+              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('crown')">
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart crown"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20 62l10-34 23 20 7-24 7 24 23-20 10 34z" fill="currentColor"/><rect x="22" y="62" width="76" height="12" rx="6" fill="currentColor" opacity=".88"/><circle cx="30" cy="28" r="5" fill="#fff" opacity=".9"/><circle cx="60" cy="24" r="5" fill="#fff" opacity=".9"/><circle cx="90" cy="28" r="5" fill="#fff" opacity=".9"/></svg></span></span>
+                <span class="vision-board-asset-label">Crown</span>
+              </button>
+              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('starburst')">
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart starburst"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 10l9 22 23-9-12 21 24 6-24 6 12 21-23-9-9 22-9-22-23 9 12-21-24-6 24-6-12-21 23 9z" fill="currentColor"/></svg></span></span>
+                <span class="vision-board-asset-label">Starburst</span>
+              </button>
+            </div>
+          </div>
         </div>
       </aside>
       <div class="vision-board-stage">
@@ -8527,16 +8719,67 @@ const VISION_BOARD_PRESETS = {
   mantra: { w: 300, content: 'I am already becoming the version of me who lives this fully.' },
   goal:   { w: 250, content: 'Name the next vivid thing you are claiming and moving toward.' },
   sticker:{ w: 172, content: 'Dream Big' },
-  crown:  { w: 152, content: '👑' },
-  spark:  { w: 152, content: '✦' },
+  crown:  { w: 176, content: '' },
+  spark:  { w: 152, content: '' },
+  bow:    { w: 176, content: '' },
+  butterfly:{ w: 176, content: '' },
+  heart:  { w: 176, content: '' },
+  gem:    { w: 176, content: '' },
+  starburst:{ w: 176, content: '' },
   image:  { w: 230, content: '' }
 };
+const VISION_BOARD_ART_LABELS = {
+  crown: 'Crown',
+  spark: 'Spark',
+  bow: 'Bow',
+  butterfly: 'Butterfly',
+  heart: 'Heart',
+  gem: 'Gem',
+  starburst: 'Starburst'
+};
+const VISION_BOARD_ART_TYPES = new Set(Object.keys(VISION_BOARD_ART_LABELS));
 let visionBoardItems = [];
 let visionBoardSeed = 1;
 let visionBoardZSeed = 1;
 let visionBoardSaveTimer = null;
 let visionBoardEventsBound = false;
 let visionBoardDrag = null;
+
+function getVisionBoardClipArtSvg(type) {
+  switch (type) {
+    case 'crown':
+      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20 62l10-34 23 20 7-24 7 24 23-20 10 34z" fill="currentColor"/><rect x="22" y="62" width="76" height="12" rx="6" fill="currentColor" opacity=".88"/><circle cx="30" cy="28" r="5" fill="#fff" opacity=".9"/><circle cx="60" cy="24" r="5" fill="#fff" opacity=".9"/><circle cx="90" cy="28" r="5" fill="#fff" opacity=".9"/></svg>';
+    case 'spark':
+      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 10l8 24 24 8-24 8-8 24-8-24-24-8 24-8z" fill="currentColor"/><circle cx="24" cy="24" r="5" fill="currentColor" opacity=".55"/><circle cx="95" cy="20" r="4" fill="currentColor" opacity=".45"/><circle cx="92" cy="67" r="6" fill="currentColor" opacity=".3"/></svg>';
+    case 'bow':
+      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 48C40 30 18 20 10 28c-8 8 4 28 28 34-5 7-3 15 6 18 8 2 14-2 16-11 2 9 8 13 16 11 9-3 11-11 6-18 24-6 36-26 28-34-8-8-30 2-50 20z" fill="currentColor"/><circle cx="60" cy="48" r="10" fill="#fff" opacity=".92"/></svg>';
+    case 'butterfly':
+      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M57 44C44 24 21 12 10 20c-10 8-2 31 22 36-17 5-24 20-16 28 9 9 29 1 41-18z" fill="currentColor"/><path d="M63 44c13-20 36-32 47-24 10 8 2 31-22 36 17 5 24 20 16 28-9 9-29 1-41-18z" fill="currentColor" opacity=".88"/><rect x="57" y="26" width="6" height="36" rx="3" fill="#2c2420"/><path d="M60 26c4-7 9-10 15-11M60 26c-4-7-9-10-15-11" stroke="#2c2420" stroke-width="3" stroke-linecap="round"/></svg>';
+    case 'heart':
+      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 73C28 54 16 38 16 24c0-10 8-18 18-18 10 0 16 6 20 13 4-7 10-13 20-13 10 0 18 8 18 18 0 14-12 30-44 49z" fill="currentColor"/><path d="M60 73C28 54 16 38 16 24c0-10 8-18 18-18 10 0 16 6 20 13 4-7 10-13 20-13 10 0 18 8 18 18 0 14-12 30-44 49z" fill="#fff" opacity=".14"/></svg>';
+    case 'gem':
+      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M26 28h68l-34 40z" fill="currentColor" opacity=".92"/><path d="M40 14h40l14 14H26z" fill="currentColor"/><path d="M60 14l-8 14 8 40 8-40z" fill="#fff" opacity=".34"/><path d="M40 14l12 14M80 14L68 28" stroke="#fff" stroke-opacity=".55" stroke-width="3"/></svg>';
+    case 'starburst':
+      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 10l9 22 23-9-12 21 24 6-24 6 12 21-23-9-9 22-9-22-23 9 12-21-24-6 24-6-12-21 23 9z" fill="currentColor"/></svg>';
+    default:
+      return '';
+  }
+}
+
+function renderVisionBoardClipArt(type) {
+  const label = VISION_BOARD_ART_LABELS[type] || 'Element';
+  return `
+    <div class="vision-board-item-bar">
+      <div class="vision-board-credit">${label}</div>
+      <button class="vision-board-delete" type="button" onclick="deleteVisionBoardItem('__ITEM_ID__')">×</button>
+    </div>
+    <div class="vision-board-art-wrap">
+      <div class="vision-board-art-frame">
+        <div class="vision-board-clipart ${type}">${getVisionBoardClipArtSvg(type)}</div>
+      </div>
+    </div>
+  `;
+}
 
 function normalizeVisionBoardNumber(value, fallback) {
   return Number.isFinite(Number(value)) ? Number(value) : fallback;
@@ -8659,6 +8902,8 @@ function renderVisionBoard() {
           </div>
           <textarea class="vision-board-textarea" placeholder="Write one specific next milestone..." oninput="updateVisionBoardItemContent('${item.id}', this.value)">${escapeHtml(item.content || '')}</textarea>
         `;
+      } else if (VISION_BOARD_ART_TYPES.has(item.type)) {
+        node.innerHTML = renderVisionBoardClipArt(item.type).replace('__ITEM_ID__', item.id);
       } else if (item.type === 'sticker') {
         node.innerHTML = `
           <div class="vision-board-item-bar">
@@ -8666,14 +8911,6 @@ function renderVisionBoard() {
             <button class="vision-board-delete" type="button" onclick="deleteVisionBoardItem('${item.id}')">×</button>
           </div>
           <input class="vision-board-input" type="text" value="${escapeHtmlAttr(item.content || '')}" placeholder="Power word" oninput="updateVisionBoardItemContent('${item.id}', this.value)" />
-        `;
-      } else if (item.type === 'crown' || item.type === 'spark') {
-        node.innerHTML = `
-          <div class="vision-board-item-bar">
-            <div class="vision-board-credit">${item.type === 'crown' ? 'Crown' : 'Spark'}</div>
-            <button class="vision-board-delete" type="button" onclick="deleteVisionBoardItem('${item.id}')">×</button>
-          </div>
-          <input class="vision-board-input" type="text" value="${escapeHtmlAttr(item.content || '')}" placeholder="${item.type === 'crown' ? '👑' : '✦'}" oninput="updateVisionBoardItemContent('${item.id}', this.value)" />
         `;
       } else {
         node.innerHTML = `
@@ -8866,32 +9103,54 @@ if (document.readyState !== 'loading') {
 
 // ═══ REVENUE PROGRESS ═══
 function updateRevProgress(){
-  // Sum all stream amounts
-  const amounts = document.querySelectorAll('.stream-amount');
-  let total = 0;
-  amounts.forEach(el => {
-    const v = el.textContent.replace(/[^0-9.]/g,'');
-    total += parseFloat(v) || 0;
-  });
+  const moneyValue = (value) => {
+    const parsed = parseFloat(String(value || '').replace(/[^0-9.\-]/g,''));
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+  const moneyText = (value) => {
+    const amount = Number.isFinite(Number(value)) ? Number(value) : 0;
+    const abs = Math.abs(amount);
+    const hasCents = Math.round(abs * 100) % 100 !== 0;
+    const formatted = abs.toLocaleString(undefined, {
+      minimumFractionDigits: hasCents ? 2 : 0,
+      maximumFractionDigits: 2
+    });
+    return (amount < 0 ? '-$' : '$') + formatted;
+  };
+
+  const amountEls = Array.from(document.querySelectorAll('.stream-amount'));
+  const vals = amountEls.map(el => moneyValue(el.textContent));
+  const total = vals.reduce((sum, amount) => sum + amount, 0);
+  const activeCount = Array.from(document.querySelectorAll('#stream-breakdown .stream-row')).filter((row, index) => {
+    const name = row.querySelector('.stream-name-text');
+    const tag = row.querySelector('.stream-tag');
+    const hasName = !!String(name ? name.textContent : '').trim();
+    const hasTag = !!String(tag ? tag.textContent : '').trim();
+    return hasName || hasTag || vals[index] > 0;
+  }).length;
   const targetEl = document.querySelector('.rev-top-row .rev-big-cell:first-child .rev-num');
   const earnedEl = document.getElementById('rev-earned');
-  let earned = total;
-  if(earnedEl){ const v = earnedEl.textContent.replace(/[^0-9.]/g,''); if(parseFloat(v)) earned = parseFloat(v)||0; }
   let target = 8500;
-  if(targetEl){ const v = targetEl.textContent.replace(/[^0-9.]/g,''); if(parseFloat(v)) target = parseFloat(v)||8500; }
-  const pct = Math.min(100, Math.round((earned/target)*100));
+  if(targetEl){
+    const v = moneyValue(targetEl.textContent);
+    if(v > 0) target = v;
+  }
+  const earned = total;
+  const pct = target > 0 ? Math.min(100, Math.round((earned/target)*100)) : 0;
   const fill = document.getElementById('rev-progress-fill');
   const lbl = document.getElementById('rev-progress-label');
   const pill = document.getElementById('rev-pct-pill');
   const rem = document.getElementById('rev-remaining');
+  const streamsPill = document.getElementById('streams-active-pill');
+  const targetSub = document.getElementById('rev-target-sub');
+  if(earnedEl) earnedEl.textContent = moneyText(earned);
   if(fill) fill.style.width = pct + '%';
   if(lbl) lbl.textContent = pct + '% of target';
   if(pill) pill.textContent = pct + '%';
-  if(rem){ const r = Math.max(0, target - earned); rem.textContent = '$' + r.toLocaleString(); }
-  // Update stream bar widths relative to salary (largest)
+  if(rem){ rem.textContent = moneyText(Math.max(0, target - earned)); }
+  if(streamsPill) streamsPill.textContent = String(activeCount);
+  if(targetSub) targetSub.textContent = activeCount === 1 ? 'Across 1 active stream' : `Across ${activeCount} active streams`;
   const bars = document.querySelectorAll('.stream-bar-fill');
-  const amountEls = document.querySelectorAll('.stream-amount');
-  const vals = Array.from(amountEls).map(el => parseFloat(el.textContent.replace(/[^0-9.]/g,''))||0);
   const maxVal = Math.max(...vals, 1);
   bars.forEach((bar,i) => { bar.style.width = (vals[i]/maxVal*100)+'%'; });
 }
@@ -11296,6 +11555,11 @@ if (document.readyState !== 'loading') {
   const HUB_STREAM_PLACEHOLDERS = ['Primary income stream','Second income stream','Third income stream','Fourth income stream','Fifth income stream','Sixth income stream'];
   const HUB_STREAM_TAG_PLACEHOLDERS = ['Main','Stream','Stream','Stream','Stream','Stream'];
   const HUB_VISION_BARS = ['vc-teal','vc-amber','vc-rose','vc-slate','vc-sage','vc-warm'];
+  const HUB_DEFAULT_STREAM_ROWS = [
+    { name:'', amount:'$0', tag:'' },
+    { name:'', amount:'$0', tag:'' },
+    { name:'', amount:'$0', tag:'' }
+  ];
   const HUB_DEFAULTS = {
     dashboard: {
       affText: '',
@@ -11314,8 +11578,8 @@ if (document.readyState !== 'loading') {
       ],
       quoteBody: '',
       quoteAttr: '',
-      streamNames: ['','','','','',''],
-      streamTags: ['','','','','','']
+      revenueTarget: '$8,500',
+      streamRows: HUB_DEFAULT_STREAM_ROWS.map((row) => ({ ...row }))
     },
     vision: {
       intro: '',
@@ -11352,6 +11616,57 @@ if (document.readyState !== 'loading') {
     return JSON.parse(JSON.stringify(source));
   }
 
+  function createDefaultRevenueStreamRows() {
+    return HUB_DEFAULT_STREAM_ROWS.map((row) => ({ ...row }));
+  }
+
+  function parseRevenueAmountValue(value) {
+    const raw = String(value == null ? '' : value).replace(/[^0-9.\-]/g, '');
+    const parsed = parseFloat(raw);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  function formatRevenueAmountValue(value) {
+    const amount = parseRevenueAmountValue(value);
+    const abs = Math.abs(amount);
+    const hasCents = Math.round(abs * 100) % 100 !== 0;
+    const formatted = abs.toLocaleString(undefined, {
+      minimumFractionDigits: hasCents ? 2 : 0,
+      maximumFractionDigits: 2
+    });
+    return (amount < 0 ? '-$' : '$') + formatted;
+  }
+
+  function getRevenueStreamPlaceholder(index) {
+    return HUB_STREAM_PLACEHOLDERS[index] || `Revenue stream ${index + 1}`;
+  }
+
+  function getRevenueTagPlaceholder(index) {
+    return HUB_STREAM_TAG_PLACEHOLDERS[index] || 'Lane';
+  }
+
+  function buildLegacyRevenueRows(rawDashboard) {
+    const names = Array.isArray(rawDashboard?.streamNames) ? rawDashboard.streamNames : [];
+    const tags = Array.isArray(rawDashboard?.streamTags) ? rawDashboard.streamTags : [];
+    const total = Math.max(names.length, tags.length);
+    return Array.from({ length: total }, (_, index) => ({
+      name: typeof names[index] === 'string' ? names[index] : '',
+      amount: '$0',
+      tag: typeof tags[index] === 'string' ? tags[index] : ''
+    })).filter((row) => row.name.trim() || row.tag.trim());
+  }
+
+  function normalizeRevenueStreamRows(rawRows, legacyRows) {
+    const sourceRows = Array.isArray(rawRows) && rawRows.length ? rawRows : legacyRows;
+    const normalized = (Array.isArray(sourceRows) ? sourceRows : [])
+      .map((row) => ({
+        name: typeof row?.name === 'string' ? row.name : '',
+        amount: formatRevenueAmountValue(row?.amount),
+        tag: typeof row?.tag === 'string' ? row.tag : ''
+      }));
+    return normalized.length ? normalized : createDefaultRevenueStreamRows();
+  }
+
   function mergeHubBoxState(raw, fallback) {
     if (Array.isArray(fallback)) {
       const source = Array.isArray(raw) ? raw : [];
@@ -11366,6 +11681,13 @@ if (document.readyState !== 'loading') {
       return out;
     }
     return raw === undefined || raw === null ? fallback : raw;
+  }
+
+  function normalizeHubBoxState(rawState) {
+    const normalized = mergeHubBoxState(rawState, HUB_DEFAULTS);
+    const rawDashboard = rawState && typeof rawState === 'object' ? rawState.dashboard : null;
+    normalized.dashboard.streamRows = normalizeRevenueStreamRows(rawDashboard?.streamRows, buildLegacyRevenueRows(rawDashboard));
+    return normalized;
   }
 
   function parseHubPath(path) {
@@ -11399,9 +11721,9 @@ if (document.readyState !== 'loading') {
 
   function loadHubBoxesLocal() {
     try {
-      hubBoxState = mergeHubBoxState(JSON.parse(localStorage.getItem(HUB_BOXES_KEY) || 'null'), HUB_DEFAULTS);
+      hubBoxState = normalizeHubBoxState(JSON.parse(localStorage.getItem(HUB_BOXES_KEY) || 'null'));
     } catch (e) {
-      hubBoxState = cloneHubBoxState(HUB_DEFAULTS);
+      hubBoxState = normalizeHubBoxState(null);
     }
   }
 
@@ -11421,7 +11743,7 @@ if (document.readyState !== 'loading') {
     if (typeof loadFromCloud !== 'function') return;
     const cloudState = await loadFromCloud(HUB_BOXES_SECTION);
     if (!cloudState) return;
-    hubBoxState = mergeHubBoxState(cloudState, HUB_DEFAULTS);
+    hubBoxState = normalizeHubBoxState(cloudState);
     saveHubBoxesLocal();
     applyHubBoxState();
   }
@@ -11619,26 +11941,96 @@ if (document.readyState !== 'loading') {
     queueHubBoxSave();
   }
 
-  function ensureRevenueEditors() {
-    document.querySelectorAll('#rev-card .stream-row').forEach((row, index) => {
-      const nameWrap = row.querySelector('.stream-name');
-      if (nameWrap && !nameWrap.querySelector('.stream-name-text')) {
-        const label = document.createElement('span');
-        label.className = 'stream-name-text';
-        const rawText = Array.from(nameWrap.childNodes)
-          .filter((node) => node.nodeType === Node.TEXT_NODE)
-          .map((node) => node.textContent)
-          .join('')
-          .trim();
-        Array.from(nameWrap.childNodes).filter((node) => node.nodeType === Node.TEXT_NODE).forEach((node) => node.remove());
-        label.textContent = rawText;
-        nameWrap.appendChild(label);
-      }
+  function getDashboardStreamRows() {
+    return normalizeRevenueStreamRows(getHubValue('dashboard.streamRows'), []);
+  }
 
-      const nameLabel = nameWrap ? nameWrap.querySelector('.stream-name-text') : null;
-      prepareHubEditor(nameLabel, `dashboard.streamNames.${index}`, HUB_STREAM_PLACEHOLDERS[index] || 'Name this stream', 'hub-inline-edit');
-      prepareHubEditor(row.querySelector('.stream-tag'), `dashboard.streamTags.${index}`, HUB_STREAM_TAG_PLACEHOLDERS[index] || 'Tag', 'hub-inline-edit');
+  function setDashboardStreamRows(rows) {
+    setHubValue('dashboard.streamRows', normalizeRevenueStreamRows(rows, []));
+  }
+
+  function bindRevenueAmountEditors(root) {
+    root.querySelectorAll('.stream-amount').forEach((amountEl) => {
+      if (amountEl.dataset.currencyBound === 'true') return;
+      amountEl.dataset.currencyBound = 'true';
+      amountEl.addEventListener('blur', () => {
+        const formatted = formatRevenueAmountValue(readHubEditorValue(amountEl));
+        writeHubEditorValue(amountEl, formatted);
+        if (amountEl.dataset.boxKey) setHubValue(amountEl.dataset.boxKey, formatted);
+        queueHubBoxSave();
+        updateRevProgress();
+      });
     });
+  }
+
+  function renderRevenueStreamRows() {
+    const breakdown = document.getElementById('stream-breakdown');
+    if (!breakdown) return;
+
+    const rows = getDashboardStreamRows();
+    breakdown.innerHTML = rows.map((row, index) => `
+      <div class="stream-row" data-stream-index="${index}">
+        <div class="stream-name">
+          <span class="stream-dot"></span>
+          <span class="stream-name-text" contenteditable="true" data-box-key="dashboard.streamRows.${index}.name" data-placeholder="${escapeHubHtml(getRevenueStreamPlaceholder(index))}"></span>
+        </div>
+        <div class="stream-bar-wrap"><div class="stream-bar-fill" style="width:0%"></div></div>
+        <span class="stream-amount hub-inline-edit" contenteditable="true" data-box-key="dashboard.streamRows.${index}.amount" data-placeholder="$0"></span>
+        <span class="stream-tag hub-inline-edit" contenteditable="true" data-box-key="dashboard.streamRows.${index}.tag" data-placeholder="${escapeHubHtml(getRevenueTagPlaceholder(index))}"></span>
+        <button class="stream-remove-btn" type="button" onclick="removeRevenueStreamRow(${index})"${rows.length <= 1 ? ' disabled' : ''}>Remove</button>
+      </div>
+    `).join('');
+
+    breakdown.querySelectorAll('.stream-row').forEach((row, index) => {
+      prepareHubEditor(row.querySelector('.stream-name-text'), `dashboard.streamRows.${index}.name`, getRevenueStreamPlaceholder(index), 'hub-inline-edit');
+      prepareHubEditor(row.querySelector('.stream-amount'), `dashboard.streamRows.${index}.amount`, '$0', 'hub-inline-edit');
+      prepareHubEditor(row.querySelector('.stream-tag'), `dashboard.streamRows.${index}.tag`, getRevenueTagPlaceholder(index), 'hub-inline-edit');
+    });
+
+    bindRevenueAmountEditors(breakdown);
+    initHubEditorBindings(breakdown);
+    updateRevProgress();
+  }
+
+  function addRevenueStreamRow() {
+    const rows = getDashboardStreamRows();
+    rows.push({ name:'', amount:'$0', tag:'' });
+    setDashboardStreamRows(rows);
+    queueHubBoxSave();
+    renderRevenueStreamRows();
+  }
+
+  function removeRevenueStreamRow(index) {
+    const rows = getDashboardStreamRows();
+    if (rows.length <= 1) {
+      rows[0] = { name:'', amount:'$0', tag:'' };
+    } else {
+      rows.splice(index, 1);
+    }
+    setDashboardStreamRows(rows);
+    queueHubBoxSave();
+    renderRevenueStreamRows();
+  }
+
+  window.addRevenueStreamRow = addRevenueStreamRow;
+  window.removeRevenueStreamRow = removeRevenueStreamRow;
+
+  function ensureRevenueEditors() {
+    const targetEl = document.querySelector('.rev-top-row .rev-big-cell:first-child .rev-num');
+    prepareHubEditor(targetEl, 'dashboard.revenueTarget', '$8,500', 'hub-inline-edit');
+
+    if (targetEl && targetEl.dataset.currencyBound !== 'true') {
+      targetEl.dataset.currencyBound = 'true';
+      targetEl.addEventListener('blur', () => {
+        const formatted = formatRevenueAmountValue(readHubEditorValue(targetEl));
+        writeHubEditorValue(targetEl, formatted);
+        setHubValue('dashboard.revenueTarget', formatted);
+        queueHubBoxSave();
+        updateRevProgress();
+      });
+    }
+
+    renderRevenueStreamRows();
   }
 
   function applyDashboardHubBoxes() {
