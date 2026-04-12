@@ -5555,7 +5555,8 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
 <script>
 window.__PCC_CONFIG__ = Object.assign({
   SUPABASE_URL: 'https://ausgchpdxghtmrdzymmy.supabase.co',
-  API_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1c2djaHBkeGdodG1yZHp5bW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1OTUwMDIsImV4cCI6MjA5MTE3MTAwMn0.8zXw7A4Xf4v7gi1UAhWaW1VvPpYJ3mJa3MTgVWAa3sw'
+  API_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1c2djaHBkeGdodG1yZHp5bW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1OTUwMDIsImV4cCI6MjA5MTE3MTAwMn0.8zXw7A4Xf4v7gi1UAhWaW1VvPpYJ3mJa3MTgVWAa3sw',
+  ADMIN_EMAIL: 'precious.hearns@yahoo.com'
 }, window.__PCC_CONFIG__ || {});
 </script>
 
@@ -7429,11 +7430,11 @@ function hasExplicitAdminRole(user) {
 }
 
 function inferAdminFromRows(rows) {
-  return Array.isArray(rows) && rows.some(row => LEGACY_ADMIN_HINT_SECTIONS.includes(String(row?.section || '').toLowerCase()));
+  return false;
 }
 
 function syncCurrentUserRole(user, rows) {
-  currentUserIsAdmin = hasExplicitAdminRole(user) || inferAdminFromRows(rows);
+  currentUserIsAdmin = hasExplicitAdminRole(user);
   document.documentElement.setAttribute('data-user-role', currentUserIsAdmin ? 'admin' : 'member');
   return currentUserIsAdmin;
 }
