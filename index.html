@@ -7378,7 +7378,7 @@ function getWeekStart() {
 
 const MEMBER_VISIBLE_PAGES = ['dashboard', 'calendar', 'vision', 'community'];
 const ADMIN_ONLY_PAGES = ['life-board', 'notes', 'streams', 'paralegal', 'home'];
-const ADMIN_DATA_SECTIONS = ['home', 'listing-notes', 'notes', 'goals', 'habits', 'todos', 'apt-search'];
+const LEGACY_ADMIN_HINT_SECTIONS = ['home', 'listing-notes', 'notes', 'todos', 'apt-search'];
 let currentUserIsAdmin = false;
 
 function parseConfigList(value) {
@@ -7429,7 +7429,7 @@ function hasExplicitAdminRole(user) {
 }
 
 function inferAdminFromRows(rows) {
-  return Array.isArray(rows) && rows.some(row => ADMIN_DATA_SECTIONS.includes(String(row?.section || '').toLowerCase()));
+  return Array.isArray(rows) && rows.some(row => LEGACY_ADMIN_HINT_SECTIONS.includes(String(row?.section || '').toLowerCase()));
 }
 
 function syncCurrentUserRole(user, rows) {
