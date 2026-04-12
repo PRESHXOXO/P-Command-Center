@@ -15,6 +15,7 @@
 
   const SOCIAL_DRAFTS_KEY = 'pcc-community-live-message-drafts-v1';
   const SOCIAL_POLL_MS = 12000;
+  const SOCIAL_HEARTBEAT_MS = 25000;
   const SOCIAL_ONLINE_WINDOW_MS = 90000;
   const SOCIAL_RECENT_WINDOW_MS = 15 * 60 * 1000;
   const SOCIAL_FEATURES = {
@@ -63,6 +64,7 @@
   };
 
   let socialPollTimer = null;
+  let socialPresenceTimer = null;
   let socialObserver = null;
   let decorateTimer = null;
 
@@ -184,12 +186,22 @@
 
   function isOnline(row) {
     const seen = new Date(row?.last_seen || '').getTime();
-    return !!seen && (Date.now() - seen) <= SOCIAL_ONLINE_WINDOW_MS;
+    const status = String(row?.status || 'online').toLowerCase();
+    return !!seen && (Date.now() - seen) <= SOCIAL_ONLINE_WINDOW_MS && status !== 'away' && status !== 'offline';
   }
 
   function isRecent(row) {
     const seen = new Date(row?.last_seen || '').getTime();
     return !!seen && (Date.now() - seen) <= SOCIAL_RECENT_WINDOW_MS;
+  }
+
+  function currentPresencePage() {
+    const activePage = document.querySelector('.page.active');
+    if (!activePage) return 'Community';
+    const title = activePage.querySelector('.pg-header h1')?.textContent?.trim();
+    if (title) return title;
+    const pageId = String(activePage.id || '').replace(/^page-/, '').trim();
+    return pageId ? (pageId.charAt(0).toUpperCase() + pageId.slice(1)) : 'Community';
   }
 
   function ensureSocialDrafts() {
@@ -355,6 +367,28 @@
     return true;
   }
 
+  async function syncSocialPresence(force, statusOverride) {
+    if (!(await ensureProfileMode(force))) return false;
+    const profile = localProfile();
+    const now = new Date().toISOString();
+    const status = statusOverride || (document.visibilityState === 'visible' ? 'online' : 'away');
+    const payload = {
+      user_id: currentUserId(),
+      display_name: currentUserName(),
+      handle: currentUserHandle(),
+      color: normalizeColor(profile.color || '#0A7266'),
+      current_page: currentPresencePage(),
+      status,
+      last_seen: now,
+      updated_at: now
+    };
+    await communityUpsert(SOCIAL_TABLES.presence, payload, 'user_id');
+    const existing = socialState.presence.find((row) => row.user_id === payload.user_id);
+    if (existing) Object.assign(existing, payload);
+    else socialState.presence.push(payload);
+    return true;
+  }
+
   function ensureSocialStyles() {
     if (document.getElementById('pcc-community-social-styles')) return;
     const style = document.createElement('style');
@@ -397,6 +431,68 @@
         gap:.35rem;
         align-items:center;
         margin-left:.6rem;
+      }
+      .comm-online-count{
+        margin-left:auto;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        min-width:1.5rem;
+        height:1.1rem;
+        padding:0 .38rem;
+        border-radius:999px;
+        background:var(--tint);
+        border:1px solid var(--teal-border);
+        color:var(--charcoal);
+        font-size:.45rem;
+      }
+      .comm-online-list{
+        display:flex;
+        flex-direction:column;
+        gap:.22rem;
+      }
+      .comm-online-empty{
+        padding:.85rem .15rem .25rem;
+        color:var(--muted);
+        font-size:.68rem;
+        line-height:1.6;
+      }
+      .comm-member-copy{
+        min-width:0;
+        flex:1;
+        display:flex;
+        flex-direction:column;
+        gap:.08rem;
+      }
+      .comm-member-presence{
+        display:inline-flex;
+        align-items:center;
+        gap:.34rem;
+        margin-left:auto;
+        padding:.22rem .48rem;
+        border-radius:999px;
+        background:rgba(34,197,94,0.08);
+        border:1px solid rgba(34,197,94,0.18);
+        color:#15622D;
+        font-size:.48rem;
+        font-weight:700;
+        letter-spacing:.08em;
+        text-transform:uppercase;
+      }
+      .comm-member-live-dot{
+        width:7px;
+        height:7px;
+        border-radius:50%;
+        background:#22C55E;
+        box-shadow:0 0 0 4px rgba(34,197,94,0.12);
+      }
+      .comm-member-live-text{
+        white-space:nowrap;
+      }
+      .comm-member[data-self="true"] .comm-member-presence{
+        background:rgba(var(--teal-rgb),0.08);
+        border-color:rgba(var(--teal-rgb),0.18);
+        color:var(--teal);
       }
       #page-community .comm-messages-layout{
         grid-template-columns:340px minmax(0,1fr);
@@ -480,6 +576,13 @@
         line-height:1.55;
       }
       @media(max-width:960px){
+        .comm-member{
+          flex-wrap:wrap;
+        }
+        .comm-member-presence{
+          order:3;
+          margin-left:2rem;
+        }
         #page-community .comm-messages-layout{
           grid-template-columns:1fr;
         }
@@ -662,6 +765,7 @@
         return;
       }
       await syncSocialProfile(force).catch(() => {});
+      await syncSocialPresence(force).catch(() => {});
       const followsReady = await ensureFollowMode(force);
       const messagesReady = await ensureSocialMode(force);
       const [profiles, presence, follows, pods, podMembers, threads, threadMembers, messages] = await Promise.all([
@@ -752,6 +856,16 @@
         const unreadDelta = Number(!!socialThreadMeta(b).unread) - Number(!!socialThreadMeta(a).unread);
         if (unreadDelta) return unreadDelta;
         return new Date(lastMessage(b.id)?.created_at || b.updated_at || 0) - new Date(lastMessage(a.id)?.created_at || a.updated_at || 0);
+      });
+  }
+
+  function activePresenceRows() {
+    return socialState.presence
+      .filter((row) => isOnline(row))
+      .sort((a, b) => {
+        const selfDelta = Number(b.user_id === currentUserId()) - Number(a.user_id === currentUserId());
+        if (selfDelta) return selfDelta;
+        return new Date(b.last_seen || 0) - new Date(a.last_seen || 0);
       });
   }
 
@@ -981,6 +1095,40 @@
     `;
   }
 
+  function renderOnlineMembersCard() {
+    const card = document.querySelector('#page-community .comm-online-card');
+    if (!card) return;
+    const rows = activePresenceRows();
+    card.innerHTML = `
+      <div class="comm-online-label"><div class="online-dot"></div> Active Now <span class="comm-online-count">${rows.length}</span></div>
+      <div class="comm-online-list">
+        ${rows.length ? rows.map((row) => {
+          const profile = profileByUserId(row.user_id) || {
+            user_id: row.user_id,
+            display_name: row.display_name || 'Member',
+            handle: row.handle || '',
+            color: row.color || '#0A7266',
+            avatar_text: initials(row.display_name || 'Member'),
+            photo_url: ''
+          };
+          const label = row.user_id === currentUserId() ? ((profile.display_name || 'You') + ' (You)') : (profile.display_name || 'Member');
+          return `
+            <div class="comm-member" data-user-id="${escAttr(profile.user_id)}" ${row.user_id === currentUserId() ? 'data-self="true"' : ''}>
+              <div class="comm-member-av">${esc((profile.avatar_text || initials(profile.display_name || 'M')).slice(0, 2))}</div>
+              <div class="comm-member-copy">
+                <span class="comm-member-name">${esc(label)}</span>
+                <span class="comm-member-status">${esc(row.current_page || 'Online now')}</span>
+              </div>
+              <div class="comm-member-presence"><span class="comm-member-live-dot"></span><span class="comm-member-live-text">Active</span></div>
+            </div>
+          `;
+        }).join('') : `
+          <div class="comm-online-empty">No one else is active right now. Keep the tab open and this list updates live.</div>
+        `}
+      </div>
+    `;
+  }
+
   function rerenderMessagesIfVisible() {
     const main = document.getElementById('comm-main');
     if (!main || main.dataset.view !== 'messages') return;
@@ -1101,6 +1249,7 @@
   function decorateCommunityDom() {
     ensureSocialStyles();
     ensureProfilePhotoControls();
+    renderOnlineMembersCard();
     const selfProfile = currentUserProfileRow();
     applyAvatar(document.getElementById('comm-avatar'), selfProfile, selfProfile.display_name, false);
     applyAvatar(document.getElementById('comm-composer-av'), selfProfile, selfProfile.display_name, false);
@@ -1124,9 +1273,9 @@
 
     document.querySelectorAll('#page-community .comm-online-card .comm-member').forEach((member) => {
       const name = member.querySelector('.comm-member-name')?.textContent?.trim() || '';
-      const profile = resolveProfile(name);
+      const profile = resolveProfile(member.dataset.userId || name);
       applyAvatar(member.querySelector('.comm-member-av'), profile || null, name, true);
-      if (profile) {
+      if (profile && profile.user_id !== currentUserId()) {
         member.dataset.userId = profile.user_id;
         member.onclick = function (event) {
           if (event.target.closest('.comm-member-actions')) return;
@@ -1184,6 +1333,14 @@
         })
         .catch(() => {});
     }, SOCIAL_POLL_MS);
+  }
+
+  function startPresenceLoop() {
+    if (socialPresenceTimer) clearInterval(socialPresenceTimer);
+    socialPresenceTimer = setInterval(() => {
+      if (!currentUserId()) return;
+      syncSocialPresence(false).catch(() => {});
+    }, SOCIAL_HEARTBEAT_MS);
   }
 
   window.updateThreadDraft = function (threadId, value) {
@@ -1377,9 +1534,11 @@
     await refreshSocialState(true).catch(() => {});
     scheduleCommunityDecorate();
     startSocialLoop();
+    startPresenceLoop();
   };
 
   document.addEventListener('visibilitychange', () => {
+    syncSocialPresence(true, document.visibilityState === 'visible' ? 'online' : 'away').catch(() => {});
     if (document.visibilityState === 'visible' && isCommunityActive()) {
       refreshSocialState(true)
         .then(() => {
@@ -1394,6 +1553,16 @@
   document.addEventListener('input', (event) => {
     if (event.target?.id === 'edit-display-name') renderEditAvatarPreview();
   });
+
+  const previousShowPage = window.showPage;
+  if (typeof previousShowPage === 'function' && !window.__pccCommunityPresenceShowPage) {
+    window.__pccCommunityPresenceShowPage = true;
+    window.showPage = function () {
+      const result = previousShowPage.apply(this, arguments);
+      syncSocialPresence(false).catch(() => {});
+      return result;
+    };
+  }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {

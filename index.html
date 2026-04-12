@@ -478,6 +478,126 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   color:var(--muted);
   margin-bottom:.8rem;
 }
+.vision-board-workspace{
+  display:grid;
+  grid-template-columns:220px minmax(0,1fr);
+  gap:1rem;
+  align-items:start;
+}
+.vision-board-library{
+  min-height:540px;
+  padding:.9rem;
+  border-radius:24px;
+  border:1px solid var(--teal-border);
+  background:linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,255,255,0.34));
+  display:flex;
+  flex-direction:column;
+  gap:.75rem;
+}
+[data-theme="dark"] .vision-board-library{
+  background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+}
+.vision-board-library-head{
+  padding:.2rem .2rem .1rem;
+}
+.vision-board-library-kicker{
+  font-size:.5rem;
+  font-weight:700;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--teal);
+  margin-bottom:.3rem;
+}
+.vision-board-library-copy{
+  font-size:.66rem;
+  line-height:1.6;
+  color:var(--charcoal);
+}
+.vision-board-library-grid{
+  display:grid;
+  gap:.6rem;
+}
+.vision-board-asset{
+  width:100%;
+  text-align:left;
+  border:none;
+  background:var(--surface2);
+  border:1px solid var(--teal-border);
+  border-radius:18px;
+  padding:.75rem;
+  cursor:pointer;
+  display:grid;
+  grid-template-columns:50px minmax(0,1fr);
+  gap:.7rem;
+  align-items:center;
+  transition:transform .18s ease, border-color .18s ease, background .18s ease;
+}
+.vision-board-asset:hover{
+  transform:translateY(-2px);
+  background:var(--tint-hover);
+  border-color:rgba(var(--teal-rgb),0.35);
+}
+.vision-board-asset-preview{
+  height:50px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.1rem;
+  color:var(--ink);
+  border:1px solid rgba(var(--teal-rgb),0.12);
+  background:linear-gradient(135deg, rgba(var(--teal-rgb),0.12), rgba(255,255,255,0.88));
+}
+.vision-board-asset.note .vision-board-asset-preview{
+  background:linear-gradient(180deg, rgba(255,249,212,0.98), rgba(255,244,184,0.9));
+}
+.vision-board-asset.quote .vision-board-asset-preview{
+  font-size:1.45rem;
+  font-style:italic;
+}
+.vision-board-asset.mantra .vision-board-asset-preview{
+  background:linear-gradient(145deg, rgba(var(--teal-rgb),0.18), rgba(255,255,255,0.92));
+}
+.vision-board-asset.goal .vision-board-asset-preview{
+  background:linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,240,255,0.92));
+  font-family:'DM Sans',sans-serif;
+  font-size:.95rem;
+  font-weight:700;
+}
+.vision-board-asset.sticker .vision-board-asset-preview{
+  border-radius:999px;
+  font-family:'DM Sans',sans-serif;
+  font-size:.74rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.vision-board-asset.crown .vision-board-asset-preview{
+  background:linear-gradient(135deg, rgba(245,158,11,0.18), rgba(255,247,214,0.96));
+  font-size:1.55rem;
+}
+.vision-board-asset.spark .vision-board-asset-preview{
+  background:linear-gradient(135deg, rgba(var(--teal-rgb),0.22), rgba(255,255,255,0.92));
+  font-size:1.45rem;
+}
+.vision-board-asset-label{
+  display:block;
+  font-size:.72rem;
+  font-weight:700;
+  letter-spacing:.06em;
+  color:var(--ink);
+  margin-bottom:.18rem;
+}
+.vision-board-asset-copy{
+  display:block;
+  font-size:.62rem;
+  line-height:1.55;
+  color:var(--muted);
+}
+.vision-board-stage{
+  min-width:0;
+}
 .vision-board-canvas{
   position:relative;
   min-height:540px;
@@ -777,6 +897,8 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   .vision-grid{grid-template-columns:repeat(2,1fr);}
   .vision-board-top{flex-direction:column;}
   .vision-board-actions{justify-content:flex-start;}
+  .vision-board-workspace{grid-template-columns:1fr;}
+  .vision-board-library{min-height:auto;}
   .vision-board-canvas{min-height:470px;}
   .quick-row{grid-template-columns:1fr;}
 }
@@ -784,6 +906,8 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   .board{grid-template-columns:1fr;}.weeks{grid-template-columns:1fr;}
   .vision-grid{grid-template-columns:1fr;}
   .vision-board-title{font-size:1.45rem;}
+  .vision-board-asset{grid-template-columns:42px minmax(0,1fr);padding:.65rem;}
+  .vision-board-asset-preview{height:42px;}
   .vision-board-canvas{min-height:410px;}
   .vision-board-item{max-width:calc(100% - 24px);}
   .pg-header{flex-direction:column;gap:.65rem;}
@@ -4050,13 +4174,6 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
       </div>
       <div class="vision-board-actions">
         <button class="vision-board-btn primary" type="button" onclick="openVisionBoardUpload()">Upload Photos</button>
-        <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('note')">Add Note</button>
-        <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('quote')">Add Quote</button>
-        <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('mantra')">Add Mantra</button>
-        <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('goal')">Add Goal Card</button>
-        <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('sticker')">Add Sticker</button>
-        <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('crown')">Add Crown</button>
-        <button class="vision-board-btn" type="button" onclick="addVisionBoardElement('spark')">Add Spark</button>
         <button class="vision-board-btn danger" type="button" onclick="clearVisionBoard()">Clear Board</button>
         <input id="vision-board-upload" type="file" accept="image/*" multiple hidden onchange="handleVisionBoardUpload(this)" />
       </div>
@@ -4065,7 +4182,68 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
       <span>Tip: paste an image straight from your clipboard while this page is open.</span>
       <span>Everything on this board saves to your own account.</span>
     </div>
-    <div class="vision-board-canvas" id="vision-board-canvas"></div>
+    <div class="vision-board-workspace">
+      <aside class="vision-board-library">
+        <div class="vision-board-library-head">
+          <div class="vision-board-library-kicker">Element Tray</div>
+          <div class="vision-board-library-copy">Pick a piece from the tray and it drops straight onto the board like a little stack of clip art.</div>
+        </div>
+        <div class="vision-board-library-grid">
+          <button class="vision-board-asset note" type="button" onclick="addVisionBoardElement('note')">
+            <span class="vision-board-asset-preview">✎</span>
+            <span>
+              <span class="vision-board-asset-label">Sticky Note</span>
+              <span class="vision-board-asset-copy">Short reminder, affirmation, or next move.</span>
+            </span>
+          </button>
+          <button class="vision-board-asset quote" type="button" onclick="addVisionBoardElement('quote')">
+            <span class="vision-board-asset-preview">“”</span>
+            <span>
+              <span class="vision-board-asset-label">Quote</span>
+              <span class="vision-board-asset-copy">A line that keeps the mood and mission in focus.</span>
+            </span>
+          </button>
+          <button class="vision-board-asset mantra" type="button" onclick="addVisionBoardElement('mantra')">
+            <span class="vision-board-asset-preview">✦</span>
+            <span>
+              <span class="vision-board-asset-label">Mantra</span>
+              <span class="vision-board-asset-copy">Big energy, center stage, full intention.</span>
+            </span>
+          </button>
+          <button class="vision-board-asset goal" type="button" onclick="addVisionBoardElement('goal')">
+            <span class="vision-board-asset-preview">Goal</span>
+            <span>
+              <span class="vision-board-asset-label">Goal Card</span>
+              <span class="vision-board-asset-copy">A vivid milestone you want staring back at you.</span>
+            </span>
+          </button>
+          <button class="vision-board-asset sticker" type="button" onclick="addVisionBoardElement('sticker')">
+            <span class="vision-board-asset-preview">Dream</span>
+            <span>
+              <span class="vision-board-asset-label">Sticker</span>
+              <span class="vision-board-asset-copy">Fun label energy for names, themes, and moods.</span>
+            </span>
+          </button>
+          <button class="vision-board-asset crown" type="button" onclick="addVisionBoardElement('crown')">
+            <span class="vision-board-asset-preview">👑</span>
+            <span>
+              <span class="vision-board-asset-label">Crown</span>
+              <span class="vision-board-asset-copy">A bold icon for ownership, luxury, and confidence.</span>
+            </span>
+          </button>
+          <button class="vision-board-asset spark" type="button" onclick="addVisionBoardElement('spark')">
+            <span class="vision-board-asset-preview">✦</span>
+            <span>
+              <span class="vision-board-asset-label">Spark</span>
+              <span class="vision-board-asset-copy">A little accent piece for motion, magic, and glow.</span>
+            </span>
+          </button>
+        </div>
+      </aside>
+      <div class="vision-board-stage">
+        <div class="vision-board-canvas" id="vision-board-canvas"></div>
+      </div>
+    </div>
   </div>
   <div class="vision-grid">
     <div class="vision-card"><div class="vision-color-bar vc-teal"></div><div class="vision-body"><div class="vision-category">Financial</div><div class="vision-title">6-Figure Life by End of 2026</div><div class="vision-desc">Multiple streams, compounding. Voya as foundation, BrandingByBella as the main event, travel commissions stacking monthly.</div><div class="vision-items"><div class="vi">$85K from BrandingByBella</div><div class="vi">$20K+ in travel commissions</div><div class="vi">Party In Ink bulk order revenue</div></div><div class="vision-progress"><div class="vp-label"><span class="vp-name">Progress</span><span class="vp-pct">28%</span></div><div class="vp-bar"><div class="vp-fill" style="width:28%"></div></div></div></div></div>
