@@ -11563,9 +11563,15 @@ if (document.readyState !== 'loading') {
   function applyCommunityHubBoxes() {
     if (!document.getElementById('page-community')) return;
     if (typeof updateCommProfile === 'function') updateCommProfile();
+    const liveCommunity = !!window.__pccCommunitySocialLive;
 
     prepareHubEditor(document.querySelector('#page-community .comm-challenge-title'), 'community.challengeTitle', 'Name the current challenge.', 'hub-editable-block');
     prepareHubEditor(document.querySelector('#page-community .comm-challenge-desc'), 'community.challengeDesc', 'Describe what members are working toward right now.', 'hub-editable-block', true);
+
+    if (liveCommunity) {
+      initHubEditorBindings(document.getElementById('page-community'));
+      return;
+    }
 
     document.querySelectorAll('#page-community .comm-pod').forEach((pod, index) => {
       const name = pod.querySelector('.comm-pod-name');
