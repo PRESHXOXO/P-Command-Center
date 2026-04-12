@@ -7795,7 +7795,9 @@ function showPage(id, btn) {
 // AFFIRMATIONS
 const AFFS=['I am the CEO of my life, my business, and my becoming.','Every decision I make today compounds into the empire I\'m building.','I don\'t hustle from lack — I execute from power.','My vision is valid. My timing is divine. My work is the proof.','I attract high-value opportunities because I operate at that level.','Rest is not a reward — it is part of the strategy.','I am not behind. I am exactly where my next chapter begins.','The version of me I\'m becoming is already proud of today\'s effort.','I close deals, protect my peace, and move with intention.','Gold Coast. Gold Standard. Everything I build is premium.'];
 let ai=0;
-setInterval(()=>{const el=document.getElementById('aff-text');if(!el)return;el.style.opacity='0';setTimeout(()=>{ai=(ai+1)%AFFS.length;el.textContent=AFFS[ai];el.style.opacity='1';},450);},8000);
+let affirmationRotationEnabled = true;
+function setAffirmationRotationEnabled(enabled){affirmationRotationEnabled=!!enabled;}
+setInterval(()=>{if(!affirmationRotationEnabled)return;const el=document.getElementById('aff-text');if(!el)return;el.style.opacity='0';setTimeout(()=>{ai=(ai+1)%AFFS.length;el.textContent=AFFS[ai];el.style.opacity='1';},450);},8000);
 
 // WEEKLY THEMES — dynamic per month
 const MEMBER_AFFIRMATIONS = [
@@ -10953,6 +10955,676 @@ if (document.readyState !== 'loading') {
 </script>
 <script src="./pcc-hub-upgrade.js"></script>
 <script src="./pcc-community-upgrade.js"></script>
+<style id="hub-editable-style">
+.hub-editable-block,
+.hub-inline-edit,
+.vision-card-edit{
+  outline:none;
+  cursor:text;
+}
+.hub-editable-block[contenteditable="true"][data-placeholder]:empty::before,
+.hub-inline-edit[contenteditable="true"][data-placeholder]:empty::before,
+.vision-card-edit[contenteditable="true"][data-placeholder]:empty::before{
+  content:attr(data-placeholder);
+  color:var(--muted);
+  opacity:.82;
+}
+.hub-inline-edit{
+  display:inline-block;
+  min-width:4.5rem;
+}
+#page-dashboard .focus-word.hub-editable-block{
+  display:block;
+  min-height:1em;
+}
+.wk-theme-input{
+  width:100%;
+  background:transparent;
+  border:none;
+  outline:none;
+  resize:none;
+  min-height:3.4rem;
+  font-size:.82rem;
+  font-weight:300;
+  color:var(--ink-mid);
+  line-height:1.5;
+  font-family:'DM Sans',sans-serif;
+}
+.wk-theme-input::placeholder,
+.vision-card-pct-input::placeholder{
+  color:var(--muted);
+}
+.habit-name-edit{
+  display:block;
+  min-width:130px;
+}
+#page-vision .vision-intro[contenteditable="true"]{
+  padding:.25rem 0;
+}
+.vision-desc-edit,
+.vision-card-edit{
+  white-space:pre-wrap;
+}
+.vision-item-edit{
+  display:block;
+  flex:1;
+  outline:none;
+  min-width:0;
+}
+.vision-item-edit[contenteditable="true"][data-placeholder]:empty::before{
+  content:attr(data-placeholder);
+  color:var(--muted);
+  opacity:.82;
+}
+.vision-card-pct-input{
+  width:58px;
+  background:transparent;
+  border:none;
+  outline:none;
+  color:var(--teal);
+  font-size:.42rem;
+  font-weight:500;
+  text-align:right;
+}
+#page-community .comm-challenge-title.hub-editable-block,
+#page-community .comm-challenge-desc.hub-editable-block{
+  display:block;
+}
+#page-community .comm-pod-name.hub-inline-edit,
+#page-community .comm-member-name.hub-inline-edit{
+  min-width:6rem;
+}
+</style>
+<script>
+(function(){
+  const HUB_BOXES_KEY = 'pcc-hub-boxes';
+  const HUB_BOXES_SECTION = 'hub-boxes';
+  const HABIT_CHECKS_KEY = 'pcc-habits';
+  const HUB_MOODS = ['low','neutral','good','locked-in'];
+  const HUB_STREAM_PLACEHOLDERS = ['Primary income stream','Second income stream','Third income stream','Fourth income stream','Fifth income stream','Sixth income stream'];
+  const HUB_STREAM_TAG_PLACEHOLDERS = ['Main','Stream','Stream','Stream','Stream','Stream'];
+  const HUB_VISION_BARS = ['vc-teal','vc-amber','vc-rose','vc-slate','vc-sage','vc-warm'];
+  const HUB_DEFAULTS = {
+    dashboard: {
+      affText: '',
+      focusWord: '',
+      focusIntention: '',
+      dailyIntention: '',
+      mood: '',
+      weekThemes: ['','','',''],
+      habits: ['','','','','','',''],
+      pillars: [
+        { name:'', status:'Maintaining' },
+        { name:'', status:'Maintaining' },
+        { name:'', status:'Maintaining' },
+        { name:'', status:'Maintaining' },
+        { name:'', status:'Maintaining' }
+      ],
+      quoteBody: '',
+      quoteAttr: '',
+      streamNames: ['','','','','',''],
+      streamTags: ['','','','','','']
+    },
+    vision: {
+      intro: '',
+      cards: HUB_VISION_BARS.map((bar) => ({
+        bar,
+        category: '',
+        title: '',
+        desc: '',
+        items: ['','',''],
+        pct: ''
+      }))
+    },
+    community: {
+      challengeTitle: '',
+      challengeDesc: '',
+      pods: [
+        { name:'', count:'' },
+        { name:'', count:'' },
+        { name:'', count:'' }
+      ],
+      online: [
+        { name:'', status:'' },
+        { name:'', status:'' },
+        { name:'', status:'' }
+      ]
+    }
+  };
+
+  let hubBoxState = cloneHubBoxState(HUB_DEFAULTS);
+  let hubBoxSaveTimer = null;
+  let habitSaveTimer = null;
+
+  function cloneHubBoxState(source) {
+    return JSON.parse(JSON.stringify(source));
+  }
+
+  function mergeHubBoxState(raw, fallback) {
+    if (Array.isArray(fallback)) {
+      const source = Array.isArray(raw) ? raw : [];
+      return fallback.map((item, index) => mergeHubBoxState(source[index], item));
+    }
+    if (fallback && typeof fallback === 'object') {
+      const source = raw && typeof raw === 'object' ? raw : {};
+      const out = {};
+      Object.keys(fallback).forEach((key) => {
+        out[key] = mergeHubBoxState(source[key], fallback[key]);
+      });
+      return out;
+    }
+    return raw === undefined || raw === null ? fallback : raw;
+  }
+
+  function parseHubPath(path) {
+    return String(path || '').split('.').map((part) => /^\d+$/.test(part) ? Number(part) : part);
+  }
+
+  function getHubValue(path) {
+    return parseHubPath(path).reduce((acc, key) => acc == null ? undefined : acc[key], hubBoxState);
+  }
+
+  function setHubValue(path, value) {
+    const parts = parseHubPath(path);
+    let cursor = hubBoxState;
+    for (let index = 0; index < parts.length - 1; index++) {
+      const key = parts[index];
+      const nextKey = parts[index + 1];
+      if (cursor[key] == null) cursor[key] = typeof nextKey === 'number' ? [] : {};
+      cursor = cursor[key];
+    }
+    cursor[parts[parts.length - 1]] = value;
+  }
+
+  function escapeHubHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function loadHubBoxesLocal() {
+    try {
+      hubBoxState = mergeHubBoxState(JSON.parse(localStorage.getItem(HUB_BOXES_KEY) || 'null'), HUB_DEFAULTS);
+    } catch (e) {
+      hubBoxState = cloneHubBoxState(HUB_DEFAULTS);
+    }
+  }
+
+  function saveHubBoxesLocal() {
+    try { localStorage.setItem(HUB_BOXES_KEY, JSON.stringify(hubBoxState)); } catch (e) {}
+  }
+
+  function queueHubBoxSave() {
+    saveHubBoxesLocal();
+    clearTimeout(hubBoxSaveTimer);
+    hubBoxSaveTimer = setTimeout(() => {
+      if (typeof syncToCloud === 'function') syncToCloud(HUB_BOXES_SECTION, hubBoxState);
+    }, 260);
+  }
+
+  async function hydrateHubBoxesFromCloud() {
+    if (typeof loadFromCloud !== 'function') return;
+    const cloudState = await loadFromCloud(HUB_BOXES_SECTION);
+    if (!cloudState) return;
+    hubBoxState = mergeHubBoxState(cloudState, HUB_DEFAULTS);
+    saveHubBoxesLocal();
+    applyHubBoxState();
+  }
+
+  function readHubEditorValue(el) {
+    const raw = el.matches('textarea,input') ? el.value : el.innerText;
+    return String(raw || '').replace(/\r/g, '');
+  }
+
+  function writeHubEditorValue(el, value) {
+    const safeValue = String(value || '');
+    if (el.matches('textarea,input')) {
+      if (el.value !== safeValue) el.value = safeValue;
+      return;
+    }
+    if (el.innerText !== safeValue) el.textContent = safeValue;
+  }
+
+  function updateVisionCardProgressPreview(input) {
+    const progress = input.closest('.vision-progress');
+    const fill = progress ? progress.querySelector('.vp-fill') : null;
+    if (fill) fill.style.width = normalizePercent(input.value);
+  }
+
+  function bindHubEditor(el) {
+    if (!el || !el.dataset.boxKey || el.dataset.hubEditableBound === 'true') return;
+    el.dataset.hubEditableBound = 'true';
+
+    const isMultiline = el.matches('textarea') || el.dataset.multiline === 'true';
+    const handleChange = () => {
+      const value = readHubEditorValue(el);
+      setHubValue(el.dataset.boxKey, value);
+      if (el.classList.contains('vision-card-pct-input')) updateVisionCardProgressPreview(el);
+      if (el.closest('#page-community') && el.classList.contains('hub-inline-edit')) {
+        const member = el.closest('.comm-member');
+        if (member) refreshCommunityMemberInitial(member);
+      }
+      queueHubBoxSave();
+    };
+
+    el.addEventListener('input', handleChange);
+    el.addEventListener('blur', handleChange);
+    if (el.isContentEditable && !isMultiline) {
+      el.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          el.blur();
+        }
+      });
+    }
+  }
+
+  function applyStoredEditorValue(el) {
+    if (!el || !el.dataset.boxKey) return;
+    const stored = getHubValue(el.dataset.boxKey);
+    writeHubEditorValue(el, typeof stored === 'string' ? stored : '');
+    if (el.classList.contains('vision-card-pct-input')) updateVisionCardProgressPreview(el);
+  }
+
+  function prepareHubEditor(el, key, placeholder, className, multiline) {
+    if (!el) return;
+    if (!el.matches('textarea,input')) el.setAttribute('contenteditable', 'true');
+    if (key) el.dataset.boxKey = key;
+    if (placeholder) el.dataset.placeholder = placeholder;
+    if (multiline) el.dataset.multiline = 'true';
+    if (className) className.split(/\s+/).filter(Boolean).forEach((name) => el.classList.add(name));
+    bindHubEditor(el);
+    applyStoredEditorValue(el);
+  }
+
+  function normalizePercent(value) {
+    const digits = String(value || '').replace(/[^\d]/g, '');
+    if (!digits) return '0%';
+    const bounded = Math.max(0, Math.min(100, Number(digits)));
+    return bounded + '%';
+  }
+
+  function loadHabitChecks() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(HABIT_CHECKS_KEY) || '{}');
+      if (parsed && typeof parsed === 'object') {
+        Object.keys(cs).forEach((key) => delete cs[key]);
+        Object.assign(cs, parsed);
+      }
+    } catch (e) {}
+  }
+
+  function queueHabitSave() {
+    try { localStorage.setItem(HABIT_CHECKS_KEY, JSON.stringify(cs)); } catch (e) {}
+    clearTimeout(habitSaveTimer);
+    habitSaveTimer = setTimeout(() => {
+      if (typeof syncToCloud === 'function') syncToCloud('habits', cs);
+    }, 260);
+  }
+
+  function syncCurrentGoalsFromStorage() {
+    if (typeof monthKey !== 'function') return;
+    try {
+      const key = monthKey();
+      const raw = localStorage.getItem(key);
+      if (raw === null) {
+        goalsByMonth[key] = [];
+      } else {
+        const parsed = JSON.parse(raw);
+        goalsByMonth[key] = Array.isArray(parsed) ? parsed : [];
+      }
+      if (typeof renderGoals === 'function') renderGoals();
+    } catch (e) {}
+  }
+
+  function syncCalendarFromStorage() {
+    try {
+      const raw = localStorage.getItem('pcc-calendar-events');
+      if (raw === null) {
+        events = [];
+      } else {
+        const parsed = JSON.parse(raw);
+        events = Array.isArray(parsed) ? parsed : [];
+      }
+      nextEvtId = Array.isArray(events) ? events.reduce((max, evt) => Math.max(max, evt && evt.id ? evt.id : 0), 0) + 1 : 1;
+      if (typeof renderCal === 'function') renderCal();
+    } catch (e) {}
+  }
+
+  function ensureSeedlessDefaults() {
+    syncCurrentGoalsFromStorage();
+    syncCalendarFromStorage();
+  }
+
+  function renderEditableWeeks() {
+    const grid = document.getElementById('weeks-grid');
+    if (!grid || typeof getMonthWeeks !== 'function') return;
+    const weeks = getMonthWeeks(curYear, curMonth);
+    const todayStr = today.toISOString().slice(0, 10);
+    grid.innerHTML = '';
+
+    weeks.forEach((week, index) => {
+      const isNow = week.start <= todayStr && todayStr <= week.end && curYear === today.getFullYear() && curMonth === today.getMonth();
+      const card = document.createElement('div');
+      card.className = 'wk' + (isNow ? ' now' : '');
+      card.innerHTML = `
+        <div class="wk-n">Week ${String(index + 1).padStart(2, '0')}${isNow ? ' â€” Now' : ''}</div>
+        <div class="wk-d">${escapeHubHtml(week.label)}</div>
+        <textarea class="wk-theme-input" data-box-key="dashboard.weekThemes.${index}" placeholder="Set a theme for this week..."></textarea>
+      `;
+      grid.appendChild(card);
+    });
+
+    initHubEditorBindings(grid);
+  }
+
+  function renderEditableHabitTracker() {
+    const tb = document.getElementById('tracker-body');
+    if (!tb) return;
+    tb.innerHTML = '';
+
+    for (let habitIndex = 0; habitIndex < 7; habitIndex++) {
+      const tr = document.createElement('tr');
+      const nameCell = document.createElement('td');
+      nameCell.innerHTML = `<div class="hub-inline-edit habit-name-edit" contenteditable="true" data-box-key="dashboard.habits.${habitIndex}" data-placeholder="Name this habit"></div>`;
+      tr.appendChild(nameCell);
+
+      for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+        const key = `${habitIndex}-${dayIndex}`;
+        const td = document.createElement('td');
+        td.style.textAlign = 'center';
+        const button = document.createElement('div');
+        button.className = 'chk' + (cs[key] ? ' on' : '');
+        button.innerHTML = cs[key] ? 'âœ“' : '';
+        button.onclick = () => {
+          cs[key] = !cs[key];
+          button.classList.toggle('on', !!cs[key]);
+          button.innerHTML = cs[key] ? 'âœ“' : '';
+          updatePct();
+          queueHabitSave();
+        };
+        td.appendChild(button);
+        tr.appendChild(td);
+      }
+
+      tb.appendChild(tr);
+    }
+
+    initHubEditorBindings(tb);
+    updatePct();
+  }
+
+  function persistPillarsFromDom() {
+    document.querySelectorAll('#page-dashboard .pillar').forEach((pillar, index) => {
+      const name = pillar.querySelector('.p-name');
+      const status = pillar.querySelector('.p-status');
+      setHubValue(`dashboard.pillars.${index}.name`, name ? readHubEditorValue(name) : '');
+      setHubValue(`dashboard.pillars.${index}.status`, status ? status.textContent.trim() : HUB_DEFAULTS.dashboard.pillars[index].status);
+    });
+    queueHubBoxSave();
+  }
+
+  function ensureRevenueEditors() {
+    document.querySelectorAll('#rev-card .stream-row').forEach((row, index) => {
+      const nameWrap = row.querySelector('.stream-name');
+      if (nameWrap && !nameWrap.querySelector('.stream-name-text')) {
+        const label = document.createElement('span');
+        label.className = 'stream-name-text';
+        const rawText = Array.from(nameWrap.childNodes)
+          .filter((node) => node.nodeType === Node.TEXT_NODE)
+          .map((node) => node.textContent)
+          .join('')
+          .trim();
+        Array.from(nameWrap.childNodes).filter((node) => node.nodeType === Node.TEXT_NODE).forEach((node) => node.remove());
+        label.textContent = rawText;
+        nameWrap.appendChild(label);
+      }
+
+      const nameLabel = nameWrap ? nameWrap.querySelector('.stream-name-text') : null;
+      prepareHubEditor(nameLabel, `dashboard.streamNames.${index}`, HUB_STREAM_PLACEHOLDERS[index] || 'Name this stream', 'hub-inline-edit');
+      prepareHubEditor(row.querySelector('.stream-tag'), `dashboard.streamTags.${index}`, HUB_STREAM_TAG_PLACEHOLDERS[index] || 'Tag', 'hub-inline-edit');
+    });
+  }
+
+  function applyDashboardHubBoxes() {
+    if (!document.getElementById('page-dashboard')) return;
+    if (typeof setAffirmationRotationEnabled === 'function') setAffirmationRotationEnabled(false);
+    ensureSeedlessDefaults();
+
+    prepareHubEditor(document.getElementById('aff-text'), 'dashboard.affText', 'Write an affirmation for this season.', 'hub-editable-block', true);
+    prepareHubEditor(document.getElementById('focus-word'), 'dashboard.focusWord', 'Name this month in one word.', 'hub-editable-block');
+
+    const focusIntention = document.getElementById('focus-intention');
+    if (focusIntention) {
+      focusIntention.placeholder = 'Use this space to define what matters most this month.';
+      prepareHubEditor(focusIntention, 'dashboard.focusIntention', '', '', true);
+    }
+
+    const dailyIntention = document.querySelector('#page-dashboard .intention');
+    if (dailyIntention) {
+      dailyIntention.placeholder = 'Today I intend to...';
+      prepareHubEditor(dailyIntention, 'dashboard.dailyIntention', '', '', true);
+    }
+
+    const moodButtons = document.querySelectorAll('#page-dashboard .mood-btn');
+    moodButtons.forEach((btn, index) => {
+      if (!btn.dataset.mood) btn.dataset.mood = HUB_MOODS[index] || `mood-${index}`;
+    });
+    const savedMood = getHubValue('dashboard.mood');
+    moodButtons.forEach((btn) => btn.classList.toggle('on', !!savedMood && btn.dataset.mood === savedMood));
+
+    document.querySelectorAll('#page-dashboard .pillar').forEach((pillar, index) => {
+      prepareHubEditor(pillar.querySelector('.p-name'), `dashboard.pillars.${index}.name`, 'Name this pillar', 'hub-inline-edit');
+      const savedStatus = getHubValue(`dashboard.pillars.${index}.status`);
+      const status = pillar.querySelector('.p-status');
+      if (status && savedStatus) {
+        status.textContent = savedStatus;
+        const states = JSON.parse(status.dataset.states || '[]');
+        const activeIndex = Math.max(0, states.indexOf(savedStatus));
+        pillar.querySelectorAll('.pip').forEach((pip, pipIndex) => pip.classList.toggle('on', pipIndex <= activeIndex));
+      }
+    });
+
+    renderEditableWeeks();
+    loadHabitChecks();
+    renderEditableHabitTracker();
+    ensureRevenueEditors();
+
+    prepareHubEditor(document.querySelector('#page-dashboard .quote-card .q-body'), 'dashboard.quoteBody', 'Drop a quote that keeps you moving.', 'hub-editable-block', true);
+    prepareHubEditor(document.querySelector('#page-dashboard .quote-card .q-attr'), 'dashboard.quoteAttr', 'Who said it?', 'hub-inline-edit');
+
+    initHubEditorBindings(document.getElementById('page-dashboard'));
+  }
+
+  function renderEditableVisionCards() {
+    const grid = document.querySelector('#page-vision .vision-grid');
+    if (!grid) return;
+    const cards = hubBoxState.vision.cards || HUB_DEFAULTS.vision.cards;
+
+    grid.innerHTML = cards.map((card, index) => `
+      <div class="vision-card">
+        <div class="vision-color-bar ${escapeHubHtml(card.bar || HUB_VISION_BARS[index] || HUB_VISION_BARS[0])}"></div>
+        <div class="vision-body">
+          <div class="vision-category vision-card-edit" contenteditable="true" data-box-key="vision.cards.${index}.category" data-placeholder="Category"></div>
+          <div class="vision-title vision-card-edit" contenteditable="true" data-box-key="vision.cards.${index}.title" data-placeholder="Give this vision a title"></div>
+          <div class="vision-desc vision-card-edit vision-desc-edit" contenteditable="true" data-box-key="vision.cards.${index}.desc" data-placeholder="Describe what this part of the future looks like." data-multiline="true"></div>
+          <div class="vision-items">
+            ${[0,1,2].map((itemIndex) => `
+              <div class="vi"><span class="vision-item-edit" contenteditable="true" data-box-key="vision.cards.${index}.items.${itemIndex}" data-placeholder="Add a milestone"></span></div>
+            `).join('')}
+          </div>
+          <div class="vision-progress">
+            <div class="vp-label">
+              <span class="vp-name">Progress</span>
+              <input class="vision-card-pct-input" data-box-key="vision.cards.${index}.pct" placeholder="0%" />
+            </div>
+            <div class="vp-bar"><div class="vp-fill" style="width:${normalizePercent(card.pct)}"></div></div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    initHubEditorBindings(grid);
+    grid.querySelectorAll('.vision-card-pct-input').forEach(updateVisionCardProgressPreview);
+  }
+
+  function applyVisionHubBoxes() {
+    if (!document.getElementById('page-vision')) return;
+    prepareHubEditor(document.querySelector('#page-vision .vision-intro'), 'vision.intro', 'Write the big picture here. What are you building toward?', 'hub-editable-block', true);
+    renderEditableVisionCards();
+    if (typeof animateVision === 'function') animateVision();
+  }
+
+  function refreshCommunityMemberInitial(member) {
+    const name = member.querySelector('.comm-member-name');
+    const avatar = member.querySelector('.comm-member-av');
+    if (!avatar) return;
+    const label = (name ? name.innerText : '').trim();
+    avatar.textContent = (label.charAt(0) || 'â€¢').toUpperCase();
+  }
+
+  function applyCommunityHubBoxes() {
+    if (!document.getElementById('page-community')) return;
+    if (typeof updateCommProfile === 'function') updateCommProfile();
+
+    prepareHubEditor(document.querySelector('#page-community .comm-challenge-title'), 'community.challengeTitle', 'Name the current challenge.', 'hub-editable-block');
+    prepareHubEditor(document.querySelector('#page-community .comm-challenge-desc'), 'community.challengeDesc', 'Describe what members are working toward right now.', 'hub-editable-block', true);
+
+    document.querySelectorAll('#page-community .comm-pod').forEach((pod, index) => {
+      const name = pod.querySelector('.comm-pod-name');
+      const count = pod.querySelector('.comm-pod-count');
+      prepareHubEditor(name, `community.pods.${index}.name`, 'Name this pod', 'hub-inline-edit');
+      prepareHubEditor(count, `community.pods.${index}.count`, 'Add a pod size', 'hub-inline-edit');
+
+      if (pod.dataset.hubClickBound !== 'true') {
+        pod.dataset.hubClickBound = 'true';
+        pod.onclick = function(event) {
+          if (event.target && event.target.closest && event.target.closest('[contenteditable="true"]')) return;
+          const podName = (name ? name.innerText : '').trim() || 'Pod';
+          const emoji = pod.querySelector('.comm-pod-emoji')?.textContent?.trim() || 'ðŸ¤';
+          const actionText = pod.querySelector('.comm-pod-join')?.textContent || '';
+          if (/open/i.test(actionText) && typeof openDM === 'function') openDM(podName, emoji);
+          else if (typeof joinPod === 'function') joinPod(podName);
+        };
+      }
+    });
+
+    document.querySelectorAll('#page-community .comm-member').forEach((member, index) => {
+      const name = member.querySelector('.comm-member-name');
+      const status = member.querySelector('.comm-member-status');
+      prepareHubEditor(name, `community.online.${index}.name`, 'Member name', 'hub-inline-edit');
+      prepareHubEditor(status, `community.online.${index}.status`, 'Status', 'hub-inline-edit');
+      refreshCommunityMemberInitial(member);
+
+      if (name && name.dataset.communityInitialBound !== 'true') {
+        name.dataset.communityInitialBound = 'true';
+        name.addEventListener('input', () => refreshCommunityMemberInitial(member));
+        name.addEventListener('blur', () => refreshCommunityMemberInitial(member));
+      }
+
+      if (member.dataset.hubClickBound !== 'true') {
+        member.dataset.hubClickBound = 'true';
+        member.onclick = function(event) {
+          if (event.target && event.target.closest && event.target.closest('[contenteditable="true"]')) return;
+          const memberName = (name ? name.innerText : '').trim() || 'Member';
+          const statusLabel = (status ? status.innerText : '').trim() || 'Online';
+          if (typeof openDM === 'function') openDM(memberName, statusLabel);
+        };
+      }
+    });
+
+    initHubEditorBindings(document.getElementById('page-community'));
+  }
+
+  function applyHubBoxState() {
+    applyDashboardHubBoxes();
+    applyVisionHubBoxes();
+    applyCommunityHubBoxes();
+  }
+
+  function initHubEditorBindings(root) {
+    if (!root) return;
+    root.querySelectorAll('[data-box-key]').forEach(bindHubEditor);
+    root.querySelectorAll('[data-box-key]').forEach(applyStoredEditorValue);
+  }
+
+  const _origSelectMood = window.selectMood;
+  window.selectMood = function(btn) {
+    _origSelectMood && _origSelectMood(btn);
+    if (btn && btn.dataset && btn.dataset.mood) {
+      setHubValue('dashboard.mood', btn.dataset.mood);
+      queueHubBoxSave();
+    }
+  };
+
+  const _origCyclePillar = window.cyclePillar;
+  window.cyclePillar = function(el) {
+    _origCyclePillar && _origCyclePillar(el);
+    persistPillarsFromDom();
+  };
+
+  window.buildWeeks = renderEditableWeeks;
+  window.renderVisionCards = function() {
+    renderEditableVisionCards();
+  };
+
+  const _origApplyRoleBasedContent = window.applyRoleBasedContent;
+  window.applyRoleBasedContent = function(rows) {
+    const result = _origApplyRoleBasedContent ? _origApplyRoleBasedContent.apply(this, arguments) : undefined;
+    loadHubBoxesLocal();
+    applyHubBoxState();
+    return result;
+  };
+
+  const _origLoadAllUserData = window.loadAllUserData;
+  if (typeof _origLoadAllUserData === 'function') {
+    window.loadAllUserData = async function() {
+      const result = await _origLoadAllUserData.apply(this, arguments);
+      loadHubBoxesLocal();
+      applyHubBoxState();
+      hydrateHubBoxesFromCloud();
+      return result;
+    };
+  }
+
+  const _origClearAllLocalData = window.clearAllLocalData;
+  if (typeof _origClearAllLocalData === 'function') {
+    window.clearAllLocalData = function(options) {
+      const result = _origClearAllLocalData.apply(this, arguments);
+      try { localStorage.removeItem(HUB_BOXES_KEY); } catch (e) {}
+      hubBoxState = cloneHubBoxState(HUB_DEFAULTS);
+      return result;
+    };
+  }
+
+  const _origShowPage = window.showPage;
+  if (typeof _origShowPage === 'function') {
+    window.showPage = function(targetId) {
+      const result = _origShowPage.apply(this, arguments);
+      if (['dashboard','vision','community','calendar'].includes(targetId)) {
+        setTimeout(applyHubBoxState, 40);
+      }
+      return result;
+    };
+  }
+
+  function startHubEditableLayer() {
+    loadHubBoxesLocal();
+    loadHabitChecks();
+    applyHubBoxState();
+    hydrateHubBoxesFromCloud();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(startHubEditableLayer, 120));
+  } else {
+    setTimeout(startHubEditableLayer, 120);
+  }
+})();
+</script>
 <style id="motion-kill">
 .m-orb,.mo1,.mo2,.mo3,.bbl,.anime-char,.speed-lines,[class*="anime"],[class*="speed-line"]{animation:none !important;display:none !important;}
 </style>
