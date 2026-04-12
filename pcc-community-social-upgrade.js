@@ -867,7 +867,7 @@
         ${!mine ? '<div class="comm-thread-sender">' + esc(sender.display_name || 'Member') + '</div>' : ''}
         ${message.body ? '<div class="comm-thread-bubble">' + fmtText(message.body) + '</div>' : ''}
         ${message.gif_url ? '<img class="comm-thread-media" src="' + escAttr(message.gif_url) + '" alt="' + escAttr(message.gif_title || 'GIF') + '" />' : ''}
-        <div class="comm-thread-meta">' + esc(mine ? 'You' : sender.display_name || 'Member') + ' • ' + esc(clockTime(message.created_at)) + '</div>
+        <div class="comm-thread-meta">${esc(mine ? 'You' : sender.display_name || 'Member')} • ${esc(clockTime(message.created_at))}</div>
       </div>
     `;
   }
