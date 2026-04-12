@@ -6836,7 +6836,7 @@ function resetWorkspaceUi(options = {}) {
   if (typeof commPosts !== 'undefined') commPosts = [];
   if (typeof userPods !== 'undefined') userPods = [];
   if (typeof userChallenges !== 'undefined') userChallenges = [];
-  if (typeof commProfile !== 'undefined') commProfile = { name:'', handle:'', bio:'', color:'#0A7266' };
+  if (typeof commProfile !== 'undefined') commProfile = { name:'', handle:'', bio:'', color:'#0A7266', photoUrl:'' };
 
   if (typeof newNote === 'function') newNote();
   if (typeof renderNotesList === 'function') renderNotesList();
@@ -7002,7 +7002,7 @@ let selectedPostType = 'update';
 let dmOpen          = false;
 let userPods        = [];
 let userChallenges  = [];
-let commProfile     = { name:'', handle:'', bio:'', color:'#0A7266' };
+let commProfile     = { name:'', handle:'', bio:'', color:'#0A7266', photoUrl:'' };
 
 // ── Helpers ──
 function getCurrentUserName() {
@@ -7135,7 +7135,7 @@ function submitEditProfile() {
   const handle = document.getElementById('edit-handle')?.value.trim();
   const bio    = document.getElementById('edit-bio')?.value.trim();
   if (!name) { safeShowToast('Please enter a display name.'); return; }
-  commProfile = { name, handle: handle || ('@'+name.toLowerCase().replace(/\s+/g,'')), bio: bio||'', color: commProfile.color };
+  commProfile = { name, handle: handle || ('@'+name.toLowerCase().replace(/\s+/g,'')), bio: bio||'', color: commProfile.color, photoUrl: commProfile.photoUrl || '' };
   saveCommProfile();
   closeEditProfile();
   updateCommProfile();

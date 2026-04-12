@@ -338,6 +338,23 @@ alter table public.community_threads enable row level security;
 alter table public.community_thread_members enable row level security;
 alter table public.community_messages enable row level security;
 
+create or replace function public.community_can_access_thread(target_thread_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.community_thread_members member_row
+    where member_row.thread_id = target_thread_id
+      and member_row.user_id = (select auth.uid())::text
+  );
+$$;
+
+revoke all on function public.community_can_access_thread(uuid) from public;
+grant execute on function public.community_can_access_thread(uuid) to authenticated;
+
 drop policy if exists community_follows_select on public.community_follows;
 drop policy if exists community_follows_insert on public.community_follows;
 drop policy if exists community_follows_delete on public.community_follows;
@@ -371,12 +388,7 @@ for select
 to authenticated
 using (
   ((select auth.uid())::text = created_by)
-  or exists (
-    select 1
-    from public.community_thread_members member_row
-    where member_row.thread_id = id
-      and member_row.user_id = (select auth.uid())::text
-  )
+  or public.community_can_access_thread(id)
 );
 
 create policy community_threads_insert
@@ -391,21 +403,11 @@ for update
 to authenticated
 using (
   ((select auth.uid())::text = created_by)
-  or exists (
-    select 1
-    from public.community_thread_members member_row
-    where member_row.thread_id = id
-      and member_row.user_id = (select auth.uid())::text
-  )
+  or public.community_can_access_thread(id)
 )
 with check (
   ((select auth.uid())::text = created_by)
-  or exists (
-    select 1
-    from public.community_thread_members member_row
-    where member_row.thread_id = id
-      and member_row.user_id = (select auth.uid())::text
-  )
+  or public.community_can_access_thread(id)
 );
 
 create policy community_threads_delete
@@ -425,12 +427,7 @@ for select
 to authenticated
 using (
   (user_id = (select auth.uid())::text)
-  or exists (
-    select 1
-    from public.community_thread_members self_row
-    where self_row.thread_id = thread_id
-      and self_row.user_id = (select auth.uid())::text
-  )
+  or public.community_can_access_thread(thread_id)
 );
 
 create policy community_thread_members_insert
@@ -478,12 +475,7 @@ on public.community_messages
 for select
 to authenticated
 using (
-  exists (
-    select 1
-    from public.community_thread_members member_row
-    where member_row.thread_id = thread_id
-      and member_row.user_id = (select auth.uid())::text
-  )
+  public.community_can_access_thread(thread_id)
 );
 
 create policy community_messages_insert
@@ -492,12 +484,7 @@ for insert
 to authenticated
 with check (
   (user_id = (select auth.uid())::text)
-  and exists (
-    select 1
-    from public.community_thread_members member_row
-    where member_row.thread_id = thread_id
-      and member_row.user_id = (select auth.uid())::text
-  )
+  and public.community_can_access_thread(thread_id)
 );
 
 create policy community_messages_update

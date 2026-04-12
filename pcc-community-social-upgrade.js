@@ -17,10 +17,34 @@
   const SOCIAL_POLL_MS = 12000;
   const SOCIAL_ONLINE_WINDOW_MS = 90000;
   const SOCIAL_RECENT_WINDOW_MS = 15 * 60 * 1000;
+  const SOCIAL_FEATURES = {
+    profiles: {
+      path: 'community_profiles?select=user_id&limit=1',
+      fallback: 'Live profile sync is not ready yet.'
+    },
+    follows: {
+      path: 'community_follows?select=follower_user_id&limit=1',
+      fallback: 'Live follows are not ready yet.'
+    },
+    messages: {
+      path: 'community_threads?select=id&limit=1',
+      fallback: 'Live messages are not ready yet.'
+    }
+  };
 
   const socialState = {
     enabled: null,
     error: '',
+    capabilities: {
+      profiles: null,
+      follows: null,
+      messages: null
+    },
+    featureErrors: {
+      profiles: '',
+      follows: '',
+      messages: ''
+    },
     loading: null,
     profiles: [],
     presence: [],
@@ -251,27 +275,72 @@
     });
   }
 
-  async function ensureSocialMode() {
+  function resetSocialCapabilities() {
+    socialState.enabled = null;
+    socialState.error = '';
+    Object.keys(socialState.capabilities).forEach((key) => {
+      socialState.capabilities[key] = null;
+    });
+    Object.keys(socialState.featureErrors).forEach((key) => {
+      socialState.featureErrors[key] = '';
+    });
+  }
+
+  function markCapabilityResult(feature, ok, error) {
+    if (!feature || !SOCIAL_FEATURES[feature]) return ok;
+    socialState.capabilities[feature] = !!ok;
+    socialState.featureErrors[feature] = ok ? '' : (error?.message || SOCIAL_FEATURES[feature].fallback);
+    if (feature === 'messages') {
+      socialState.enabled = !!ok;
+      socialState.error = socialState.featureErrors[feature];
+    }
+    return !!ok;
+  }
+
+  async function ensureSocialCapability(feature, force) {
+    if (!SOCIAL_FEATURES[feature]) return false;
     if (!currentUserId()) {
-      socialState.enabled = null;
-      socialState.error = '';
+      resetSocialCapabilities();
       return false;
     }
-    if (socialState.enabled !== null) return socialState.enabled;
+    if (!force && socialState.capabilities[feature] !== null) return socialState.capabilities[feature];
     try {
-      await communityRequest(SOCIAL_TABLES.threads + '?select=id&limit=1');
-      socialState.enabled = true;
-      socialState.error = '';
-      return true;
+      await communityRequest(SOCIAL_FEATURES[feature].path);
+      return markCapabilityResult(feature, true);
     } catch (error) {
-      socialState.enabled = false;
-      socialState.error = error.message || 'Live messages are not ready yet.';
-      return false;
+      return markCapabilityResult(feature, false, error);
     }
   }
 
-  async function syncSocialProfile() {
-    if (!(await ensureSocialMode())) return false;
+  async function ensureSocialMode(force) {
+    return ensureSocialCapability('messages', force);
+  }
+
+  async function ensureProfileMode(force) {
+    return ensureSocialCapability('profiles', force);
+  }
+
+  async function ensureFollowMode(force) {
+    const [profilesReady, followsReady] = await Promise.all([
+      ensureSocialCapability('profiles', force),
+      ensureSocialCapability('follows', force)
+    ]);
+    return !!(profilesReady && followsReady);
+  }
+
+  async function safeCommunityList(path, feature, force) {
+    if (feature && !(await ensureSocialCapability(feature, force))) return [];
+    try {
+      const rows = await communityRequest(path);
+      return Array.isArray(rows) ? rows : [];
+    } catch (error) {
+      if (feature) markCapabilityResult(feature, false, error);
+      return [];
+    }
+  }
+
+  async function syncSocialProfile(force) {
+    if (!(await ensureProfileMode(force))) return false;
     const profile = localProfile();
     await communityUpsert(SOCIAL_TABLES.profiles, {
       user_id: currentUserId(),
@@ -581,7 +650,7 @@
     if (socialState.loading && !force) return socialState.loading;
     socialState.loading = (async function () {
       ensureSocialDrafts();
-      if (!(await ensureSocialMode())) {
+      if (!(await ensureProfileMode(force))) {
         socialState.profiles = [];
         socialState.presence = [];
         socialState.follows = [];
@@ -592,16 +661,26 @@
         socialState.messages = [];
         return;
       }
-      await syncSocialProfile().catch(() => {});
+      await syncSocialProfile(force).catch(() => {});
+      const followsReady = await ensureFollowMode(force);
+      const messagesReady = await ensureSocialMode(force);
       const [profiles, presence, follows, pods, podMembers, threads, threadMembers, messages] = await Promise.all([
-        communityRequest(SOCIAL_TABLES.profiles + '?select=user_id,display_name,handle,bio,color,avatar_text,photo_url,updated_at&limit=400'),
-        communityRequest(SOCIAL_TABLES.presence + '?select=user_id,display_name,handle,color,current_page,status,last_seen,updated_at&limit=400'),
-        communityRequest(SOCIAL_TABLES.follows + '?select=follower_user_id,followee_user_id,created_at&limit=1500'),
-        communityRequest(SOCIAL_TABLES.pods + '?select=id,name,emoji,description,created_by,created_at&order=created_at.desc&limit=120'),
-        communityRequest(SOCIAL_TABLES.podMembers + '?select=pod_id,user_id,joined_at&limit=2000'),
-        communityRequest(SOCIAL_TABLES.threads + '?select=id,kind,title,emoji,subtitle,created_by,dm_key,pod_id,created_at,updated_at&order=updated_at.desc&limit=300'),
-        communityRequest(SOCIAL_TABLES.threadMembers + '?select=thread_id,user_id,joined_at,last_read_at,pinned&limit=3000'),
-        communityRequest(SOCIAL_TABLES.messages + '?select=id,thread_id,user_id,body,gif_url,gif_title,created_at&order=created_at.asc&limit=4000')
+        safeCommunityList(SOCIAL_TABLES.profiles + '?select=user_id,display_name,handle,bio,color,avatar_text,photo_url,updated_at&limit=400', 'profiles', force),
+        safeCommunityList(SOCIAL_TABLES.presence + '?select=user_id,display_name,handle,color,current_page,status,last_seen,updated_at&limit=400', null, force),
+        followsReady
+          ? safeCommunityList(SOCIAL_TABLES.follows + '?select=follower_user_id,followee_user_id,created_at&limit=1500', 'follows', force)
+          : Promise.resolve([]),
+        safeCommunityList(SOCIAL_TABLES.pods + '?select=id,name,emoji,description,created_by,created_at&order=created_at.desc&limit=120', null, force),
+        safeCommunityList(SOCIAL_TABLES.podMembers + '?select=pod_id,user_id,joined_at&limit=2000', null, force),
+        messagesReady
+          ? safeCommunityList(SOCIAL_TABLES.threads + '?select=id,kind,title,emoji,subtitle,created_by,dm_key,pod_id,created_at,updated_at&order=updated_at.desc&limit=300', 'messages', force)
+          : Promise.resolve([]),
+        messagesReady
+          ? safeCommunityList(SOCIAL_TABLES.threadMembers + '?select=thread_id,user_id,joined_at,last_read_at,pinned&limit=3000', 'messages', force)
+          : Promise.resolve([]),
+        messagesReady
+          ? safeCommunityList(SOCIAL_TABLES.messages + '?select=id,thread_id,user_id,body,gif_url,gif_title,created_at&order=created_at.asc&limit=4000', 'messages', force)
+          : Promise.resolve([])
       ]);
       socialState.profiles = Array.isArray(profiles) ? profiles : [];
       socialState.presence = Array.isArray(presence) ? presence.filter(isRecent) : [];
@@ -761,7 +840,7 @@
   }
 
   async function ensurePodThreadMembership(ref) {
-    if (!(await ensureSocialMode())) return;
+    if (!(await ensureSocialMode(true))) return;
     try {
       await ensurePodThread(ref);
     } catch (error) {
@@ -831,13 +910,13 @@
 
   function renderMessagesContent(container) {
     ensureSocialStyles();
-    const enabled = socialState.enabled;
+    const enabled = socialState.capabilities.messages;
     if (enabled === false) {
       container.innerHTML = `
         <div class="comm-view-panel">
           <div class="comm-view-title">Messages</div>
-          <div class="comm-view-sub">Live messages, follows, and profile photos need the updated Community SQL file.</div>
-          <div class="comm-message-empty">Run the latest <code>community-live-supabase.sql</code> in Supabase to turn on shared threads, follow relationships, and profile-photo sync. Feed, pods, and challenges can stay live while we wait.</div>
+          <div class="comm-view-sub">Live direct messages still need the updated Community thread SQL.</div>
+          <div class="comm-message-empty">Profiles, follows, and photos can keep working while we wait. Run the latest <code>community-live-supabase.sql</code> in Supabase to turn on the shared thread tables and message policies.</div>
         </div>
       `;
       return;
@@ -949,7 +1028,7 @@
   }
 
   async function sendMessageFromInput(inputId) {
-    if (!(await ensureSocialMode())) {
+    if (!(await ensureSocialMode(true))) {
       if (inputId === 'dm-input' && typeof legacySendDM === 'function') legacySendDM();
       else if (typeof legacySendThreadMessageFromView === 'function') legacySendThreadMessageFromView();
       return;
@@ -1148,7 +1227,7 @@
   };
 
   window.openDM = async function (ref, emoji, options) {
-    if (!(await ensureSocialMode())) {
+    if (!(await ensureSocialMode(true))) {
       if (typeof legacyOpenDM === 'function') legacyOpenDM(ref, emoji);
       return;
     }
@@ -1186,8 +1265,8 @@
   };
 
   window.toggleCommunityFollow = async function (ref) {
-    if (!(await ensureSocialMode())) {
-      toast('Follow/add will turn on after the updated Community SQL runs.');
+    if (!(await ensureFollowMode(true))) {
+      toast('Follow/add still needs the live Community follow tables turned on.');
       return;
     }
     await refreshSocialState(false);
@@ -1256,14 +1335,16 @@
   window.updateCommProfile = function () {
     if (typeof previousUpdateCommProfile === 'function') previousUpdateCommProfile();
     scheduleCommunityDecorate();
-    syncSocialProfile()
+    syncSocialProfile(true)
       .then(() => refreshSocialState(true))
       .then(() => {
         rerenderMessagesIfVisible();
         renderDmPanel(false);
         scheduleCommunityDecorate();
       })
-      .catch(() => {});
+      .catch(() => {
+        toast('Profile saved on this device. Live profile sync is not ready yet.');
+      });
   };
 
   window.joinPod = async function (podRef) {
