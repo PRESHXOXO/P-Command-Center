@@ -318,6 +318,7 @@
   function migrateLegacyItem(item, index) {
     if (!item || typeof item !== 'object') return null;
     const type = item.kind || item.type || 'image';
+    const legacyVariant = item.variant || type;
     if (type === 'image') {
       return normalizeItem({
         module: 'photo',
@@ -337,8 +338,54 @@
         aspectRatio: (item.width || item.w || 360) / Math.max(item.height || item.h || Math.round((item.width || item.w || 360) * 1.12), 1)
       }, index);
     }
-    if (type === 'text') {
-      if (item.variant === 'goal') {
+    if (type === 'goal' || (type === 'text' && legacyVariant === 'goal')) {
+      return normalizeItem({
+        module: 'goal',
+        variant: 'goal-focus',
+        id: item.id,
+        x: item.x,
+        y: item.y,
+        z: item.z,
+        rotate: item.rotation,
+        w: item.width || item.w || 360,
+        h: item.height || item.h || 300,
+        title: item.label || '',
+        focus: item.content || '',
+        steps: ['', '', '']
+      }, index);
+    }
+    if (type === 'quote' || type === 'mantra' || (type === 'text' && (legacyVariant === 'quote' || legacyVariant === 'mantra'))) {
+      return normalizeItem({
+        module: 'affirmation',
+        variant: type === 'mantra' || legacyVariant === 'mantra' ? 'intention-card' : 'affirmation-card',
+        id: item.id,
+        x: item.x,
+        y: item.y,
+        z: item.z,
+        rotate: item.rotation,
+        w: item.width || item.w || (type === 'mantra' || legacyVariant === 'mantra' ? 360 : 380),
+        h: item.height || item.h || (type === 'mantra' || legacyVariant === 'mantra' ? 230 : 260),
+        text: item.content || '',
+        caption: item.label || ''
+      }, index);
+    }
+    if (type === 'sticker' || (type === 'text' && legacyVariant === 'label')) {
+      return normalizeItem({
+        module: 'text',
+        variant: 'micro-label',
+        id: item.id,
+        x: item.x,
+        y: item.y,
+        z: item.z,
+        rotate: item.rotation,
+        w: item.width || item.w || 260,
+        h: item.height || item.h || 118,
+        title: item.content || item.label || '',
+        body: ''
+      }, index);
+    }
+    if (type === 'note' || type === 'text') {
+      if (legacyVariant === 'goal') {
         return normalizeItem({
           module: 'goal',
           variant: 'goal-focus',
@@ -354,24 +401,24 @@
           steps: ['', '', '']
         }, index);
       }
-      if (item.variant === 'quote' || item.variant === 'mantra') {
+      if (legacyVariant === 'quote' || legacyVariant === 'mantra') {
         return normalizeItem({
           module: 'affirmation',
-          variant: 'affirmation-card',
+          variant: legacyVariant === 'mantra' ? 'intention-card' : 'affirmation-card',
           id: item.id,
           x: item.x,
           y: item.y,
           z: item.z,
           rotate: item.rotation,
-          w: item.width || item.w || 380,
-          h: item.height || item.h || 260,
+          w: item.width || item.w || (legacyVariant === 'mantra' ? 360 : 380),
+          h: item.height || item.h || (legacyVariant === 'mantra' ? 230 : 260),
           text: item.content || '',
-          caption: ''
+          caption: item.label || ''
         }, index);
       }
       return normalizeItem({
         module: 'text',
-        variant: item.variant === 'label' ? 'micro-label' : 'note-card',
+        variant: legacyVariant === 'label' ? 'micro-label' : 'note-card',
         id: item.id,
         x: item.x,
         y: item.y,
@@ -379,8 +426,8 @@
         rotate: item.rotation,
         w: item.width || item.w || 320,
         h: item.height || item.h || 240,
-        title: item.variant === 'label' ? item.content || '' : '',
-        body: item.variant === 'label' ? '' : item.content || ''
+        title: legacyVariant === 'label' ? item.content || '' : '',
+        body: legacyVariant === 'label' ? '' : item.content || ''
       }, index);
     }
     return normalizeItem({
