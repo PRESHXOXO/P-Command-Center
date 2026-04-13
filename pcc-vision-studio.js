@@ -10,6 +10,10 @@
   const OUTPUT_MAX_BYTES = 950 * 1024;
   const DEFAULT_SCROLL = { left: 220, top: 160 };
   const SNAP_THRESHOLD = 12;
+  const MIN_ZOOM = 0.34;
+  const MAX_ZOOM = 1.45;
+  const DEFAULT_ZOOM = 0.58;
+  const DEFAULT_TITLE = "P's Vision Studio";
 
   const CATEGORY_DEFS = [
     { id: 'elements', label: 'Elements', copy: 'Panels, washes, dividers', icon: 'grid' },
@@ -253,7 +257,9 @@
         width: BOARD_WIDTH,
         height: BOARD_HEIGHT,
         scrollLeft: DEFAULT_SCROLL.left,
-        scrollTop: DEFAULT_SCROLL.top
+        scrollTop: DEFAULT_SCROLL.top,
+        zoom: DEFAULT_ZOOM,
+        title: DEFAULT_TITLE
       },
       items: []
     };
@@ -264,7 +270,9 @@
       width: BOARD_WIDTH,
       height: BOARD_HEIGHT,
       scrollLeft: clamp(toNumber(board?.scrollLeft, DEFAULT_SCROLL.left), 0, BOARD_WIDTH),
-      scrollTop: clamp(toNumber(board?.scrollTop, DEFAULT_SCROLL.top), 0, BOARD_HEIGHT)
+      scrollTop: clamp(toNumber(board?.scrollTop, DEFAULT_SCROLL.top), 0, BOARD_HEIGHT),
+      zoom: clamp(toNumber(board?.zoom, DEFAULT_ZOOM), MIN_ZOOM, MAX_ZOOM),
+      title: typeof board?.title === 'string' && board.title.trim() ? board.title.trim() : DEFAULT_TITLE
     };
   }
 
@@ -298,6 +306,14 @@
 
   function weekNotes() {
     return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(label => ({ label, note: '' }));
+  }
+
+  function currentCategory() {
+    return CATEGORY_DEFS.find(entry => entry.id === state.activeCategory) || CATEGORY_DEFS[0];
+  }
+
+  function zoomLabel() {
+    return Math.round((state.board.zoom || DEFAULT_ZOOM) * 100) + '%';
   }
 
   function mapLegacyAccent(variant) {
@@ -557,7 +573,9 @@
         width: BOARD_WIDTH,
         height: BOARD_HEIGHT,
         scrollLeft: state.board.scrollLeft,
-        scrollTop: state.board.scrollTop
+        scrollTop: state.board.scrollTop,
+        zoom: state.board.zoom,
+        title: state.board.title
       },
       items: state.items.map(item => JSON.parse(JSON.stringify(item)))
     };
@@ -581,6 +599,7 @@
   function viewportPlacement(size) {
     const viewport = state.refs.viewport;
     const jitter = Math.min(44, state.items.length * 10);
+    const zoom = state.board.zoom || DEFAULT_ZOOM;
     if (!viewport) {
       return {
         x: BOARD_PADDING + jitter,
@@ -588,18 +607,19 @@
       };
     }
     return {
-      x: clamp(round(viewport.scrollLeft + (viewport.clientWidth / 2) - (size.w / 2) + jitter), BOARD_PADDING, BOARD_WIDTH - size.w - BOARD_PADDING),
-      y: clamp(round(viewport.scrollTop + (viewport.clientHeight / 2) - (size.h / 2) + jitter), BOARD_PADDING, BOARD_HEIGHT - size.h - BOARD_PADDING)
+      x: clamp(round(((viewport.scrollLeft + (viewport.clientWidth / 2)) / zoom) - (size.w / 2) + jitter), BOARD_PADDING, BOARD_WIDTH - size.w - BOARD_PADDING),
+      y: clamp(round(((viewport.scrollTop + (viewport.clientHeight / 2)) / zoom) - (size.h / 2) + jitter), BOARD_PADDING, BOARD_HEIGHT - size.h - BOARD_PADDING)
     };
   }
 
   function pointerPlacement(event, size) {
     const board = state.refs.board;
+    const zoom = state.board.zoom || DEFAULT_ZOOM;
     if (!board) return viewportPlacement(size);
     const rect = board.getBoundingClientRect();
     return {
-      x: clamp(round(event.clientX - rect.left - (size.w / 2)), BOARD_PADDING, BOARD_WIDTH - size.w - BOARD_PADDING),
-      y: clamp(round(event.clientY - rect.top - (size.h / 2)), BOARD_PADDING, BOARD_HEIGHT - size.h - BOARD_PADDING)
+      x: clamp(round(((event.clientX - rect.left) / zoom) - (size.w / 2)), BOARD_PADDING, BOARD_WIDTH - size.w - BOARD_PADDING),
+      y: clamp(round(((event.clientY - rect.top) / zoom) - (size.h / 2)), BOARD_PADDING, BOARD_HEIGHT - size.h - BOARD_PADDING)
     };
   }
 
@@ -665,11 +685,10 @@
 
   function renderCategoryButtons() {
     return CATEGORY_DEFS.map(category => `
-      <button class="vs-category-btn${category.id === state.activeCategory ? ' is-active' : ''}" type="button" data-category="${escapeHtmlAttr(category.id)}">
+      <button class="vs-category-btn${category.id === state.activeCategory ? ' is-active' : ''}" type="button" data-category="${escapeHtmlAttr(category.id)}" title="${escapeHtmlAttr(category.label)}">
         <span class="vs-category-icon">${iconSvg(category.icon)}</span>
         <span class="vs-category-text">
           <span class="vs-category-label">${escapeHtml(category.label)}</span>
-          <span class="vs-category-copy">${escapeHtml(category.copy)}</span>
         </span>
       </button>
     `).join('');
@@ -709,60 +728,93 @@
   }
 
   function boardShell() {
+    const category = currentCategory();
     return `
-      <section class="vs-shell">
-        <aside class="vs-sidebar">
-          <div class="vs-panel vs-sidebar-inner">
-            <div class="vs-sidebar-top">
-              <div class="vs-kicker">Creative Command Center</div>
-              <h2 class="vs-title">Vision Studio</h2>
-              <p class="vs-subtitle">Build a living board with planning widgets, luxe visuals, and a freeform editorial canvas.</p>
-              <label class="vs-search">
-                <span class="vs-search-icon" aria-hidden="true"></span>
-                <input id="vs-search" type="text" placeholder="Search modules, photos, accents..." value="${escapeHtmlAttr(state.search)}" />
-              </label>
-              <div class="vs-category-grid" id="vs-category-grid">${renderCategoryButtons()}</div>
+      <section class="vs-editor">
+        <header class="vs-appbar">
+          <div class="vs-appbar-left">
+            <div class="vs-brand-mark">P</div>
+            <div class="vs-brand-copy">
+              <div class="vs-brand-kicker">Command Center</div>
+              <div class="vs-brand-name">Vision Editor</div>
+            </div>
+          </div>
+          <div class="vs-appbar-center">
+            <input id="vs-board-title" class="vs-board-title-input" type="text" value="${escapeHtmlAttr(state.board.title || DEFAULT_TITLE)}" placeholder="Untitled vision board" />
+            <div class="vs-board-title-sub">Royal blue studio - auto-saved - freeform planning canvas</div>
+          </div>
+          <div class="vs-appbar-actions">
+            <button class="vs-top-btn" type="button" data-action="quick-headline">Text</button>
+            <button class="vs-top-btn" type="button" data-action="quick-goal">Goal</button>
+            <button class="vs-top-btn" type="button" data-action="quick-affirmation">Affirm</button>
+            <button class="vs-top-btn primary" type="button" data-action="upload-board-photo">Upload</button>
+            <button class="vs-top-btn" type="button" data-action="toggle-snap">${state.snapEnabled ? 'Snap On' : 'Snap Off'}</button>
+            <input id="vs-upload-input" type="file" accept="image/*" multiple hidden />
+          </div>
+        </header>
+        <div class="vs-editor-body">
+          <aside class="vs-rail">
+            <div class="vs-rail-stack" id="vs-category-grid">${renderCategoryButtons()}</div>
+          </aside>
+          <aside class="vs-library-pane">
+            <div class="vs-library-pane-head">
+              <div>
+                <div class="vs-kicker">Library</div>
+                <h2 class="vs-title">${escapeHtml(category.label)}</h2>
+                <p class="vs-subtitle">${escapeHtml(category.copy)}. Drag pieces onto the artboard or click to drop them in.</p>
+              </div>
+              <div class="vs-pane-badge">${state.items.length} module${state.items.length === 1 ? '' : 's'}</div>
+            </div>
+            <label class="vs-search">
+              <span class="vs-search-icon" aria-hidden="true"></span>
+              <input id="vs-search" type="text" placeholder="Search elements, photos, text..." value="${escapeHtmlAttr(state.search)}" />
+            </label>
+            <div class="vs-library-meta">
+              <span class="vs-mini-chip">Click to add</span>
+              <span class="vs-mini-chip">Drag to place</span>
+              <span class="vs-mini-chip">Resize on board</span>
             </div>
             <div class="vs-library">
               <div class="vs-library-head">
-                <div>
-                  <div class="vs-library-title">${escapeHtml(CATEGORY_DEFS.find(entry => entry.id === state.activeCategory)?.label || 'Library')}</div>
-                </div>
-                <div class="vs-library-caption">Drag or click to place modules on the board.</div>
+                <div class="vs-library-title">${escapeHtml(category.label)} Bank</div>
+                <div class="vs-library-caption">Curated for a branded vision board editor.</div>
               </div>
               <div class="vs-library-grid" id="vs-library-grid">${renderLibraryGrid()}</div>
             </div>
-          </div>
-        </aside>
-        <div class="vs-main">
-          <div class="vs-panel vs-toolbar">
-            <div class="vs-toolbar-copy">
-              <h3 class="vs-toolbar-title">Freeform planning canvas</h3>
-              <p class="vs-toolbar-sub">Layer photos, goals, habits, calendars, affirmations, and design elements in one fluid premium workspace.</p>
-              <div class="vs-toolbar-chips">
-                <span class="vs-chip">Auto-saved</span>
-                <span class="vs-chip">${state.snapEnabled ? 'Snap on' : 'Snap off'}</span>
-                <span class="vs-chip">Free licensed photos</span>
+          </aside>
+          <div class="vs-stage-shell">
+            <div class="vs-stage-topbar">
+              <div class="vs-stage-pill">Editor mode</div>
+              <div class="vs-stage-copy">Drag, resize, layer, and compose across a full studio workspace.</div>
+              <div class="vs-stage-actions">
+                <button class="vs-stage-btn" type="button" data-action="reset-view">Reset View</button>
+                <button class="vs-stage-btn danger" type="button" data-action="clear-board">Clear Board</button>
               </div>
             </div>
-            <div class="vs-toolbar-actions">
-              <button class="vs-btn primary" type="button" data-action="upload-board-photo">Upload Photo</button>
-              <button class="vs-btn${state.snapEnabled ? ' is-active' : ''}" type="button" data-action="toggle-snap">Snap</button>
-              <button class="vs-btn ghost" type="button" data-action="reset-view">Reset View</button>
-              <button class="vs-btn ghost" type="button" data-action="clear-board">Clear</button>
-              <input id="vs-upload-input" type="file" accept="image/*" multiple hidden />
+            <div class="vs-stage">
+              <div class="vs-viewport-shell">
+                <div class="vs-viewport" id="vs-viewport">
+                  <div class="vs-board-scale" id="vs-board-scale">
+                    <div class="vs-board" id="vs-board"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="vs-stage-footer">
+              <div class="vs-stage-footer-copy">
+                <strong>${escapeHtml(state.board.title || DEFAULT_TITLE)}</strong>
+                <span>Use the grip to move modules so scrolling stays smooth.</span>
+              </div>
+              <div class="vs-zoom-wrap">
+                <button class="vs-zoom-btn" type="button" data-action="zoom-out">-</button>
+                <input id="vs-zoom-range" class="vs-zoom-range" type="range" min="${MIN_ZOOM}" max="${MAX_ZOOM}" step="0.01" value="${state.board.zoom || DEFAULT_ZOOM}" />
+                <button class="vs-zoom-btn" type="button" data-action="zoom-in">+</button>
+                <button class="vs-stage-btn" type="button" data-action="zoom-fit">Fit</button>
+                <div class="vs-zoom-value" id="vs-zoom-value">${zoomLabel()}</div>
+              </div>
             </div>
           </div>
-          <div class="vs-panel vs-workspace">
-            <div class="vs-stage-top">
-              <div><strong>Design canvas</strong> with drag, resize, layering, and snapping.</div>
-              <div>Move modules naturally. Use the top handle to drag so scrolling stays smooth.</div>
-            </div>
-            <div class="vs-viewport" id="vs-viewport">
-              <div class="vs-board" id="vs-board"></div>
-            </div>
           </div>
-        </div>
       </section>
     `;
   }
@@ -799,8 +851,8 @@
       <div class="vs-empty">
         <div class="vs-empty-inner">
           <div class="vs-empty-mark">+</div>
-          <div class="vs-empty-title">Start with a module.</div>
-          <div class="vs-empty-copy">Choose a category on the left and place the pieces you actually want to use. The canvas begins clean on purpose.</div>
+          <div class="vs-empty-title">Build your board your way.</div>
+          <div class="vs-empty-copy">Pull in photos, frames, planning blocks, and words from the left. The editor starts clean on purpose so every layer feels intentional.</div>
         </div>
       </div>
     `;
@@ -1045,6 +1097,62 @@
       ? state.items.slice().sort((a, b) => a.z - b.z).map(renderItem).join('')
       : renderEmptyState();
     state.refs.board.innerHTML = html + renderGuides();
+    updateChrome();
+  }
+
+  function fitZoomValue() {
+    const viewport = state.refs.viewport;
+    if (!viewport) return DEFAULT_ZOOM;
+    const usableWidth = Math.max(440, viewport.clientWidth - 180);
+    const usableHeight = Math.max(320, viewport.clientHeight - 180);
+    return clamp(Math.min(usableWidth / BOARD_WIDTH, usableHeight / BOARD_HEIGHT), MIN_ZOOM, MAX_ZOOM);
+  }
+
+  function applyViewportMetrics() {
+    if (state.root) {
+      state.root.style.setProperty('--vs-board-width', BOARD_WIDTH + 'px');
+      state.root.style.setProperty('--vs-board-height', BOARD_HEIGHT + 'px');
+      state.root.style.setProperty('--vs-scale', String(state.board.zoom || DEFAULT_ZOOM));
+    }
+    if (state.refs.boardScale) {
+      state.refs.boardScale.style.width = Math.round(BOARD_WIDTH * (state.board.zoom || DEFAULT_ZOOM)) + 'px';
+      state.refs.boardScale.style.height = Math.round(BOARD_HEIGHT * (state.board.zoom || DEFAULT_ZOOM)) + 'px';
+    }
+  }
+
+  function updateChrome() {
+    if (state.refs.zoomRange) state.refs.zoomRange.value = String(state.board.zoom || DEFAULT_ZOOM);
+    if (state.refs.zoomValue) state.refs.zoomValue.textContent = zoomLabel();
+    if (state.refs.titleInput && document.activeElement !== state.refs.titleInput) {
+      state.refs.titleInput.value = state.board.title || DEFAULT_TITLE;
+    }
+    if (state.refs.paneBadge) {
+      state.refs.paneBadge.textContent = state.items.length + ' module' + (state.items.length === 1 ? '' : 's');
+    }
+    if (state.refs.footerTitle) state.refs.footerTitle.textContent = state.board.title || DEFAULT_TITLE;
+  }
+
+  function setZoom(nextZoom, options) {
+    const viewport = state.refs.viewport;
+    const preserveCenter = !options || options.preserveCenter !== false;
+    const previousZoom = state.board.zoom || DEFAULT_ZOOM;
+    const targetZoom = clamp(nextZoom, MIN_ZOOM, MAX_ZOOM);
+    if (!viewport) {
+      state.board.zoom = targetZoom;
+      applyViewportMetrics();
+      updateChrome();
+      return;
+    }
+    const centerX = preserveCenter ? (viewport.scrollLeft + (viewport.clientWidth / 2)) / previousZoom : 0;
+    const centerY = preserveCenter ? (viewport.scrollTop + (viewport.clientHeight / 2)) / previousZoom : 0;
+    state.board.zoom = targetZoom;
+    applyViewportMetrics();
+    if (preserveCenter) {
+      viewport.scrollLeft = Math.max(0, round((centerX * targetZoom) - (viewport.clientWidth / 2)));
+      viewport.scrollTop = Math.max(0, round((centerY * targetZoom) - (viewport.clientHeight / 2)));
+      syncScrollPosition();
+    }
+    updateChrome();
   }
 
   function rerenderShell() {
@@ -1052,6 +1160,7 @@
     state.root.innerHTML = boardShell();
     cacheRefs();
     bindMountedRefs();
+    applyViewportMetrics();
     updateCategoryUi();
     updateLibraryUi();
     restoreScroll();
@@ -1065,7 +1174,13 @@
       search: state.root.querySelector('#vs-search'),
       upload: state.root.querySelector('#vs-upload-input'),
       viewport: state.root.querySelector('#vs-viewport'),
-      board: state.root.querySelector('#vs-board')
+      board: state.root.querySelector('#vs-board'),
+      boardScale: state.root.querySelector('#vs-board-scale'),
+      titleInput: state.root.querySelector('#vs-board-title'),
+      zoomRange: state.root.querySelector('#vs-zoom-range'),
+      zoomValue: state.root.querySelector('#vs-zoom-value'),
+      paneBadge: state.root.querySelector('.vs-pane-badge'),
+      footerTitle: state.root.querySelector('.vs-stage-footer-copy strong')
     };
   }
 
@@ -1083,6 +1198,7 @@
     if (!state.refs.viewport) return;
     state.refs.viewport.scrollLeft = state.board.scrollLeft;
     state.refs.viewport.scrollTop = state.board.scrollTop;
+    updateChrome();
   }
 
   function bringToFront(itemId) {
@@ -1278,12 +1394,13 @@
   }
 
   function handlePointerMove(event) {
+    const zoom = state.board.zoom || DEFAULT_ZOOM;
     if (state.drag) {
       autoScroll(event);
       const item = state.items.find(entry => entry.id === state.drag.id);
       if (!item) return;
-      const dx = (event.clientX - state.drag.startX) + (state.refs.viewport.scrollLeft - state.drag.scrollLeft);
-      const dy = (event.clientY - state.drag.startY) + (state.refs.viewport.scrollTop - state.drag.scrollTop);
+      const dx = ((event.clientX - state.drag.startX) + (state.refs.viewport.scrollLeft - state.drag.scrollLeft)) / zoom;
+      const dy = ((event.clientY - state.drag.startY) + (state.refs.viewport.scrollTop - state.drag.scrollTop)) / zoom;
       const snapped = computeSnap(item.id, state.drag.originX + dx, state.drag.originY + dy, item.w, item.h);
       item.x = snapped.x;
       item.y = snapped.y;
@@ -1295,8 +1412,8 @@
       autoScroll(event);
       const item = state.items.find(entry => entry.id === state.resize.id);
       if (!item) return;
-      const dx = (event.clientX - state.resize.startX) + (state.refs.viewport.scrollLeft - state.resize.scrollLeft);
-      const dy = (event.clientY - state.resize.startY) + (state.refs.viewport.scrollTop - state.resize.scrollTop);
+      const dx = ((event.clientX - state.resize.startX) + (state.refs.viewport.scrollLeft - state.resize.scrollLeft)) / zoom;
+      const dy = ((event.clientY - state.resize.startY) + (state.refs.viewport.scrollTop - state.resize.scrollTop)) / zoom;
       let nextW = clamp(round(state.resize.originW + dx), 140, BOARD_WIDTH - item.x - BOARD_PADDING);
       let nextH = clamp(round(state.resize.originH + dy), 90, BOARD_HEIGHT - item.y - BOARD_PADDING);
       if (state.resize.lockAspect) {
@@ -1347,9 +1464,33 @@
           state.pendingUploadTarget = null;
           openUpload();
           return;
+        case 'quick-headline':
+          addItem(spawnFromLibrary('headline'));
+          return;
+        case 'quick-goal':
+          addItem(spawnFromLibrary('goal-focus'));
+          return;
+        case 'quick-affirmation':
+          addItem(spawnFromLibrary('affirmation-card'));
+          return;
         case 'toggle-snap':
           state.snapEnabled = !state.snapEnabled;
           rerenderShell();
+          return;
+        case 'zoom-in':
+          setZoom((state.board.zoom || DEFAULT_ZOOM) + 0.08);
+          queueSave();
+          return;
+        case 'zoom-out':
+          setZoom((state.board.zoom || DEFAULT_ZOOM) - 0.08);
+          queueSave();
+          return;
+        case 'zoom-fit':
+          state.board.scrollLeft = 0;
+          state.board.scrollTop = 0;
+          setZoom(fitZoomValue(), { preserveCenter: false });
+          restoreScroll();
+          queueSave();
           return;
         case 'reset-view':
           state.board.scrollLeft = DEFAULT_SCROLL.left;
@@ -1420,6 +1561,17 @@
     if (event.target === state.refs.search) {
       state.search = event.target.value || '';
       updateLibraryUi();
+      return;
+    }
+    if (event.target === state.refs.titleInput) {
+      state.board.title = (event.target.value || '').trim() || DEFAULT_TITLE;
+      updateChrome();
+      queueSave();
+      return;
+    }
+    if (event.target === state.refs.zoomRange) {
+      setZoom(toNumber(event.target.value, DEFAULT_ZOOM));
+      queueSave();
       return;
     }
     const editable = event.target.closest('[data-edit-item]');
@@ -1636,6 +1788,11 @@
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp);
     document.addEventListener('paste', handlePaste);
+    window.addEventListener('resize', () => {
+      if (!state.root) return;
+      applyViewportMetrics();
+      updateChrome();
+    });
   }
 
   function mount() {
