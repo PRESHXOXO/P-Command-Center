@@ -18,6 +18,7 @@
   const SOCIAL_HEARTBEAT_MS = 25000;
   const SOCIAL_ONLINE_WINDOW_MS = 90000;
   const SOCIAL_RECENT_WINDOW_MS = 15 * 60 * 1000;
+  const MAX_PROFILE_PHOTO_BYTES = 2 * 1024 * 1024;
   const SOCIAL_FEATURES = {
     profiles: {
       path: 'community_profiles?select=user_id&limit=1',
@@ -451,6 +452,18 @@
         flex-direction:column;
         gap:.22rem;
       }
+      .comm-pod-list{
+        display:flex;
+        flex-direction:column;
+        gap:.38rem;
+      }
+      .comm-pod-copy{
+        min-width:0;
+        flex:1;
+        display:flex;
+        flex-direction:column;
+        gap:.08rem;
+      }
       .comm-online-empty{
         padding:.85rem .15rem .25rem;
         color:var(--muted);
@@ -629,14 +642,14 @@
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
-        const maxDim = 420;
+        const maxDim = 320;
         const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
         const canvas = document.createElement('canvas');
         canvas.width = Math.max(1, Math.round(img.width * scale));
         canvas.height = Math.max(1, Math.round(img.height * scale));
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', 0.88));
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
       };
       img.onerror = () => resolve(raw);
       img.src = raw;
@@ -679,6 +692,11 @@
   window.handleCommunityProfilePhoto = async function (input) {
     const file = input?.files?.[0];
     if (!file) return;
+    if (file.size > MAX_PROFILE_PHOTO_BYTES) {
+      toast('Please use a profile photo under 2 MB.');
+      if (input) input.value = '';
+      return;
+    }
     socialState.photoDraft = await compressProfilePhoto(file);
     socialState.photoDirty = true;
     renderEditAvatarPreview();
@@ -877,6 +895,14 @@
     return socialState.threads.find((thread) => thread.id === socialState.activeThreadId) || null;
   }
 
+  function podMemberRows(podId) {
+    return socialState.podMembers.filter((row) => row.pod_id === podId);
+  }
+
+  function currentUserInPod(podId) {
+    return podMemberRows(podId).some((row) => row.user_id === currentUserId());
+  }
+
   async function markThreadRead(threadId) {
     if (!threadId || !(await ensureSocialMode())) return;
     const existing = membershipFor(threadId);
@@ -939,13 +965,22 @@
       }, 'pod_id');
       thread = Array.isArray(createdRows) ? createdRows[0] : createdRows;
     }
-    const podMembers = socialState.podMembers.filter((row) => row.pod_id === pod.id);
+    const podMembers = podMemberRows(pod.id);
     const now = new Date().toISOString();
-    const memberRows = (podMembers.length ? podMembers : [{ user_id: currentUserId() }]).map((row) => ({
+    const existingMembership = membershipFor(thread.id);
+    const creatorCanSyncAll = !thread.created_by || thread.created_by === currentUserId();
+    const sourceRows = creatorCanSyncAll
+      ? (podMembers.length ? podMembers : [{ user_id: currentUserId(), joined_at: now }])
+      : [
+          podMembers.find((row) => row.user_id === currentUserId())
+          || existingMembership
+          || { user_id: currentUserId(), joined_at: now }
+        ];
+    const memberRows = sourceRows.map((row) => ({
       thread_id: thread.id,
       user_id: row.user_id,
       joined_at: row.joined_at || now,
-      last_read_at: row.user_id === currentUserId() ? now : (membershipFor(thread.id)?.last_read_at || now),
+      last_read_at: row.user_id === currentUserId() ? now : (existingMembership?.last_read_at || now),
       pinned: row.user_id === currentUserId()
     }));
     await communityUpsert(SOCIAL_TABLES.threadMembers, memberRows, 'thread_id,user_id');
@@ -1129,6 +1164,40 @@
     `;
   }
 
+  function renderPodsCard() {
+    const card = document.querySelector('#page-community .comm-pods-card');
+    if (!card) return;
+    const pods = socialState.pods
+      .slice()
+      .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    card.innerHTML = `
+      <div class="comm-pods-label">🤝 Accountability Pods <span class="comm-online-count">${pods.length}</span></div>
+      <div class="comm-pod-list">
+        ${pods.length ? pods.map((pod) => {
+          const count = podMemberRows(pod.id).length;
+          const joined = currentUserInPod(pod.id);
+          const thread = socialState.threads.find((row) => row.kind === 'pod' && row.pod_id === pod.id);
+          const hasThreadAccess = !!(thread && threadMembersFor(thread.id).some((row) => row.user_id === currentUserId()));
+          const canOpen = joined || hasThreadAccess || thread?.created_by === currentUserId();
+          const action = canOpen ? 'Open' : 'Join';
+          const countLabel = count ? (count + ' member' + (count === 1 ? '' : 's')) : 'New pod';
+          return `
+            <div class="comm-pod" data-pod-id="${escAttr(pod.id)}">
+              <span class="comm-pod-emoji">${esc(pod.emoji || '🤝')}</span>
+              <div class="comm-pod-copy">
+                <span class="comm-pod-name">${esc(pod.name || 'Pod')}</span>
+                <span class="comm-pod-count">${esc(countLabel)}</span>
+              </div>
+              <button class="comm-pod-join" type="button">${esc(action)}</button>
+            </div>
+          `;
+        }).join('') : `
+          <div class="comm-online-empty">No live pods yet. Use Create Pod to start the first one.</div>
+        `}
+      </div>
+    `;
+  }
+
   function rerenderMessagesIfVisible() {
     const main = document.getElementById('comm-main');
     if (!main || main.dataset.view !== 'messages') return;
@@ -1249,6 +1318,7 @@
   function decorateCommunityDom() {
     ensureSocialStyles();
     ensureProfilePhotoControls();
+    renderPodsCard();
     renderOnlineMembersCard();
     const selfProfile = currentUserProfileRow();
     applyAvatar(document.getElementById('comm-avatar'), selfProfile, selfProfile.display_name, false);
@@ -1267,6 +1337,31 @@
           event.preventDefault();
           event.stopPropagation();
           window.openDM(profile.user_id, profile.avatar_text || initials(profile.display_name));
+        };
+      }
+    });
+
+    document.querySelectorAll('#page-community .comm-pods-card .comm-pod').forEach((podCard) => {
+      const pod = podByRef(podCard.dataset.podId || '');
+      if (!pod) return;
+      const joined = currentUserInPod(pod.id);
+      const thread = socialState.threads.find((row) => row.kind === 'pod' && row.pod_id === pod.id);
+      const hasThreadAccess = !!(thread && threadMembersFor(thread.id).some((row) => row.user_id === currentUserId()));
+      const canOpen = joined || hasThreadAccess || thread?.created_by === currentUserId();
+      const actionBtn = podCard.querySelector('.comm-pod-join');
+      const openPod = function (event) {
+        if (event && event.target && event.target.closest && event.target.closest('.comm-pod-join')) return;
+        if (canOpen) window.openDM(pod.id, pod.emoji || initials(pod.name), { type: 'pod' });
+        else window.joinPod(pod.id);
+      };
+      podCard.onclick = openPod;
+      if (actionBtn) {
+        actionBtn.textContent = canOpen ? 'Open' : 'Join';
+        actionBtn.onclick = function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (canOpen) window.openDM(pod.id, pod.emoji || initials(pod.name), { type: 'pod' });
+          else window.joinPod(pod.id);
         };
       }
     });

@@ -355,6 +355,58 @@ $$;
 revoke all on function public.community_can_access_thread(uuid) from public;
 grant execute on function public.community_can_access_thread(uuid) to authenticated;
 
+create or replace function public.community_can_manage_thread(target_thread_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.community_threads thread_row
+    where thread_row.id = target_thread_id
+      and thread_row.created_by = (select auth.uid())::text
+  );
+$$;
+
+revoke all on function public.community_can_manage_thread(uuid) from public;
+grant execute on function public.community_can_manage_thread(uuid) to authenticated;
+
+create or replace function public.community_can_write_own_thread_membership(target_thread_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.community_threads thread_row
+    where thread_row.id = target_thread_id
+      and (
+        thread_row.created_by = (select auth.uid())::text
+        or exists (
+          select 1
+          from public.community_thread_members member_row
+          where member_row.thread_id = thread_row.id
+            and member_row.user_id = (select auth.uid())::text
+        )
+        or (
+          thread_row.kind = 'pod'
+          and thread_row.pod_id is not null
+          and exists (
+            select 1
+            from public.community_pod_members pod_member_row
+            where pod_member_row.pod_id = thread_row.pod_id
+              and pod_member_row.user_id = (select auth.uid())::text
+          )
+        )
+      )
+  );
+$$;
+
+revoke all on function public.community_can_write_own_thread_membership(uuid) from public;
+grant execute on function public.community_can_write_own_thread_membership(uuid) to authenticated;
+
 drop policy if exists community_follows_select on public.community_follows;
 drop policy if exists community_follows_insert on public.community_follows;
 drop policy if exists community_follows_delete on public.community_follows;
@@ -401,14 +453,8 @@ create policy community_threads_update
 on public.community_threads
 for update
 to authenticated
-using (
-  ((select auth.uid())::text = created_by)
-  or public.community_can_access_thread(id)
-)
-with check (
-  ((select auth.uid())::text = created_by)
-  or public.community_can_access_thread(id)
-);
+using (public.community_can_manage_thread(id))
+with check (public.community_can_manage_thread(id));
 
 create policy community_threads_delete
 on public.community_threads
@@ -435,12 +481,10 @@ on public.community_thread_members
 for insert
 to authenticated
 with check (
-  (user_id = (select auth.uid())::text)
-  or exists (
-    select 1
-    from public.community_threads thread_row
-    where thread_row.id = thread_id
-      and thread_row.created_by = (select auth.uid())::text
+  public.community_can_manage_thread(thread_id)
+  or (
+    user_id = (select auth.uid())::text
+    and public.community_can_write_own_thread_membership(thread_id)
   )
 );
 
@@ -448,20 +492,24 @@ create policy community_thread_members_update
 on public.community_thread_members
 for update
 to authenticated
-using (user_id = (select auth.uid())::text)
-with check (user_id = (select auth.uid())::text);
+using (
+  user_id = (select auth.uid())::text
+  and public.community_can_write_own_thread_membership(thread_id)
+)
+with check (
+  user_id = (select auth.uid())::text
+  and public.community_can_write_own_thread_membership(thread_id)
+);
 
 create policy community_thread_members_delete
 on public.community_thread_members
 for delete
 to authenticated
 using (
-  (user_id = (select auth.uid())::text)
-  or exists (
-    select 1
-    from public.community_threads thread_row
-    where thread_row.id = thread_id
-      and thread_row.created_by = (select auth.uid())::text
+  public.community_can_manage_thread(thread_id)
+  or (
+    user_id = (select auth.uid())::text
+    and public.community_can_write_own_thread_membership(thread_id)
   )
 );
 
