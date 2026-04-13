@@ -469,6 +469,15 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   border-color:rgba(139,32,32,0.18);
   background:rgba(200,60,60,0.06);
 }
+.vision-board-hidden-input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+  left:-9999px;
+  top:auto;
+}
 .vision-board-helper{
   display:flex;
   justify-content:space-between;
@@ -477,6 +486,10 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   font-size:.64rem;
   color:var(--muted);
   margin-bottom:.8rem;
+}
+.vision-board-helper strong{
+  color:var(--charcoal);
+  font-weight:600;
 }
 .vision-board-workspace{
   display:grid;
@@ -534,6 +547,11 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:.55rem;
+}
+.vision-board-stock-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:.6rem;
 }
 .vision-board-asset{
   width:100%;
@@ -606,12 +624,57 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   text-align:center;
   gap:.45rem;
 }
-.vision-board-asset.clipart .vision-board-asset-preview{
-  height:82px;
+.vision-board-asset.photo{
+  grid-template-columns:1fr;
+  padding:.58rem;
+  gap:.5rem;
+}
+.vision-board-asset.photo .vision-board-asset-preview{
+  height:108px;
   border-radius:18px;
+  padding:0;
+  background:rgba(255,255,255,0.68);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.72),
+    0 8px 18px rgba(44,36,32,0.05);
+}
+.vision-board-asset-thumb{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  border-radius:inherit;
+}
+.vision-board-asset-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.5rem;
+}
+.vision-board-asset-kind{
+  font-size:.52rem;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--teal);
+}
+.vision-board-asset-source{
+  font-size:.5rem;
+  font-weight:600;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.vision-board-asset.clipart .vision-board-asset-preview{
+  height:86px;
+  border-radius:22px;
   background:
-    radial-gradient(circle at 20% 20%, rgba(var(--teal-rgb),0.18), transparent 35%),
-    linear-gradient(160deg, rgba(255,255,255,0.96), rgba(var(--teal-rgb),0.08));
+    radial-gradient(circle at 16% 18%, rgba(var(--teal-rgb),0.18), transparent 34%),
+    radial-gradient(circle at 84% 18%, rgba(255,255,255,0.9), transparent 22%),
+    linear-gradient(160deg, rgba(255,255,255,0.98), rgba(var(--teal-rgb),0.05));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.82),
+    0 10px 18px rgba(44,36,32,0.05);
 }
 .vision-board-asset.clipart .vision-board-asset-label{
   margin-bottom:0;
@@ -631,8 +694,12 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   height:100%;
   display:block;
 }
+.vision-board-clipart.ribbon{color:#d36c98;}
 .vision-board-clipart.bow{color:#d36c98;}
 .vision-board-clipart.butterfly{color:#7d73e6;}
+.vision-board-clipart.blossom{color:#ef8eb1;}
+.vision-board-clipart.crescent{color:#6f7be7;}
+.vision-board-clipart.cloud{color:#7eb9da;}
 .vision-board-clipart.heart{color:#ec6b88;}
 .vision-board-clipart.gem{color:#5d9bd6;}
 .vision-board-clipart.starburst{color:#f0a54a;}
@@ -772,11 +839,15 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   width:250px;
   background:linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,240,255,0.92));
 }
+.vision-board-item.ribbon,
 .vision-board-item.crown,
 .vision-board-item.spark{
   width:152px;
   border-radius:28px;
 }
+.vision-board-item.blossom,
+.vision-board-item.crescent,
+.vision-board-item.cloud,
 .vision-board-item.bow,
 .vision-board-item.butterfly,
 .vision-board-item.heart,
@@ -801,8 +872,12 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 }
 [data-theme="dark"] .vision-board-item.crown,
 [data-theme="dark"] .vision-board-item.spark,
+[data-theme="dark"] .vision-board-item.ribbon,
 [data-theme="dark"] .vision-board-item.bow,
 [data-theme="dark"] .vision-board-item.butterfly,
+[data-theme="dark"] .vision-board-item.blossom,
+[data-theme="dark"] .vision-board-item.crescent,
+[data-theme="dark"] .vision-board-item.cloud,
 [data-theme="dark"] .vision-board-item.heart,
 [data-theme="dark"] .vision-board-item.gem,
 [data-theme="dark"] .vision-board-item.starburst{
@@ -888,8 +963,12 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   font-weight:700;
   letter-spacing:.04em;
 }
+.vision-board-item.ribbon .vision-board-art-frame{box-shadow:inset 0 0 0 1px rgba(211,108,152,0.12);}
 .vision-board-item.bow .vision-board-art-frame{box-shadow:inset 0 0 0 1px rgba(211,108,152,0.12);}
 .vision-board-item.butterfly .vision-board-art-frame{box-shadow:inset 0 0 0 1px rgba(125,115,230,0.14);}
+.vision-board-item.blossom .vision-board-art-frame{box-shadow:inset 0 0 0 1px rgba(239,142,177,0.12);}
+.vision-board-item.crescent .vision-board-art-frame{box-shadow:inset 0 0 0 1px rgba(111,123,231,0.14);}
+.vision-board-item.cloud .vision-board-art-frame{box-shadow:inset 0 0 0 1px rgba(126,185,218,0.14);}
 .vision-board-item.heart .vision-board-art-frame{box-shadow:inset 0 0 0 1px rgba(236,107,136,0.12);}
 .vision-board-item.gem .vision-board-art-frame{box-shadow:inset 0 0 0 1px rgba(93,155,214,0.14);}
 .vision-board-item.starburst .vision-board-art-frame{box-shadow:inset 0 0 0 1px rgba(240,165,74,0.14);}
@@ -901,6 +980,15 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   display:block;
   border-radius:18px;
   object-fit:cover;
+}
+.vision-board-image-note{
+  margin:.45rem .2rem 0;
+  font-size:.5rem;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--muted);
+  text-align:center;
 }
 .vision-board-credit{
   font-size:.46rem;
@@ -1012,6 +1100,8 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
   .vision-board-title{font-size:1.45rem;}
   .vision-board-asset{grid-template-columns:42px minmax(0,1fr);padding:.65rem;}
   .vision-board-asset-preview{height:42px;}
+  .vision-board-asset.photo{grid-template-columns:1fr;padding:.55rem;}
+  .vision-board-asset.photo .vision-board-asset-preview{height:92px;}
   .vision-board-asset.clipart{grid-template-columns:1fr;padding:.55rem;}
   .vision-board-asset.clipart .vision-board-asset-preview{height:70px;}
   .vision-board-canvas{min-height:410px;}
@@ -4344,25 +4434,29 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
       <div>
         <div class="vision-board-kicker">Live Board</div>
         <div class="vision-board-title">Build It Visually</div>
-        <div class="vision-board-copy">Paste or upload photos, drag them into place, and mix in notes, quotes, and little elements that make the future feel real while you are building toward it.</div>
+        <div class="vision-board-copy">Paste or upload photos, drag them into place, and layer in dreamy little art pieces so the board feels more like a collage than a checklist.</div>
       </div>
       <div class="vision-board-actions">
         <button class="vision-board-btn primary" type="button" onclick="openVisionBoardUpload()">Upload Photos</button>
         <button class="vision-board-btn danger" type="button" onclick="clearVisionBoard()">Clear Board</button>
-        <input id="vision-board-upload" type="file" accept="image/*" multiple hidden onchange="handleVisionBoardUpload(this)" />
+        <input id="vision-board-upload" class="vision-board-hidden-input" type="file" accept="image/*" multiple onchange="handleVisionBoardUpload(this)" />
       </div>
     </div>
     <div class="vision-board-helper">
       <span>Tip: paste an image straight from your clipboard while this page is open.</span>
-      <span>Everything on this board saves to your own account.</span>
+      <span><strong>Free image bank included:</strong> curated texture and mood images are pulled in from free-to-use Pexels photography.</span>
     </div>
     <div class="vision-board-workspace">
       <aside class="vision-board-library">
         <div class="vision-board-library-head">
           <div class="vision-board-library-kicker">Element Tray</div>
-          <div class="vision-board-library-copy">Pick a piece from the tray and it drops straight onto the board like a little stack of clip art.</div>
+          <div class="vision-board-library-copy">Build the board like a collage: start with a real image bank, then layer in art and words on top.</div>
         </div>
         <div class="vision-board-library-grid">
+          <div class="vision-board-library-section">
+            <div class="vision-board-library-label">Free Image Bank</div>
+            <div class="vision-board-stock-grid" id="vision-board-stock-bank"></div>
+          </div>
           <div class="vision-board-library-section">
             <div class="vision-board-library-label">Words & Cards</div>
             <button class="vision-board-asset note" type="button" onclick="addVisionBoardElement('note')">
@@ -4404,29 +4498,41 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
           <div class="vision-board-library-section">
             <div class="vision-board-library-label">Clip Art</div>
             <div class="vision-board-asset-grid-2">
-              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('bow')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart bow"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 48C40 30 18 20 10 28c-8 8 4 28 28 34-5 7-3 15 6 18 8 2 14-2 16-11 2 9 8 13 16 11 9-3 11-11 6-18 24-6 36-26 28-34-8-8-30 2-50 20z" fill="currentColor"/><circle cx="60" cy="48" r="10" fill="#fff" opacity=".92"/></svg></span></span>
-                <span class="vision-board-asset-label">Bow</span>
+              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('ribbon')">
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart ribbon"><svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 58c18-26 43-39 69-39 17 0 31 5 40 13-18 3-34 13-45 29 13 5 23 14 27 25-11-7-27-11-46-10-18 1-33 7-45 16 8-12 8-24 0-34z" fill="currentColor"/><path d="M25 65c19-10 41-12 63-6" stroke="#fff" stroke-opacity=".46" stroke-width="4" stroke-linecap="round"/></svg></span></span>
+                <span class="vision-board-asset-label">Satin Ribbon</span>
               </button>
               <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('butterfly')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart butterfly"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M57 44C44 24 21 12 10 20c-10 8-2 31 22 36-17 5-24 20-16 28 9 9 29 1 41-18z" fill="currentColor"/><path d="M63 44c13-20 36-32 47-24 10 8 2 31-22 36 17 5 24 20 16 28-9 9-29 1-41-18z" fill="currentColor" opacity=".88"/><rect x="57" y="26" width="6" height="36" rx="3" fill="#2c2420"/><path d="M60 26c4-7 9-10 15-11M60 26c-4-7-9-10-15-11" stroke="#2c2420" stroke-width="3" stroke-linecap="round"/></svg></span></span>
-                <span class="vision-board-asset-label">Butterfly</span>
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart butterfly"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M58 45c-14-24-33-34-44-28-11 7-5 28 18 35-16 4-24 17-18 26 8 10 28 5 44-16z" fill="currentColor"/><path d="M62 45c14-24 33-34 44-28 11 7 5 28-18 35 16 4 24 17 18 26-8 10-28 5-44-16z" fill="currentColor" opacity=".84"/><path d="M60 23v42" stroke="#2c2420" stroke-width="4" stroke-linecap="round"/><path d="M60 24c6-8 12-10 18-11M60 24c-6-8-12-10-18-11" stroke="#2c2420" stroke-width="3" stroke-linecap="round"/><circle cx="38" cy="34" r="4" fill="#fff" opacity=".42"/><circle cx="81" cy="34" r="4" fill="#fff" opacity=".38"/></svg></span></span>
+                <span class="vision-board-asset-label">Flutter</span>
+              </button>
+              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('blossom')">
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart blossom"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g fill="currentColor"><ellipse cx="60" cy="24" rx="14" ry="18"/><ellipse cx="86" cy="42" rx="14" ry="18" transform="rotate(70 86 42)"/><ellipse cx="76" cy="70" rx="14" ry="18" transform="rotate(144 76 70)"/><ellipse cx="44" cy="70" rx="14" ry="18" transform="rotate(-144 44 70)"/><ellipse cx="34" cy="42" rx="14" ry="18" transform="rotate(-70 34 42)"/></g><circle cx="60" cy="47" r="10" fill="#fff" opacity=".92"/><circle cx="60" cy="47" r="4" fill="currentColor" opacity=".35"/></svg></span></span>
+                <span class="vision-board-asset-label">Bloom</span>
+              </button>
+              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('crescent')">
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart crescent"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M78 12c-18 5-31 23-31 43 0 16 9 31 24 39-6 2-12 4-19 4-23 0-42-19-42-43s19-43 43-43c9 0 17 2 25 0z" fill="currentColor"/><path d="M92 18l2 5 5 2-5 2-2 5-2-5-5-2 5-2zM84 33l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z" fill="#fff" opacity=".82"/></svg></span></span>
+                <span class="vision-board-asset-label">Moonlight</span>
               </button>
               <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('heart')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart heart"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 73C28 54 16 38 16 24c0-10 8-18 18-18 10 0 16 6 20 13 4-7 10-13 20-13 10 0 18 8 18 18 0 14-12 30-44 49z" fill="currentColor"/><path d="M60 73C28 54 16 38 16 24c0-10 8-18 18-18 10 0 16 6 20 13 4-7 10-13 20-13 10 0 18 8 18 18 0 14-12 30-44 49z" fill="#fff" opacity=".14"/></svg></span></span>
-                <span class="vision-board-asset-label">Heart</span>
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart heart"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 73C28 54 16 38 16 24c0-10 8-18 18-18 10 0 16 6 20 13 4-7 10-13 20-13 10 0 18 8 18 18 0 14-12 30-44 49z" fill="currentColor"/><path d="M61 25c7-9 16-13 25-13 10 0 17 8 17 18 0 11-9 24-32 40" fill="#fff" opacity=".12"/><path d="M42 26c3-6 8-10 14-12" stroke="#fff" stroke-opacity=".45" stroke-width="4" stroke-linecap="round"/></svg></span></span>
+                <span class="vision-board-asset-label">Blush Heart</span>
+              </button>
+              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('cloud')">
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart cloud"><svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M42 72h50c15 0 26-9 26-22 0-12-10-21-23-21-3-15-16-25-32-25-18 0-32 13-34 31C16 37 6 47 6 60c0 7 3 12 8 16 6 5 15 8 28 8z" fill="currentColor"/><path d="M98 18l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM28 24l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z" fill="#fff" opacity=".76"/><path d="M31 74c15-7 44-8 62-2" stroke="#fff" stroke-opacity=".34" stroke-width="4" stroke-linecap="round"/></svg></span></span>
+                <span class="vision-board-asset-label">Daydream Cloud</span>
               </button>
               <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('gem')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart gem"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M26 28h68l-34 40z" fill="currentColor" opacity=".92"/><path d="M40 14h40l14 14H26z" fill="currentColor"/><path d="M60 14l-8 14 8 40 8-40z" fill="#fff" opacity=".34"/><path d="M40 14l12 14M80 14L68 28" stroke="#fff" stroke-opacity=".55" stroke-width="3"/></svg></span></span>
-                <span class="vision-board-asset-label">Gem</span>
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart gem"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M26 28h68l-34 40z" fill="currentColor" opacity=".9"/><path d="M40 14h40l14 14H26z" fill="currentColor"/><path d="M60 14l-8 14 8 40 8-40z" fill="#fff" opacity=".34"/><path d="M40 14l12 14M80 14L68 28M26 28l19 0M94 28H75" stroke="#fff" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/></svg></span></span>
+                <span class="vision-board-asset-label">Prism</span>
               </button>
               <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('crown')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart crown"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20 62l10-34 23 20 7-24 7 24 23-20 10 34z" fill="currentColor"/><rect x="22" y="62" width="76" height="12" rx="6" fill="currentColor" opacity=".88"/><circle cx="30" cy="28" r="5" fill="#fff" opacity=".9"/><circle cx="60" cy="24" r="5" fill="#fff" opacity=".9"/><circle cx="90" cy="28" r="5" fill="#fff" opacity=".9"/></svg></span></span>
-                <span class="vision-board-asset-label">Crown</span>
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart crown"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20 62l10-34 23 20 7-24 7 24 23-20 10 34z" fill="currentColor"/><path d="M28 58c10-11 18-18 32-18s22 7 32 18" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="4" stroke-linecap="round"/><rect x="22" y="62" width="76" height="12" rx="6" fill="currentColor" opacity=".88"/><circle cx="30" cy="28" r="5" fill="#fff" opacity=".9"/><circle cx="60" cy="24" r="5" fill="#fff" opacity=".9"/><circle cx="90" cy="28" r="5" fill="#fff" opacity=".9"/></svg></span></span>
+                <span class="vision-board-asset-label">Tiara</span>
               </button>
               <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('starburst')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart starburst"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 10l9 22 23-9-12 21 24 6-24 6 12 21-23-9-9 22-9-22-23 9 12-21-24-6 24-6-12-21 23 9z" fill="currentColor"/></svg></span></span>
-                <span class="vision-board-asset-label">Starburst</span>
+                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart starburst"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 10l9 22 23-9-12 21 24 6-24 6 12 21-23-9-9 22-9-22-23 9 12-21-24-6 24-6-12-21 23 9z" fill="currentColor"/><circle cx="60" cy="50" r="9" fill="#fff" opacity=".18"/></svg></span></span>
+                <span class="vision-board-asset-label">Burst</span>
               </button>
             </div>
           </div>
@@ -8698,30 +8804,115 @@ function animateVision(){
 // LIVE VISION BOARD
 const VISION_BOARD_KEY = 'pcc-vision-board';
 const VISION_BOARD_MAX_ITEMS = 36;
+const VISION_BOARD_INPUT_MAX_BYTES = 16 * 1024 * 1024;
+const VISION_BOARD_OUTPUT_MAX_BYTES = 180 * 1024;
 const VISION_BOARD_PRESETS = {
   note:   { w: 250, content: 'Add a dream, reminder, or intention here.' },
   quote:  { w: 290, content: 'Write a line that pulls you back into the future you are building.' },
   mantra: { w: 300, content: 'I am already becoming the version of me who lives this fully.' },
   goal:   { w: 250, content: 'Name the next vivid thing you are claiming and moving toward.' },
   sticker:{ w: 172, content: 'Dream Big' },
+  ribbon: { w: 176, content: '' },
   crown:  { w: 176, content: '' },
   spark:  { w: 152, content: '' },
   bow:    { w: 176, content: '' },
   butterfly:{ w: 176, content: '' },
+  blossom:{ w: 176, content: '' },
+  crescent:{ w: 176, content: '' },
+  cloud:{ w: 176, content: '' },
   heart:  { w: 176, content: '' },
   gem:    { w: 176, content: '' },
   starburst:{ w: 176, content: '' },
   image:  { w: 230, content: '' }
 };
 const VISION_BOARD_ART_LABELS = {
-  crown: 'Crown',
+  ribbon: 'Satin Ribbon',
+  crown: 'Tiara',
   spark: 'Spark',
   bow: 'Bow',
-  butterfly: 'Butterfly',
-  heart: 'Heart',
-  gem: 'Gem',
-  starburst: 'Starburst'
+  butterfly: 'Flutter',
+  blossom: 'Bloom',
+  crescent: 'Moonlight',
+  cloud: 'Daydream Cloud',
+  heart: 'Blush Heart',
+  gem: 'Prism',
+  starburst: 'Burst'
 };
+const VISION_BOARD_STOCK_ASSETS = [
+  {
+    id: 'paper-fibers',
+    label: 'Paper Fibers',
+    kind: 'Texture',
+    source: 'Pexels',
+    src: 'https://images.pexels.com/photos/5993559/pexels-photo-5993559.jpeg?auto=compress&cs=tinysrgb&w=900',
+    w: 248
+  },
+  {
+    id: 'soft-paper',
+    label: 'Soft Paper',
+    kind: 'Texture',
+    source: 'Pexels',
+    src: 'https://images.pexels.com/photos/5993568/pexels-photo-5993568.jpeg?auto=compress&cs=tinysrgb&w=900',
+    w: 248
+  },
+  {
+    id: 'satin-fuchsia',
+    label: 'Fuchsia Satin',
+    kind: 'Fabric',
+    source: 'Pexels',
+    src: 'https://images.pexels.com/photos/6276018/pexels-photo-6276018.jpeg?auto=compress&cs=tinysrgb&w=900',
+    w: 232
+  },
+  {
+    id: 'rose-veil',
+    label: 'Rose Veil',
+    kind: 'Fabric',
+    source: 'Pexels',
+    src: 'https://images.pexels.com/photos/6571742/pexels-photo-6571742.jpeg?auto=compress&cs=tinysrgb&w=900',
+    w: 232
+  },
+  {
+    id: 'blush-marble',
+    label: 'Blush Marble',
+    kind: 'Surface',
+    source: 'Pexels',
+    src: 'https://images.pexels.com/photos/4709542/pexels-photo-4709542.jpeg?auto=compress&cs=tinysrgb&w=900',
+    w: 248
+  },
+  {
+    id: 'plant-shadow',
+    label: 'Plant Shadow',
+    kind: 'Light',
+    source: 'Pexels',
+    src: 'https://images.pexels.com/photos/2821756/pexels-photo-2821756.jpeg?auto=compress&cs=tinysrgb&w=900',
+    w: 248
+  },
+  {
+    id: 'pink-clouds',
+    label: 'Pink Clouds',
+    kind: 'Sky',
+    source: 'Pexels',
+    src: 'https://images.pexels.com/photos/30614902/pexels-photo-30614902.jpeg?auto=compress&cs=tinysrgb&w=900',
+    w: 268
+  },
+  {
+    id: 'twilight-clouds',
+    label: 'Twilight Clouds',
+    kind: 'Sky',
+    source: 'Pexels',
+    src: 'https://images.pexels.com/photos/30505082/pexels-photo-30505082.jpeg?auto=compress&cs=tinysrgb&w=900',
+    w: 268
+  },
+  {
+    id: 'pink-swirl',
+    label: 'Pink Swirl',
+    kind: 'Abstract',
+    source: 'Pexels',
+    src: 'https://images.pexels.com/photos/30903808/pexels-photo-30903808.jpeg?auto=compress&cs=tinysrgb&w=900',
+    w: 236
+  }
+];
+const VISION_BOARD_STOCK_ASSET_MAP = Object.fromEntries(VISION_BOARD_STOCK_ASSETS.map(asset => [asset.id, asset]));
 const VISION_BOARD_ART_TYPES = new Set(Object.keys(VISION_BOARD_ART_LABELS));
 let visionBoardItems = [];
 let visionBoardSeed = 1;
@@ -8732,20 +8923,28 @@ let visionBoardDrag = null;
 
 function getVisionBoardClipArtSvg(type) {
   switch (type) {
+    case 'ribbon':
+      return '<svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 58c18-26 43-39 69-39 17 0 31 5 40 13-18 3-34 13-45 29 13 5 23 14 27 25-11-7-27-11-46-10-18 1-33 7-45 16 8-12 8-24 0-34z" fill="currentColor"/><path d="M25 65c19-10 41-12 63-6" stroke="#fff" stroke-opacity=".46" stroke-width="4" stroke-linecap="round"/></svg>';
     case 'crown':
-      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20 62l10-34 23 20 7-24 7 24 23-20 10 34z" fill="currentColor"/><rect x="22" y="62" width="76" height="12" rx="6" fill="currentColor" opacity=".88"/><circle cx="30" cy="28" r="5" fill="#fff" opacity=".9"/><circle cx="60" cy="24" r="5" fill="#fff" opacity=".9"/><circle cx="90" cy="28" r="5" fill="#fff" opacity=".9"/></svg>';
+      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20 62l10-34 23 20 7-24 7 24 23-20 10 34z" fill="currentColor"/><path d="M28 58c10-11 18-18 32-18s22 7 32 18" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="4" stroke-linecap="round"/><rect x="22" y="62" width="76" height="12" rx="6" fill="currentColor" opacity=".88"/><circle cx="30" cy="28" r="5" fill="#fff" opacity=".9"/><circle cx="60" cy="24" r="5" fill="#fff" opacity=".9"/><circle cx="90" cy="28" r="5" fill="#fff" opacity=".9"/></svg>';
     case 'spark':
       return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 10l8 24 24 8-24 8-8 24-8-24-24-8 24-8z" fill="currentColor"/><circle cx="24" cy="24" r="5" fill="currentColor" opacity=".55"/><circle cx="95" cy="20" r="4" fill="currentColor" opacity=".45"/><circle cx="92" cy="67" r="6" fill="currentColor" opacity=".3"/></svg>';
     case 'bow':
       return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 48C40 30 18 20 10 28c-8 8 4 28 28 34-5 7-3 15 6 18 8 2 14-2 16-11 2 9 8 13 16 11 9-3 11-11 6-18 24-6 36-26 28-34-8-8-30 2-50 20z" fill="currentColor"/><circle cx="60" cy="48" r="10" fill="#fff" opacity=".92"/></svg>';
     case 'butterfly':
-      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M57 44C44 24 21 12 10 20c-10 8-2 31 22 36-17 5-24 20-16 28 9 9 29 1 41-18z" fill="currentColor"/><path d="M63 44c13-20 36-32 47-24 10 8 2 31-22 36 17 5 24 20 16 28-9 9-29 1-41-18z" fill="currentColor" opacity=".88"/><rect x="57" y="26" width="6" height="36" rx="3" fill="#2c2420"/><path d="M60 26c4-7 9-10 15-11M60 26c-4-7-9-10-15-11" stroke="#2c2420" stroke-width="3" stroke-linecap="round"/></svg>';
+      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M58 45c-14-24-33-34-44-28-11 7-5 28 18 35-16 4-24 17-18 26 8 10 28 5 44-16z" fill="currentColor"/><path d="M62 45c14-24 33-34 44-28 11 7 5 28-18 35 16 4 24 17 18 26-8 10-28 5-44-16z" fill="currentColor" opacity=".84"/><path d="M60 23v42" stroke="#2c2420" stroke-width="4" stroke-linecap="round"/><path d="M60 24c6-8 12-10 18-11M60 24c-6-8-12-10-18-11" stroke="#2c2420" stroke-width="3" stroke-linecap="round"/><circle cx="38" cy="34" r="4" fill="#fff" opacity=".42"/><circle cx="81" cy="34" r="4" fill="#fff" opacity=".38"/></svg>';
+    case 'blossom':
+      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g fill="currentColor"><ellipse cx="60" cy="24" rx="14" ry="18"/><ellipse cx="86" cy="42" rx="14" ry="18" transform="rotate(70 86 42)"/><ellipse cx="76" cy="70" rx="14" ry="18" transform="rotate(144 76 70)"/><ellipse cx="44" cy="70" rx="14" ry="18" transform="rotate(-144 44 70)"/><ellipse cx="34" cy="42" rx="14" ry="18" transform="rotate(-70 34 42)"/></g><circle cx="60" cy="47" r="10" fill="#fff" opacity=".92"/><circle cx="60" cy="47" r="4" fill="currentColor" opacity=".35"/></svg>';
+    case 'crescent':
+      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M78 12c-18 5-31 23-31 43 0 16 9 31 24 39-6 2-12 4-19 4-23 0-42-19-42-43s19-43 43-43c9 0 17 2 25 0z" fill="currentColor"/><path d="M92 18l2 5 5 2-5 2-2 5-2-5-5-2 5-2zM84 33l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z" fill="#fff" opacity=".82"/></svg>';
+    case 'cloud':
+      return '<svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M42 72h50c15 0 26-9 26-22 0-12-10-21-23-21-3-15-16-25-32-25-18 0-32 13-34 31C16 37 6 47 6 60c0 7 3 12 8 16 6 5 15 8 28 8z" fill="currentColor"/><path d="M98 18l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM28 24l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z" fill="#fff" opacity=".76"/><path d="M31 74c15-7 44-8 62-2" stroke="#fff" stroke-opacity=".34" stroke-width="4" stroke-linecap="round"/></svg>';
     case 'heart':
-      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 73C28 54 16 38 16 24c0-10 8-18 18-18 10 0 16 6 20 13 4-7 10-13 20-13 10 0 18 8 18 18 0 14-12 30-44 49z" fill="currentColor"/><path d="M60 73C28 54 16 38 16 24c0-10 8-18 18-18 10 0 16 6 20 13 4-7 10-13 20-13 10 0 18 8 18 18 0 14-12 30-44 49z" fill="#fff" opacity=".14"/></svg>';
+      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 73C28 54 16 38 16 24c0-10 8-18 18-18 10 0 16 6 20 13 4-7 10-13 20-13 10 0 18 8 18 18 0 14-12 30-44 49z" fill="currentColor"/><path d="M61 25c7-9 16-13 25-13 10 0 17 8 17 18 0 11-9 24-32 40" fill="#fff" opacity=".12"/><path d="M42 26c3-6 8-10 14-12" stroke="#fff" stroke-opacity=".45" stroke-width="4" stroke-linecap="round"/></svg>';
     case 'gem':
-      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M26 28h68l-34 40z" fill="currentColor" opacity=".92"/><path d="M40 14h40l14 14H26z" fill="currentColor"/><path d="M60 14l-8 14 8 40 8-40z" fill="#fff" opacity=".34"/><path d="M40 14l12 14M80 14L68 28" stroke="#fff" stroke-opacity=".55" stroke-width="3"/></svg>';
+      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M26 28h68l-34 40z" fill="currentColor" opacity=".9"/><path d="M40 14h40l14 14H26z" fill="currentColor"/><path d="M60 14l-8 14 8 40 8-40z" fill="#fff" opacity=".34"/><path d="M40 14l12 14M80 14L68 28M26 28h19M75 28h19" stroke="#fff" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/></svg>';
     case 'starburst':
-      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 10l9 22 23-9-12 21 24 6-24 6 12 21-23-9-9 22-9-22-23 9 12-21-24-6 24-6-12-21 23 9z" fill="currentColor"/></svg>';
+      return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 10l9 22 23-9-12 21 24 6-24 6 12 21-23-9-9 22-9-22-23 9 12-21-24-6 24-6-12-21 23 9z" fill="currentColor"/><circle cx="60" cy="50" r="9" fill="#fff" opacity=".18"/></svg>';
     default:
       return '';
   }
@@ -8786,7 +8985,9 @@ function createVisionBoardItem(type, extra = {}) {
     w: normalizeVisionBoardNumber(extra.w, preset.w),
     z: normalizeVisionBoardNumber(extra.z, visionBoardZSeed++),
     content: typeof extra.content === 'string' ? extra.content : preset.content,
-    src: typeof extra.src === 'string' ? extra.src : ''
+    src: typeof extra.src === 'string' ? extra.src : '',
+    label: typeof extra.label === 'string' ? extra.label : '',
+    credit: typeof extra.credit === 'string' ? extra.credit : ''
   };
 }
 
@@ -8797,6 +8998,8 @@ function normalizeVisionBoardItem(raw) {
   item.id = String(raw.id);
   item.content = typeof raw.content === 'string' ? raw.content : item.content;
   item.src = typeof raw.src === 'string' ? raw.src : '';
+  item.label = typeof raw.label === 'string' ? raw.label : '';
+  item.credit = typeof raw.credit === 'string' ? raw.credit : '';
   return item;
 }
 
@@ -8822,6 +9025,26 @@ function queueVisionBoardSave() {
 
 function getVisionBoardCanvas() {
   return document.getElementById('vision-board-canvas');
+}
+
+function renderVisionBoardStockBank() {
+  const bank = document.getElementById('vision-board-stock-bank');
+  if (!bank) return;
+  bank.innerHTML = VISION_BOARD_STOCK_ASSETS.map((asset) => `
+    <button class="vision-board-asset photo" type="button" onclick="addVisionBoardStockAsset('${escapeHtmlAttr(asset.id)}')">
+      <span class="vision-board-asset-preview">
+        <img class="vision-board-asset-thumb" src="${escapeHtmlAttr(asset.src)}" alt="${escapeHtmlAttr(asset.label)}" loading="lazy" />
+      </span>
+      <span>
+        <span class="vision-board-asset-meta">
+          <span class="vision-board-asset-kind">${escapeHtml(asset.kind)}</span>
+          <span class="vision-board-asset-source">${escapeHtml(asset.source)}</span>
+        </span>
+        <span class="vision-board-asset-label">${escapeHtml(asset.label)}</span>
+        <span class="vision-board-asset-copy">Drop this onto the board as a full image layer.</span>
+      </span>
+    </button>
+  `).join('');
 }
 
 function renderVisionBoard() {
@@ -8856,11 +9079,12 @@ function renderVisionBoard() {
       if (item.type === 'image') {
         node.innerHTML = `
           <div class="vision-board-item-bar">
-            <div class="vision-board-grip">Drag</div>
+            <div class="vision-board-grip">${escapeHtml(item.label || 'Image')}</div>
             <button class="vision-board-delete" type="button" onclick="deleteVisionBoardItem('${item.id}')">×</button>
           </div>
           <div class="vision-board-image-wrap">
-            <img src="${escapeHtmlAttr(item.src)}" alt="Vision board upload" />
+            <img src="${escapeHtmlAttr(item.src)}" alt="${escapeHtmlAttr(item.label || 'Vision board image')}" />
+            ${item.credit ? '<div class="vision-board-image-note">' + escapeHtml(item.credit) + '</div>' : ''}
           </div>
         `;
       } else if (item.type === 'quote') {
@@ -8912,8 +9136,26 @@ function renderVisionBoard() {
     });
 }
 
+function addVisionBoardStockAsset(assetId) {
+  if (visionBoardItems.length >= VISION_BOARD_MAX_ITEMS) {
+    if (typeof safeShowToast === 'function') safeShowToast('Vision board is full for now. Remove something before adding more.');
+    return;
+  }
+  const asset = VISION_BOARD_STOCK_ASSET_MAP[assetId];
+  if (!asset) return;
+  visionBoardItems.push(createVisionBoardItem('image', {
+    src: asset.src,
+    w: asset.w || 240,
+    label: asset.label,
+    credit: 'Free image via ' + asset.source
+  }));
+  queueVisionBoardSave();
+  renderVisionBoard();
+}
+
 function initVisionBoard() {
   loadVisionBoardState();
+  renderVisionBoardStockBank();
   renderVisionBoard();
   if (visionBoardEventsBound) return;
   visionBoardEventsBound = true;
@@ -8997,7 +9239,14 @@ function addVisionBoardElement(type) {
 }
 
 function openVisionBoardUpload() {
-  document.getElementById('vision-board-upload')?.click();
+  const input = document.getElementById('vision-board-upload');
+  if (!input) return;
+  try {
+    if (typeof input.showPicker === 'function') input.showPicker();
+    else input.click();
+  } catch (error) {
+    input.click();
+  }
 }
 
 function readFileAsDataUrl(file) {
@@ -9009,22 +9258,37 @@ function readFileAsDataUrl(file) {
   });
 }
 
+function visionBoardDataUrlByteLength(dataUrl) {
+  const base64 = String(dataUrl || '').split(',')[1] || '';
+  return Math.ceil((base64.length * 3) / 4);
+}
+
 async function compressVisionBoardImage(file) {
   if (!file || !String(file.type || '').startsWith('image/')) return null;
-  if (file.type === 'image/gif') return readFileAsDataUrl(file);
   const dataUrl = await readFileAsDataUrl(file);
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
-      const maxDim = 1200;
-      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.max(1, Math.round(img.width * scale));
-      canvas.height = Math.max(1, Math.round(img.height * scale));
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-      resolve(canvas.toDataURL(outputType, 0.86));
+      const attempts = [
+        { dim: 960, quality: 0.84 },
+        { dim: 820, quality: 0.78 },
+        { dim: 680, quality: 0.72 },
+        { dim: 560, quality: 0.66 },
+        { dim: 460, quality: 0.6 }
+      ];
+      let last = dataUrl;
+      for (const step of attempts) {
+        const scale = Math.min(1, step.dim / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(img.width * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
+        const ctx = canvas.getContext('2d');
+        if (!ctx) continue;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        last = canvas.toDataURL('image/jpeg', step.quality);
+        if (visionBoardDataUrlByteLength(last) <= VISION_BOARD_OUTPUT_MAX_BYTES) break;
+      }
+      resolve(last);
     };
     img.onerror = () => resolve(dataUrl);
     img.src = dataUrl;
@@ -9033,17 +9297,53 @@ async function compressVisionBoardImage(file) {
 
 async function addVisionBoardImages(files) {
   const list = Array.from(files || []).filter(file => String(file.type || '').startsWith('image/'));
-  if (!list.length) return;
+  if (!list.length) {
+    if (typeof safeShowToast === 'function') safeShowToast('Choose an image file first.');
+    return;
+  }
   const roomLeft = Math.max(0, VISION_BOARD_MAX_ITEMS - visionBoardItems.length);
+  if (!roomLeft) {
+    if (typeof safeShowToast === 'function') safeShowToast('Vision board is full for now. Remove something before adding more.');
+    return;
+  }
   const accepted = list.slice(0, roomLeft);
+  let added = 0;
+  let skipped = 0;
   for (const file of accepted) {
-    const src = await compressVisionBoardImage(file);
-    if (!src) continue;
-    visionBoardItems.push(createVisionBoardItem('image', { src }));
+    if (file.size > VISION_BOARD_INPUT_MAX_BYTES) {
+      skipped++;
+      continue;
+    }
+    try {
+      const src = await compressVisionBoardImage(file);
+      if (!src) {
+        skipped++;
+        continue;
+      }
+      visionBoardItems.push(createVisionBoardItem('image', {
+        src,
+        label: 'Uploaded Photo',
+        credit: 'Your upload'
+      }));
+      added++;
+    } catch (error) {
+      skipped++;
+    }
+  }
+  if (!added) {
+    if (typeof safeShowToast === 'function') {
+      safeShowToast(skipped ? 'Could not add that photo. Try a JPG, PNG, WEBP, or a smaller image.' : 'No photos were added.');
+    }
+    return;
   }
   syncVisionBoardSeeds();
   queueVisionBoardSave();
   renderVisionBoard();
+  if (typeof safeShowToast === 'function') {
+    const base = added === 1 ? '1 photo added to your vision board.' : `${added} photos added to your vision board.`;
+    const note = skipped ? ' Some files were skipped because they were too large or unreadable.' : '';
+    safeShowToast(base + note);
+  }
 }
 
 async function handleVisionBoardUpload(input) {

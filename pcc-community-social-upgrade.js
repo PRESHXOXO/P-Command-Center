@@ -18,7 +18,8 @@
   const SOCIAL_HEARTBEAT_MS = 25000;
   const SOCIAL_ONLINE_WINDOW_MS = 90000;
   const SOCIAL_RECENT_WINDOW_MS = 15 * 60 * 1000;
-  const MAX_PROFILE_PHOTO_BYTES = 2 * 1024 * 1024;
+  const MAX_PROFILE_PHOTO_BYTES = 12 * 1024 * 1024;
+  const MAX_PROFILE_PHOTO_OUTPUT_BYTES = 220 * 1024;
   const SOCIAL_FEATURES = {
     profiles: {
       path: 'community_profiles?select=user_id&limit=1',
@@ -588,6 +589,15 @@
         margin-top:.45rem;
         line-height:1.55;
       }
+      #edit-profile-overlay .comm-hidden-file-input{
+        position:absolute;
+        width:1px;
+        height:1px;
+        opacity:0;
+        pointer-events:none;
+        left:-9999px;
+        top:auto;
+      }
       @media(max-width:960px){
         .comm-member{
           flex-wrap:wrap;
@@ -620,7 +630,7 @@
       <div class="comm-photo-actions">
         <button class="comm-modal-cancel" type="button" onclick="openCommunityPhotoPicker()">Upload Photo</button>
         <button class="comm-modal-cancel" type="button" onclick="clearCommunityProfilePhoto()">Remove Photo</button>
-        <input id="comm-profile-photo-input" type="file" accept="image/*" hidden onchange="handleCommunityProfilePhoto(this)" />
+        <input id="comm-profile-photo-input" class="comm-hidden-file-input" type="file" accept="image/*" onchange="handleCommunityProfilePhoto(this)" />
       </div>
       <div class="comm-photo-note">Square photos work best. Your image is saved to your Community profile and shows up in the feed, messages, and live member list.</div>
     `;
@@ -636,20 +646,37 @@
     });
   }
 
+  function dataUrlByteLength(dataUrl) {
+    const base64 = String(dataUrl || '').split(',')[1] || '';
+    return Math.ceil((base64.length * 3) / 4);
+  }
+
   async function compressProfilePhoto(file) {
     if (!file || !String(file.type || '').startsWith('image/')) return '';
     const raw = await readFileAsDataUrl(file);
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
-        const maxDim = 320;
-        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(img.width * scale));
-        canvas.height = Math.max(1, Math.round(img.height * scale));
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', 0.82));
+        const attempts = [
+          { dim: 320, quality: 0.82 },
+          { dim: 280, quality: 0.78 },
+          { dim: 240, quality: 0.74 },
+          { dim: 220, quality: 0.7 },
+          { dim: 180, quality: 0.64 }
+        ];
+        let last = raw;
+        for (const step of attempts) {
+          const scale = Math.min(1, step.dim / Math.max(img.width, img.height));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          const ctx = canvas.getContext('2d');
+          if (!ctx) continue;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          last = canvas.toDataURL('image/jpeg', step.quality);
+          if (dataUrlByteLength(last) <= MAX_PROFILE_PHOTO_OUTPUT_BYTES) break;
+        }
+        resolve(last);
       };
       img.onerror = () => resolve(raw);
       img.src = raw;
@@ -686,20 +713,37 @@
   }
 
   window.openCommunityPhotoPicker = function () {
-    document.getElementById('comm-profile-photo-input')?.click();
+    const input = document.getElementById('comm-profile-photo-input');
+    if (!input) {
+      ensureProfilePhotoControls();
+    }
+    const picker = document.getElementById('comm-profile-photo-input');
+    if (!picker) return;
+    try {
+      if (typeof picker.showPicker === 'function') picker.showPicker();
+      else picker.click();
+    } catch (error) {
+      picker.click();
+    }
   };
 
   window.handleCommunityProfilePhoto = async function (input) {
     const file = input?.files?.[0];
     if (!file) return;
     if (file.size > MAX_PROFILE_PHOTO_BYTES) {
-      toast('Please use a profile photo under 2 MB.');
+      toast('Please use a profile photo under 12 MB.');
       if (input) input.value = '';
       return;
     }
-    socialState.photoDraft = await compressProfilePhoto(file);
-    socialState.photoDirty = true;
-    renderEditAvatarPreview();
+    try {
+      socialState.photoDraft = await compressProfilePhoto(file);
+      if (!socialState.photoDraft) throw new Error('empty photo');
+      socialState.photoDirty = true;
+      renderEditAvatarPreview();
+      toast('Photo ready. Save profile to keep it.');
+    } catch (error) {
+      toast('Could not load that photo. Try a JPG, PNG, WEBP, or a smaller image export.');
+    }
     if (input) input.value = '';
   };
 
