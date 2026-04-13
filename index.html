@@ -6,6 +6,7 @@
 <title>P's Command Center</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="./pcc-vision-studio.css" rel="stylesheet">
 <style>
 /* ── LIGHT MODE (default) ── */
 :root {
@@ -4429,6 +4430,7 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
     <div style="text-align:right;padding-bottom:.35rem;"><div class="sub">Where you're going — always</div></div>
   </div>
   <p class="vision-intro">This is the north star. Every habit, every goal, every decision on the dashboard feeds into what's mapped below. Review this when it gets hard. This is the why.</p>
+  <div id="vision-studio-root" class="vision-studio-root"></div>
   <div class="vision-board-shell">
     <div class="vision-board-top">
       <div>
@@ -9154,6 +9156,10 @@ function addVisionBoardStockAsset(assetId) {
 }
 
 function initVisionBoard() {
+  if (document.getElementById('vision-studio-root') && window.VisionStudio && typeof window.VisionStudio.mount === 'function') {
+    window.VisionStudio.mount();
+    return;
+  }
   loadVisionBoardState();
   renderVisionBoardStockBank();
   renderVisionBoard();
@@ -11751,6 +11757,7 @@ if (document.readyState !== 'loading') {
 <script src="./pcc-hub-upgrade.js"></script>
 <script src="./pcc-community-upgrade.js"></script>
 <script src="./pcc-community-social-upgrade.js"></script>
+<script src="./pcc-vision-studio.js"></script>
 <style id="hub-editable-style">
 .hub-editable-block,
 .hub-inline-edit,
