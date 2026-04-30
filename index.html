@@ -8272,6 +8272,14 @@ function applyRoleBasedNavigation() {
   }
 }
 
+function emitPageChange(pageId, page, trigger) {
+  try {
+    const detail = { pageId, page: page || null, trigger: trigger || null };
+    const evt = new CustomEvent('pcc:pagechange', { detail });
+    window.dispatchEvent(evt);
+  } catch (e) {}
+}
+
 // NAV
 function showPage(id, btn) {
   const targetId = canAccessPage(id) ? id : 'dashboard';
@@ -8291,6 +8299,7 @@ function showPage(id, btn) {
     setTimeout(initVisionBoard, 50);
   }
   if (targetId === 'community')  setTimeout(initCommunity, 50);
+  emitPageChange(targetId, page, targetBtn);
   return targetId;
 }
 
@@ -10157,16 +10166,13 @@ function mobileNavGo(pageId, btn) {
   closeMobileNav();
 }
 
-// Sync mobile drawer active state when desktop tabs are clicked
-const _origShowPage = window.showPage;
-window.showPage = function(id, btn) {
-  const resolvedPageId = _origShowPage ? _origShowPage(id, btn) : id;
-  // Sync mobile drawer
+// Sync mobile drawer active state when page changes
+window.addEventListener('pcc:pagechange', function(event) {
+  const resolvedPageId = event.detail?.pageId || 'dashboard';
   document.querySelectorAll('.mobile-nav-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.page === resolvedPageId);
   });
-  return resolvedPageId;
-};
+});
 
 // Close drawer on escape
 document.addEventListener('keydown', e => {
@@ -11546,15 +11552,6 @@ if (document.readyState !== 'loading') {
 
 // ── Page wrapper ──
 (function() {
-  const originalShowPage = window.showPage;
-  if (typeof originalShowPage === 'function') {
-    window.showPage = function(id, btn) {
-      const resolvedPageId = originalShowPage(id, btn);
-      document.querySelectorAll('.nav-tab[data-page="custom"]').forEach(tab => tab.classList.add('on'));
-      return resolvedPageId;
-    };
-  }
-
   function bindTopNavTabs() {
     document.querySelectorAll('.nav-tabs .nav-tab').forEach(tab => {
       if (tab.dataset.codexBound === 'true') return;
@@ -12542,16 +12539,12 @@ if (document.readyState !== 'loading') {
     };
   }
 
-  const _origShowPage = window.showPage;
-  if (typeof _origShowPage === 'function') {
-    window.showPage = function(targetId) {
-      const result = _origShowPage.apply(this, arguments);
-      if (['dashboard','vision','community','calendar'].includes(targetId)) {
-        setTimeout(applyHubBoxState, 40);
-      }
-      return result;
-    };
-  }
+  window.addEventListener('pcc:pagechange', function(event) {
+    const targetId = event.detail?.pageId || '';
+    if (['dashboard','vision','community','calendar'].includes(targetId)) {
+      setTimeout(applyHubBoxState, 40);
+    }
+  });
 
   function startHubEditableLayer() {
     loadHubBoxesLocal();
