@@ -1,0 +1,87 @@
+<div class="pg-header">
+    <div>
+      <div class="eyebrow">The Inner Circle</div>
+      <h1>Community</h1>
+    </div>
+    <div style="text-align:right;padding-bottom:.35rem;">
+      <div class="sub">Business in the front. Sisterhood in the back.</div>
+    </div>
+  </div>
+
+  <div class="community-layout">
+
+    <div class="comm-sidebar">
+      <div class="comm-profile-card">
+        <div class="comm-avatar" id="comm-avatar">P</div>
+        <div class="comm-profile-name" id="comm-profile-name">Precious</div>
+        <div class="comm-profile-handle" id="comm-profile-handle">@precious</div>
+        <button class="comm-edit-profile-btn" onclick="openEditProfile()">✎ Edit Profile</button>
+        <div class="comm-stats">
+          <div class="comm-stat"><div class="comm-stat-n" id="comm-posts-count">0</div><div class="comm-stat-l">Posts</div></div>
+          <div class="comm-stat"><div class="comm-stat-n">1</div><div class="comm-stat-l">Pod</div></div>
+          <div class="comm-stat"><div class="comm-stat-n" id="comm-streak">1</div><div class="comm-stat-l">Day streak</div></div>
+        </div>
+      </div>
+      <div class="comm-nav">
+        <div class="comm-nav-item active" onclick="switchCommView('feed',this)"><span class="comm-nav-icon">📋</span> Feed</div>
+        <div class="comm-nav-item" onclick="switchCommView('pods',this)"><span class="comm-nav-icon">🤝</span> My Pod</div>
+        <div class="comm-nav-item" onclick="switchCommView('challenges',this)"><span class="comm-nav-icon">⚡</span> Challenges</div>
+        <div class="comm-nav-item" onclick="switchCommView('wins',this)"><span class="comm-nav-icon">🏆</span> Win Wall</div>
+        <div class="comm-nav-item" onclick="switchCommView('messages',this)"><span class="comm-nav-icon">💬</span> Messages</div>
+      </div>
+      <button class="comm-create-btn" onclick="openCreatePod()">+ Create Pod</button>
+      <button class="comm-create-btn comm-create-btn-secondary" onclick="openCreateChallenge()">+ Create Challenge</button>
+    </div>
+
+    <div class="comm-main" id="comm-main">
+      <div class="comm-composer">
+        <div class="comm-composer-top">
+          <div class="comm-composer-avatar" id="comm-composer-av">P</div>
+          <textarea class="comm-composer-input" id="comm-compose-text"
+            placeholder="Share a win, set a goal, ask for support... This is your space. 👑"
+            maxlength="500" oninput="updateCharCount(this)"></textarea>
+        </div>
+        <div class="comm-post-types" id="comm-post-types">
+          <button class="comm-type-btn selected" data-type="update" onclick="selectPostType(this)">📢 Update</button>
+          <button class="comm-type-btn" data-type="win" onclick="selectPostType(this)">🏆 Win</button>
+          <button class="comm-type-btn" data-type="goal" onclick="selectPostType(this)">🎯 Goal</button>
+          <button class="comm-type-btn" data-type="support" onclick="selectPostType(this)">🌸 Support</button>
+          <button class="comm-type-btn" data-type="question" onclick="selectPostType(this)">💭 Question</button>
+        </div>
+        <div class="comm-composer-footer">
+          <span class="comm-char-count" id="comm-char-count">0 / 500</span>
+          <button class="comm-post-btn" onclick="submitPost()">Post ✦</button>
+        </div>
+      </div>
+      <div class="comm-feed-tabs">
+        <button class="comm-feed-tab active" onclick="filterFeed('all',this)">✦ All</button>
+        <button class="comm-feed-tab" onclick="filterFeed('win',this)">🏆 Wins</button>
+        <button class="comm-feed-tab" onclick="filterFeed('goal',this)">🎯 Goals</button>
+        <button class="comm-feed-tab" onclick="filterFeed('support',this)">🌸 Support</button>
+        <button class="comm-feed-tab" onclick="filterFeed('question',this)">💭 Questions</button>
+      </div>
+      <div id="comm-feed"></div>
+    </div>
+
+    <div class="comm-right">
+      <div class="comm-challenge-card">
+        <div class="comm-challenge-label">🔥 Active Challenge</div>
+        <div class="comm-challenge-title">30-Day Income Sprint</div>
+        <div class="comm-challenge-desc">Track at least one income-generating action every day for 30 days. Log it in your Streams tab.</div>
+        <div class="comm-challenge-progress"><div class="comm-challenge-fill" id="challenge-fill"></div></div>
+        <div class="comm-challenge-meta">
+          <span id="challenge-day">Day 1 of 30</span>
+          <span id="challenge-members">1 member joined</span>
+        </div>
+        <button class="comm-join-btn" id="challenge-join-btn" onclick="joinChallenge()">Join Challenge →</button>
+      </div>
+      <div class="comm-pods-card">
+        <div class="comm-pods-label">🤝 Accountability Pods</div>
+        <div class="comm-online-empty">Live pods load here when Community sync is ready.</div>
+      </div>
+      <div class="comm-online-card">
+        <div class="comm-online-label"><div class="online-dot"></div> Online Now</div>
+        <div class="comm-online-empty">Active members appear here once presence sync connects.</div>
+      </div>
+    </div>
+  </div>

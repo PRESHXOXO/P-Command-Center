@@ -6,7 +6,6 @@
 <title>P's Command Center</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<link href="./pcc-vision-studio.css" rel="stylesheet">
 <style>
 /* ── LIGHT MODE (default) ── */
 :root {
@@ -166,6 +165,49 @@ body{font-family:'DM Sans',sans-serif;font-weight:300;background:var(--bg);color
 /* ═══ PAGES ═══ */
 .page{display:none;position:relative;z-index:10;max-width:1160px;margin:0 auto;padding:7.65rem 2rem 5rem;}
 .page.active{display:block;animation:fadeIn .35s ease both;}
+.page-shell-loading{min-height:48vh;display:none;}
+.page-shell-loading.active{display:block;}
+.page-shell-card{
+  max-width:620px;
+  margin:5.4rem auto 0;
+  padding:2rem 2.1rem;
+  border-radius:28px;
+  border:1px solid rgba(var(--teal-rgb),0.14);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.82), rgba(255,255,255,0.6)),
+    radial-gradient(circle at top right, rgba(var(--teal-rgb),0.12), transparent 48%);
+  box-shadow:0 30px 70px rgba(44,36,32,0.12), inset 0 1px 0 rgba(255,255,255,0.75);
+  backdrop-filter:blur(16px);
+  text-align:left;
+}
+.page-shell-kicker{
+  font-size:.62rem;
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  color:var(--teal);
+  font-weight:600;
+  margin-bottom:.75rem;
+}
+.page-shell-title{
+  font-family:var(--font-display, 'Cormorant Garamond', serif);
+  font-size:2.05rem;
+  line-height:1.05;
+  color:var(--ink);
+  margin-bottom:.55rem;
+}
+.page-shell-copy{
+  font-size:.85rem;
+  line-height:1.7;
+  color:var(--charcoal);
+  max-width:48ch;
+}
+[data-theme="dark"] .page-shell-card{
+  background:
+    linear-gradient(145deg, rgba(28,28,30,0.86), rgba(22,22,24,0.72)),
+    radial-gradient(circle at top right, rgba(var(--teal-rgb),0.16), transparent 48%);
+  border-color:rgba(var(--teal-rgb),0.22);
+  box-shadow:0 28px 60px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.04);
+}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
 /* ═══ GLASS ═══ */
@@ -4370,318 +4412,47 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
 </div>
 
 <!-- ════════ LIFE BOARD ════════ -->
-<div class="page" id="page-life-board">
-  <div class="pg-header">
-    <div><div class="eyebrow">Life Board</div><h1>Your Roles</h1></div>
-    <div style="text-align:right;padding-bottom:.35rem;"><div class="sub">Actively hiring for your best life</div></div>
-  </div>
-  <div class="bento">
-    <div class="board-head"><h2>All Active Listings</h2><div class="bline"></div><div class="bsub" id="lb-month-label">Ongoing</div></div>
-    <div class="filters">
-      <button class="f-btn on" onclick="filterBoard('all',this)">All</button>
-      <button class="f-btn" onclick="filterBoard('career',this)">Career</button>
-      <button class="f-btn" onclick="filterBoard('business',this)">Business</button>
-      <button class="f-btn" onclick="filterBoard('wellness',this)">Wellness</button>
-      <button class="f-btn" onclick="filterBoard('creative',this)">Creative</button>
-      <button class="f-btn" onclick="filterBoard('personal',this)">Personal</button>
-      <button class="f-btn" onclick="filterBoard('financial',this)">Financial</button>
-    </div>
-    <div class="board" id="board"></div>
+<div class="page page-shell-loading" id="page-life-board" data-page-lazy="true" data-page-loaded="false" aria-busy="true">
+  <div class="page-shell-card">
+    <div class="page-shell-kicker">Loading Hub</div>
+    <div class="page-shell-title">Life Board</div>
+    <div class="page-shell-copy">Loading the opportunity tracker and role board...</div>
   </div>
 </div>
 
 <!-- ════════ NOTES ════════ -->
-<div class="page" id="page-notes">
-  <div class="pg-header">
-    <div><div class="eyebrow">Notes</div><h1>Capture</h1></div>
-    <div style="text-align:right;padding-bottom:.35rem;"><div class="sub">Ideas · Reflections · Strategy</div></div>
-  </div>
-  <div class="quick-row">
-    <div class="quick-card"><div class="quick-label">Brain Dump</div><textarea class="quick-input" placeholder="Whatever's on your mind right now..."></textarea></div>
-    <div class="quick-card"><div class="quick-label">Today's Win</div><textarea class="quick-input" placeholder="What did you do today that deserves recognition..."></textarea></div>
-    <div class="quick-card"><div class="quick-label">One Thing Tomorrow</div><textarea class="quick-input" placeholder="The single most important thing tomorrow..."></textarea></div>
-  </div>
-  <div class="notes-layout">
-    <div class="notes-sidebar">
-      <div class="notes-sidebar-label">Saved Notes</div>
-      <div class="notes-scroll" id="notes-list"></div>
-      <button class="note-new-btn" onclick="newNote()">+ New Note</button>
-    </div>
-    <div class="note-editor-card">
-      <input class="note-title-input" id="note-title" placeholder="Note title..." />
-      <div class="note-divider"></div>
-      <textarea class="note-body-input" id="note-body" placeholder="Start writing... strategy, reflections, ideas, gratitude — whatever needs a home."></textarea>
-      <div class="note-divider"></div>
-      <div class="note-toolbar">
-        <input class="note-tags-input" id="note-tags" placeholder="Tags: business, personal, ideas..." />
-        <div class="note-actions">
-          <button class="note-delete-btn" onclick="deleteNote()">Delete</button>
-          <button class="note-save-btn" onclick="saveNote()">Save Note</button>
-        </div>
-      </div>
-    </div>
+<div class="page page-shell-loading" id="page-notes" data-page-lazy="true" data-page-loaded="false" aria-busy="true">
+  <div class="page-shell-card">
+    <div class="page-shell-kicker">Loading Hub</div>
+    <div class="page-shell-title">Notes</div>
+    <div class="page-shell-copy">Loading your writing space...</div>
   </div>
 </div>
 
 <!-- ════════ VISION ════════ -->
-<div class="page" id="page-vision">
-  <div class="pg-header">
-    <div><div class="eyebrow">Creative Command Center</div><h1>Vision Studio</h1></div>
-    <div style="text-align:right;padding-bottom:.35rem;"><div class="sub">Design your next chapter in layers</div></div>
-  </div>
-  <p class="vision-intro">Start with a clean canvas and build only what matters: photos, goals, habits, calendars, affirmations, frames, and accents arranged your way.</p>
-  <div id="vision-studio-root" class="vision-studio-root"></div>
-  <div class="vision-board-shell">
-    <div class="vision-board-top">
-      <div>
-        <div class="vision-board-kicker">Live Board</div>
-        <div class="vision-board-title">Build It Visually</div>
-        <div class="vision-board-copy">Paste or upload photos, drag them into place, and layer in dreamy little art pieces so the board feels more like a collage than a checklist.</div>
-      </div>
-      <div class="vision-board-actions">
-        <button class="vision-board-btn primary" type="button" onclick="openVisionBoardUpload()">Upload Photos</button>
-        <button class="vision-board-btn danger" type="button" onclick="clearVisionBoard()">Clear Board</button>
-        <input id="vision-board-upload" class="vision-board-hidden-input" type="file" accept="image/*" multiple onchange="handleVisionBoardUpload(this)" />
-      </div>
-    </div>
-    <div class="vision-board-helper">
-      <span>Tip: paste an image straight from your clipboard while this page is open.</span>
-      <span><strong>Free image bank included:</strong> curated texture and mood images are pulled in from free-to-use Pexels photography.</span>
-    </div>
-    <div class="vision-board-workspace">
-      <aside class="vision-board-library">
-        <div class="vision-board-library-head">
-          <div class="vision-board-library-kicker">Element Tray</div>
-          <div class="vision-board-library-copy">Build the board like a collage: start with a real image bank, then layer in art and words on top.</div>
-        </div>
-        <div class="vision-board-library-grid">
-          <div class="vision-board-library-section">
-            <div class="vision-board-library-label">Free Image Bank</div>
-            <div class="vision-board-stock-grid" id="vision-board-stock-bank"></div>
-          </div>
-          <div class="vision-board-library-section">
-            <div class="vision-board-library-label">Words & Cards</div>
-            <button class="vision-board-asset note" type="button" onclick="addVisionBoardElement('note')">
-              <span class="vision-board-asset-preview">✎</span>
-              <span>
-                <span class="vision-board-asset-label">Sticky Note</span>
-                <span class="vision-board-asset-copy">Short reminder, affirmation, or next move.</span>
-              </span>
-            </button>
-            <button class="vision-board-asset quote" type="button" onclick="addVisionBoardElement('quote')">
-              <span class="vision-board-asset-preview">“”</span>
-              <span>
-                <span class="vision-board-asset-label">Quote</span>
-                <span class="vision-board-asset-copy">A line that keeps the mood and mission in focus.</span>
-              </span>
-            </button>
-            <button class="vision-board-asset mantra" type="button" onclick="addVisionBoardElement('mantra')">
-              <span class="vision-board-asset-preview">✦</span>
-              <span>
-                <span class="vision-board-asset-label">Mantra</span>
-                <span class="vision-board-asset-copy">Big energy, center stage, full intention.</span>
-              </span>
-            </button>
-            <button class="vision-board-asset goal" type="button" onclick="addVisionBoardElement('goal')">
-              <span class="vision-board-asset-preview">Goal</span>
-              <span>
-                <span class="vision-board-asset-label">Goal Card</span>
-                <span class="vision-board-asset-copy">A vivid milestone you want staring back at you.</span>
-              </span>
-            </button>
-            <button class="vision-board-asset sticker" type="button" onclick="addVisionBoardElement('sticker')">
-              <span class="vision-board-asset-preview">Dream</span>
-              <span>
-                <span class="vision-board-asset-label">Sticker</span>
-                <span class="vision-board-asset-copy">Fun label energy for names, themes, and moods.</span>
-              </span>
-            </button>
-          </div>
-          <div class="vision-board-library-section">
-            <div class="vision-board-library-label">Clip Art</div>
-            <div class="vision-board-asset-grid-2">
-              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('ribbon')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart ribbon"><svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 58c18-26 43-39 69-39 17 0 31 5 40 13-18 3-34 13-45 29 13 5 23 14 27 25-11-7-27-11-46-10-18 1-33 7-45 16 8-12 8-24 0-34z" fill="currentColor"/><path d="M25 65c19-10 41-12 63-6" stroke="#fff" stroke-opacity=".46" stroke-width="4" stroke-linecap="round"/></svg></span></span>
-                <span class="vision-board-asset-label">Satin Ribbon</span>
-              </button>
-              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('butterfly')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart butterfly"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M58 45c-14-24-33-34-44-28-11 7-5 28 18 35-16 4-24 17-18 26 8 10 28 5 44-16z" fill="currentColor"/><path d="M62 45c14-24 33-34 44-28 11 7 5 28-18 35 16 4 24 17 18 26-8 10-28 5-44-16z" fill="currentColor" opacity=".84"/><path d="M60 23v42" stroke="#2c2420" stroke-width="4" stroke-linecap="round"/><path d="M60 24c6-8 12-10 18-11M60 24c-6-8-12-10-18-11" stroke="#2c2420" stroke-width="3" stroke-linecap="round"/><circle cx="38" cy="34" r="4" fill="#fff" opacity=".42"/><circle cx="81" cy="34" r="4" fill="#fff" opacity=".38"/></svg></span></span>
-                <span class="vision-board-asset-label">Flutter</span>
-              </button>
-              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('blossom')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart blossom"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g fill="currentColor"><ellipse cx="60" cy="24" rx="14" ry="18"/><ellipse cx="86" cy="42" rx="14" ry="18" transform="rotate(70 86 42)"/><ellipse cx="76" cy="70" rx="14" ry="18" transform="rotate(144 76 70)"/><ellipse cx="44" cy="70" rx="14" ry="18" transform="rotate(-144 44 70)"/><ellipse cx="34" cy="42" rx="14" ry="18" transform="rotate(-70 34 42)"/></g><circle cx="60" cy="47" r="10" fill="#fff" opacity=".92"/><circle cx="60" cy="47" r="4" fill="currentColor" opacity=".35"/></svg></span></span>
-                <span class="vision-board-asset-label">Bloom</span>
-              </button>
-              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('crescent')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart crescent"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M78 12c-18 5-31 23-31 43 0 16 9 31 24 39-6 2-12 4-19 4-23 0-42-19-42-43s19-43 43-43c9 0 17 2 25 0z" fill="currentColor"/><path d="M92 18l2 5 5 2-5 2-2 5-2-5-5-2 5-2zM84 33l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z" fill="#fff" opacity=".82"/></svg></span></span>
-                <span class="vision-board-asset-label">Moonlight</span>
-              </button>
-              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('heart')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart heart"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 73C28 54 16 38 16 24c0-10 8-18 18-18 10 0 16 6 20 13 4-7 10-13 20-13 10 0 18 8 18 18 0 14-12 30-44 49z" fill="currentColor"/><path d="M61 25c7-9 16-13 25-13 10 0 17 8 17 18 0 11-9 24-32 40" fill="#fff" opacity=".12"/><path d="M42 26c3-6 8-10 14-12" stroke="#fff" stroke-opacity=".45" stroke-width="4" stroke-linecap="round"/></svg></span></span>
-                <span class="vision-board-asset-label">Blush Heart</span>
-              </button>
-              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('cloud')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart cloud"><svg viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M42 72h50c15 0 26-9 26-22 0-12-10-21-23-21-3-15-16-25-32-25-18 0-32 13-34 31C16 37 6 47 6 60c0 7 3 12 8 16 6 5 15 8 28 8z" fill="currentColor"/><path d="M98 18l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM28 24l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z" fill="#fff" opacity=".76"/><path d="M31 74c15-7 44-8 62-2" stroke="#fff" stroke-opacity=".34" stroke-width="4" stroke-linecap="round"/></svg></span></span>
-                <span class="vision-board-asset-label">Daydream Cloud</span>
-              </button>
-              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('gem')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart gem"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M26 28h68l-34 40z" fill="currentColor" opacity=".9"/><path d="M40 14h40l14 14H26z" fill="currentColor"/><path d="M60 14l-8 14 8 40 8-40z" fill="#fff" opacity=".34"/><path d="M40 14l12 14M80 14L68 28M26 28l19 0M94 28H75" stroke="#fff" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/></svg></span></span>
-                <span class="vision-board-asset-label">Prism</span>
-              </button>
-              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('crown')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart crown"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20 62l10-34 23 20 7-24 7 24 23-20 10 34z" fill="currentColor"/><path d="M28 58c10-11 18-18 32-18s22 7 32 18" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="4" stroke-linecap="round"/><rect x="22" y="62" width="76" height="12" rx="6" fill="currentColor" opacity=".88"/><circle cx="30" cy="28" r="5" fill="#fff" opacity=".9"/><circle cx="60" cy="24" r="5" fill="#fff" opacity=".9"/><circle cx="90" cy="28" r="5" fill="#fff" opacity=".9"/></svg></span></span>
-                <span class="vision-board-asset-label">Tiara</span>
-              </button>
-              <button class="vision-board-asset clipart" type="button" onclick="addVisionBoardElement('starburst')">
-                <span class="vision-board-asset-preview clipart"><span class="vision-board-clipart starburst"><svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M60 10l9 22 23-9-12 21 24 6-24 6 12 21-23-9-9 22-9-22-23 9 12-21-24-6 24-6-12-21 23 9z" fill="currentColor"/><circle cx="60" cy="50" r="9" fill="#fff" opacity=".18"/></svg></span></span>
-                <span class="vision-board-asset-label">Burst</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </aside>
-      <div class="vision-board-stage">
-        <div class="vision-board-canvas" id="vision-board-canvas"></div>
-      </div>
-    </div>
-  </div>
-  <div class="vision-grid">
-    <div class="vision-card"><div class="vision-color-bar vc-teal"></div><div class="vision-body"><div class="vision-category">Financial</div><div class="vision-title">6-Figure Life by End of 2026</div><div class="vision-desc">Multiple streams, compounding. Voya as foundation, BrandingByBella as the main event, travel commissions stacking monthly.</div><div class="vision-items"><div class="vi">$85K from BrandingByBella</div><div class="vi">$20K+ in travel commissions</div><div class="vi">Party In Ink bulk order revenue</div></div><div class="vision-progress"><div class="vp-label"><span class="vp-name">Progress</span><span class="vp-pct">28%</span></div><div class="vp-bar"><div class="vp-fill" style="width:28%"></div></div></div></div></div>
-    <div class="vision-card"><div class="vision-color-bar vc-amber"></div><div class="vision-body"><div class="vision-category">Creative Empire</div><div class="vision-title">Gold Coast Health — Sold</div><div class="vision-desc">A prestige medical drama centered on five Black women running a Miami hospital. Scripts are written. The pitch is ready. The market needs this.</div><div class="vision-items"><div class="vi">4 scripts complete</div><div class="vi">Pitch deck produced</div><div class="vi">Production company outreach active</div></div><div class="vision-progress"><div class="vp-label"><span class="vp-name">Development</span><span class="vp-pct">55%</span></div><div class="vp-bar"><div class="vp-fill" style="width:55%"></div></div></div></div></div>
-    <div class="vision-card"><div class="vision-color-bar vc-rose"></div><div class="vision-body"><div class="vision-category">Location</div><div class="vision-title">Home in Miramar / Pembroke Pines</div><div class="vision-desc">Back in your city. FIU's Legal Studies Institute. Your market, your roots, the version of yourself that is fully operating at capacity.</div><div class="vision-items"><div class="vi">FIU LSI enrollment Summer 2026</div><div class="vi">Paralegal credential as legal lane</div><div class="vi">Proximity to South Florida market</div></div><div class="vision-progress"><div class="vp-label"><span class="vp-name">Planning</span><span class="vp-pct">20%</span></div><div class="vp-bar"><div class="vp-fill" style="width:20%"></div></div></div></div></div>
-    <div class="vision-card"><div class="vision-color-bar vc-slate"></div><div class="vision-body"><div class="vision-category">Brand</div><div class="vision-title">BrandingByBella — Fully Booked</div><div class="vision-desc">Retainer clients. High-ticket brand systems. A consultancy known for luxury work that speaks before you enter the room.</div><div class="vision-items"><div class="vi">3+ retainer clients active</div><div class="vi">Case study portfolio published</div><div class="vi">Referral pipeline established</div></div><div class="vision-progress"><div class="vp-label"><span class="vp-name">Building</span><span class="vp-pct">40%</span></div><div class="vp-bar"><div class="vp-fill" style="width:40%"></div></div></div></div></div>
-    <div class="vision-card"><div class="vision-color-bar vc-sage"></div><div class="vision-body"><div class="vision-category">Lifestyle</div><div class="vision-title">Luxury Travel — Living the Brand</div><div class="vision-desc">You sell what you live. Travel content, commissions, and a personal brand that exists in aspirational spaces.</div><div class="vision-items"><div class="vi">Consistent travel content</div><div class="vi">5+ bookings per month</div><div class="vi">Outside Agents fully activated</div></div><div class="vision-progress"><div class="vp-label"><span class="vp-name">Active</span><span class="vp-pct">35%</span></div><div class="vp-bar"><div class="vp-fill" style="width:35%"></div></div></div></div></div>
-    <div class="vision-card"><div class="vision-color-bar vc-warm"></div><div class="vision-body"><div class="vision-category">Wellness</div><div class="vision-title">Body & Mind at Peak</div><div class="vision-desc">Not just functional — thriving. Movement, peace, boundaries, and a morning routine that sets the tone for a CEO-level day.</div><div class="vision-items"><div class="vi">3x/week movement locked in</div><div class="vi">Journaling as strategic practice</div><div class="vi">Peace protected like a portfolio</div></div><div class="vision-progress"><div class="vp-label"><span class="vp-name">Consistency</span><span class="vp-pct">60%</span></div><div class="vp-bar"><div class="vp-fill" style="width:60%"></div></div></div></div></div>
+<div class="page page-shell-loading" id="page-vision" data-page-lazy="true" data-page-loaded="false" aria-busy="true">
+  <div class="page-shell-card">
+    <div class="page-shell-kicker">Loading Hub</div>
+    <div class="page-shell-title">Vision Studio</div>
+    <div class="page-shell-copy">Preparing the creative studio and board tools...</div>
   </div>
 </div>
 
 <!-- ════════ SCHEDULE ════════ -->
-<div class="page" id="page-calendar">
-  <div class="pg-header">
-    <div><div class="eyebrow">Schedule</div><h1 id="cal-page-title">—</h1></div>
-    <div style="text-align:right;padding-bottom:.35rem;"><div class="sub">Time is the only non-renewable resource</div></div>
-  </div>
-  <div class="cal-layout">
-    <div class="cal-grid-wrap">
-      <div class="cal-month-nav">
-        <button class="cal-nav-btn" onclick="globalMonthShift(-1)">‹</button>
-        <div class="cal-month-title" id="cal-title">—</div>
-        <button class="cal-nav-btn" onclick="globalMonthShift(1)">›</button>
-      </div>
-      <div class="cal-days-header">
-        <div class="cal-day-name">Sun</div><div class="cal-day-name">Mon</div><div class="cal-day-name">Tue</div>
-        <div class="cal-day-name">Wed</div><div class="cal-day-name">Thu</div><div class="cal-day-name">Fri</div><div class="cal-day-name">Sat</div>
-      </div>
-      <div class="cal-days" id="cal-days"></div>
-    </div>
-    <div class="cal-sidebar-col">
-      <div class="events-card">
-        <div class="sec-label">Events This Month</div>
-        <div class="event-list" id="events-list"></div>
-      </div>
-      <div class="add-event-card">
-        <div class="sec-label">Add to Schedule</div>
-        <div class="add-event-form">
-          <input class="add-input" id="evt-title" placeholder="Event or deadline..." />
-          <div class="add-row">
-            <input class="add-input" id="evt-date" type="date" />
-            <input class="add-input" id="evt-tag" placeholder="Tag (e.g. Business)" />
-          </div>
-          <button class="add-btn" onclick="addEvent()">Add to Calendar</button>
-        </div>
-      </div>
-    </div>
+<div class="page page-shell-loading" id="page-calendar" data-page-lazy="true" data-page-loaded="false" aria-busy="true">
+  <div class="page-shell-card">
+    <div class="page-shell-kicker">Loading Hub</div>
+    <div class="page-shell-title">Schedule</div>
+    <div class="page-shell-copy">Loading your calendar and event planner...</div>
   </div>
 </div>
 
 <!-- COMMUNITY HUB -->
-<div class="page" id="page-community">
-  <div class="pg-header">
-    <div>
-      <div class="eyebrow">The Inner Circle</div>
-      <h1>Community</h1>
-    </div>
-    <div style="text-align:right;padding-bottom:.35rem;">
-      <div class="sub">Business in the front. Sisterhood in the back.</div>
-    </div>
-  </div>
-
-  <div class="community-layout">
-
-    <div class="comm-sidebar">
-      <div class="comm-profile-card">
-        <div class="comm-avatar" id="comm-avatar">P</div>
-        <div class="comm-profile-name" id="comm-profile-name">Precious</div>
-        <div class="comm-profile-handle" id="comm-profile-handle">@precious</div>
-        <button class="comm-edit-profile-btn" onclick="openEditProfile()">✎ Edit Profile</button>
-        <div class="comm-stats">
-          <div class="comm-stat"><div class="comm-stat-n" id="comm-posts-count">0</div><div class="comm-stat-l">Posts</div></div>
-          <div class="comm-stat"><div class="comm-stat-n">1</div><div class="comm-stat-l">Pod</div></div>
-          <div class="comm-stat"><div class="comm-stat-n" id="comm-streak">1</div><div class="comm-stat-l">Day streak</div></div>
-        </div>
-      </div>
-      <div class="comm-nav">
-        <div class="comm-nav-item active" onclick="switchCommView('feed',this)"><span class="comm-nav-icon">📋</span> Feed</div>
-        <div class="comm-nav-item" onclick="switchCommView('pods',this)"><span class="comm-nav-icon">🤝</span> My Pod</div>
-        <div class="comm-nav-item" onclick="switchCommView('challenges',this)"><span class="comm-nav-icon">⚡</span> Challenges</div>
-        <div class="comm-nav-item" onclick="switchCommView('wins',this)"><span class="comm-nav-icon">🏆</span> Win Wall</div>
-        <div class="comm-nav-item" onclick="switchCommView('messages',this)"><span class="comm-nav-icon">💬</span> Messages</div>
-      </div>
-      <button class="comm-create-btn" onclick="openCreatePod()">+ Create Pod</button>
-      <button class="comm-create-btn comm-create-btn-secondary" onclick="openCreateChallenge()">+ Create Challenge</button>
-    </div>
-
-    <div class="comm-main" id="comm-main">
-      <div class="comm-composer">
-        <div class="comm-composer-top">
-          <div class="comm-composer-avatar" id="comm-composer-av">P</div>
-          <textarea class="comm-composer-input" id="comm-compose-text"
-            placeholder="Share a win, set a goal, ask for support... This is your space. 👑"
-            maxlength="500" oninput="updateCharCount(this)"></textarea>
-        </div>
-        <div class="comm-post-types" id="comm-post-types">
-          <button class="comm-type-btn selected" data-type="update" onclick="selectPostType(this)">📢 Update</button>
-          <button class="comm-type-btn" data-type="win" onclick="selectPostType(this)">🏆 Win</button>
-          <button class="comm-type-btn" data-type="goal" onclick="selectPostType(this)">🎯 Goal</button>
-          <button class="comm-type-btn" data-type="support" onclick="selectPostType(this)">🌸 Support</button>
-          <button class="comm-type-btn" data-type="question" onclick="selectPostType(this)">💭 Question</button>
-        </div>
-        <div class="comm-composer-footer">
-          <span class="comm-char-count" id="comm-char-count">0 / 500</span>
-          <button class="comm-post-btn" onclick="submitPost()">Post ✦</button>
-        </div>
-      </div>
-      <div class="comm-feed-tabs">
-        <button class="comm-feed-tab active" onclick="filterFeed('all',this)">✦ All</button>
-        <button class="comm-feed-tab" onclick="filterFeed('win',this)">🏆 Wins</button>
-        <button class="comm-feed-tab" onclick="filterFeed('goal',this)">🎯 Goals</button>
-        <button class="comm-feed-tab" onclick="filterFeed('support',this)">🌸 Support</button>
-        <button class="comm-feed-tab" onclick="filterFeed('question',this)">💭 Questions</button>
-      </div>
-      <div id="comm-feed"></div>
-    </div>
-
-    <div class="comm-right">
-      <div class="comm-challenge-card">
-        <div class="comm-challenge-label">🔥 Active Challenge</div>
-        <div class="comm-challenge-title">30-Day Income Sprint</div>
-        <div class="comm-challenge-desc">Track at least one income-generating action every day for 30 days. Log it in your Streams tab.</div>
-        <div class="comm-challenge-progress"><div class="comm-challenge-fill" id="challenge-fill"></div></div>
-        <div class="comm-challenge-meta">
-          <span id="challenge-day">Day 1 of 30</span>
-          <span id="challenge-members">1 member joined</span>
-        </div>
-        <button class="comm-join-btn" id="challenge-join-btn" onclick="joinChallenge()">Join Challenge →</button>
-      </div>
-      <div class="comm-pods-card">
-        <div class="comm-pods-label">🤝 Accountability Pods</div>
-        <div class="comm-online-empty">Live pods load here when Community sync is ready.</div>
-      </div>
-      <div class="comm-online-card">
-        <div class="comm-online-label"><div class="online-dot"></div> Online Now</div>
-        <div class="comm-online-empty">Active members appear here once presence sync connects.</div>
-      </div>
-    </div>
+<div class="page page-shell-loading" id="page-community" data-page-lazy="true" data-page-loaded="false" aria-busy="true">
+  <div class="page-shell-card">
+    <div class="page-shell-kicker">Loading Hub</div>
+    <div class="page-shell-title">Community</div>
+    <div class="page-shell-copy">Connecting the inner circle and live spaces...</div>
   </div>
 </div>
 
@@ -4757,1077 +4528,31 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
 
 <!-- NAV -->
 <!-- ════════ STREAMS PAGE ════════ -->
-<div class="page" id="page-streams">
-  <div class="pg-header">
-    <div>
-      <div class="eyebrow">Income Streams</div>
-      <h1>The Money</h1>
-    </div>
-    <div style="text-align:right;padding-bottom:.35rem;">
-      <div class="sub">Six lanes. All active. All yours.</div>
-    </div>
-  </div>
-
-  <div class="streams-hub">
-
-    <!-- VOYA -->
-    <div class="stream-hub-card g">
-      <div class="shc-bloom shc-bloom-1"></div>
-      <div class="shc-header">
-        <div class="shc-icon">💼</div>
-        <div>
-          <div class="shc-cat">Career</div>
-          <div class="shc-title">Voya Financial</div>
-          <div class="shc-sub">Customer Contact Rep · Benefits &amp; Claims</div>
-        </div>
-        <div class="shc-status s-active"><span class="s-dot"></span>Active</div>
-      </div>
-      <div class="shc-body">
-        <div class="shc-metrics">
-          <div class="shc-metric"><div class="shc-m-label">Monthly Base</div><div class="shc-m-val rev-editable" contenteditable="true">$3,200</div></div>
-          <div class="shc-metric"><div class="shc-m-label">YTD</div><div class="shc-m-val rev-editable" contenteditable="true">$12,800</div></div>
-          <div class="shc-metric"><div class="shc-m-label">Goal</div><div class="shc-m-val">Stable base</div></div>
-        </div>
-        <div class="shc-divider"></div>
-        <div class="shc-focus-label">This Month's Focus</div>
-        <textarea class="shc-notes" placeholder="What's your focus at Voya this month? Pivot strategy, performance notes, internal moves...">Explore ops/analyst internal pivot. Document impact. Keep performing at full capacity.</textarea>
-        <div class="shc-tags"><span class="shc-tag">Salary</span><span class="shc-tag">Benefits</span><span class="shc-tag">Internal Pivot</span></div>
-        <div class="shc-actions">
-          <div class="shc-action-label">Next Move</div>
-          <textarea class="shc-next" placeholder="What is the single next action for this stream?">Schedule 1:1 with manager to discuss career path options.</textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- BRANDINGBYBELLA -->
-    <div class="stream-hub-card g">
-      <div class="shc-bloom shc-bloom-2"></div>
-      <div class="shc-header">
-        <div class="shc-icon">✦</div>
-        <div>
-          <div class="shc-cat">Brand Consulting</div>
-          <div class="shc-title">BrandingByBella</div>
-          <div class="shc-sub">Luxury Brand Systems · Retainer Clients</div>
-        </div>
-        <div class="shc-status s-open"><span class="s-dot"></span>Hiring</div>
-      </div>
-      <div class="shc-body">
-        <div class="shc-metrics">
-          <div class="shc-metric"><div class="shc-m-label">MTD Earned</div><div class="shc-m-val rev-editable" contenteditable="true">$0</div></div>
-          <div class="shc-metric"><div class="shc-m-label">Annual Goal</div><div class="shc-m-val">$85,000</div></div>
-          <div class="shc-metric"><div class="shc-m-label">Active Retainers</div><div class="shc-m-val rev-editable" contenteditable="true">0</div></div>
-        </div>
-        <div class="shc-divider"></div>
-        <div class="shc-focus-label">This Month's Focus</div>
-        <textarea class="shc-notes" placeholder="Client pipeline, active projects, content strategy...">Close 1 retainer. Post 2 case studies. Reach out to 3 warm leads from Q1.</textarea>
-        <div class="shc-tags"><span class="shc-tag">Brand Identity</span><span class="shc-tag">Creative Direction</span><span class="shc-tag">Retainer</span></div>
-        <div class="shc-actions">
-          <div class="shc-action-label">Next Move</div>
-          <textarea class="shc-next" placeholder="What is the single next action for this stream?">Send proposal to top 2 leads by end of this week.</textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- PARTY IN INK -->
-    <div class="stream-hub-card g">
-      <div class="shc-bloom shc-bloom-3"></div>
-      <div class="shc-header">
-        <div class="shc-icon">✉</div>
-        <div>
-          <div class="shc-cat">Product · E-Commerce</div>
-          <div class="shc-title">Party In Ink</div>
-          <div class="shc-sub">Luxury Stationery · With Shila</div>
-        </div>
-        <div class="shc-status s-build"><span class="s-dot"></span>Building</div>
-      </div>
-      <div class="shc-body">
-        <div class="shc-metrics">
-          <div class="shc-metric"><div class="shc-m-label">MTD Earned</div><div class="shc-m-val rev-editable" contenteditable="true">$0</div></div>
-          <div class="shc-metric"><div class="shc-m-label">Orders This Mo.</div><div class="shc-m-val rev-editable" contenteditable="true">0</div></div>
-          <div class="shc-metric"><div class="shc-m-label">Bulk Target</div><div class="shc-m-val">1 bulk order</div></div>
-        </div>
-        <div class="shc-divider"></div>
-        <div class="shc-focus-label">This Month's Focus</div>
-        <textarea class="shc-notes" placeholder="Active orders, Shila coordination, product updates...">Land 1 bulk order. Refresh spring product photography. Coordinate April drops with Shila.</textarea>
-        <div class="shc-tags"><span class="shc-tag">Stationery</span><span class="shc-tag">Bulk Orders</span><span class="shc-tag">Co-Founder</span></div>
-        <div class="shc-actions">
-          <div class="shc-action-label">Next Move</div>
-          <textarea class="shc-next" placeholder="What is the single next action for this stream?">Pitch 3 event planners in the Jacksonville area for bulk orders.</textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- CELEBRATE SZN -->
-    <div class="stream-hub-card g">
-      <div class="shc-bloom shc-bloom-1"></div>
-      <div class="shc-header">
-        <div class="shc-icon">◈</div>
-        <div>
-          <div class="shc-cat">E-Commerce · Etsy</div>
-          <div class="shc-title">Celebrate SZN</div>
-          <div class="shc-sub">Holiday Décor · Diva Plates · Wreaths</div>
-        </div>
-        <div class="shc-status s-build"><span class="s-dot"></span>Building</div>
-      </div>
-      <div class="shc-body">
-        <div class="shc-metrics">
-          <div class="shc-metric"><div class="shc-m-label">MTD Earned</div><div class="shc-m-val rev-editable" contenteditable="true">$0</div></div>
-          <div class="shc-metric"><div class="shc-m-label">Active Listings</div><div class="shc-m-val rev-editable" contenteditable="true">0</div></div>
-          <div class="shc-metric"><div class="shc-m-label">Hero SKUs</div><div class="shc-m-val">Diva Plates</div></div>
-        </div>
-        <div class="shc-divider"></div>
-        <div class="shc-focus-label">This Month's Focus</div>
-        <textarea class="shc-notes" placeholder="Listing updates, SEO, inventory planning...">Implement SEO rewrites from audit. Add 3 new listings. Start planning Q3/Q4 inventory.</textarea>
-        <div class="shc-tags"><span class="shc-tag">Etsy</span><span class="shc-tag">SEO</span><span class="shc-tag">Passive Income</span></div>
-        <div class="shc-actions">
-          <div class="shc-action-label">Next Move</div>
-          <textarea class="shc-next" placeholder="What is the single next action for this stream?">Rewrite top 5 listing titles with updated SEO keywords.</textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- TRAVEL -->
-    <div class="stream-hub-card g">
-      <div class="shc-bloom shc-bloom-2"></div>
-      <div class="shc-header">
-        <div class="shc-icon">✈</div>
-        <div>
-          <div class="shc-cat">Travel Consulting</div>
-          <div class="shc-title">Outside Agents</div>
-          <div class="shc-sub">Luxury Travel · Influencer · Commissions</div>
-        </div>
-        <div class="shc-status s-open"><span class="s-dot"></span>Hiring</div>
-      </div>
-      <div class="shc-body">
-        <div class="shc-metrics">
-          <div class="shc-metric"><div class="shc-m-label">MTD Commissions</div><div class="shc-m-val rev-editable" contenteditable="true">$0</div></div>
-          <div class="shc-metric"><div class="shc-m-label">Bookings This Mo.</div><div class="shc-m-val rev-editable" contenteditable="true">0</div></div>
-          <div class="shc-metric"><div class="shc-m-label">Mo. Target</div><div class="shc-m-val">1 booking</div></div>
-        </div>
-        <div class="shc-divider"></div>
-        <div class="shc-focus-label">This Month's Focus</div>
-        <textarea class="shc-notes" placeholder="Active bookings, content strategy, client pipeline...">Close 1 booking. Post travel content 2x this week. Reach out to 5 network contacts.</textarea>
-        <div class="shc-tags"><span class="shc-tag">Luxury Travel</span><span class="shc-tag">Commissions</span><span class="shc-tag">Influencer</span></div>
-        <div class="shc-actions">
-          <div class="shc-action-label">Next Move</div>
-          <textarea class="shc-next" placeholder="What is the single next action for this stream?">Post one travel reel and add link to booking inquiry in bio.</textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- CREATIVE DIRECTION -->
-    <div class="stream-hub-card g">
-      <div class="shc-bloom shc-bloom-3"></div>
-      <div class="shc-header">
-        <div class="shc-icon">◉</div>
-        <div>
-          <div class="shc-cat">Creative Services</div>
-          <div class="shc-title">Creative Direction</div>
-          <div class="shc-sub">Brand Shoots · Campaign Direction · CD Work</div>
-        </div>
-        <div class="shc-status s-open"><span class="s-dot"></span>Hiring</div>
-      </div>
-      <div class="shc-body">
-        <div class="shc-metrics">
-          <div class="shc-metric"><div class="shc-m-label">MTD Earned</div><div class="shc-m-val rev-editable" contenteditable="true">$0</div></div>
-          <div class="shc-metric"><div class="shc-m-label">Active Projects</div><div class="shc-m-val rev-editable" contenteditable="true">0</div></div>
-          <div class="shc-metric"><div class="shc-m-label">Rate Target</div><div class="shc-m-val rev-editable" contenteditable="true">$1,500/project</div></div>
-        </div>
-        <div class="shc-divider"></div>
-        <div class="shc-focus-label">This Month's Focus</div>
-        <textarea class="shc-notes" placeholder="Active CD projects, portfolio updates, outreach...">Publish Moonstone Looks case study. Add 2 CD portfolio pieces to BrandingByBella site.</textarea>
-        <div class="shc-tags"><span class="shc-tag">Creative Direction</span><span class="shc-tag">Portfolio</span><span class="shc-tag">Premium Rate</span></div>
-        <div class="shc-actions">
-          <div class="shc-action-label">Next Move</div>
-          <textarea class="shc-next" placeholder="What is the single next action for this stream?">Write and publish the Moonstone Looks brand case study this week.</textarea>
-        </div>
-      </div>
-    </div>
-
+<div class="page page-shell-loading" id="page-streams" data-page-lazy="true" data-page-loaded="false" aria-busy="true">
+  <div class="page-shell-card">
+    <div class="page-shell-kicker">Loading Hub</div>
+    <div class="page-shell-title">Streams</div>
+    <div class="page-shell-copy">Loading your revenue and income lanes...</div>
   </div>
 </div>
 
 
 <!-- ════════ PARALEGAL PAGE ════════ -->
-<div class="page" id="page-paralegal">
-  <div class="pg-header">
-    <div>
-      <div class="eyebrow">FIU Legal Studies Institute</div>
-      <h1>Paralegal</h1>
-    </div>
-    <div style="text-align:right;padding-bottom:.35rem;">
-      <div class="sub">Summer 2026 · Miramar / Pembroke Pines</div>
-      <div class="mantra">"The legal lane is already yours."</div>
-    </div>
+<div class="page page-shell-loading" id="page-paralegal" data-page-lazy="true" data-page-loaded="false" aria-busy="true">
+  <div class="page-shell-card">
+    <div class="page-shell-kicker">Loading Hub</div>
+    <div class="page-shell-title">Paralegal</div>
+    <div class="page-shell-copy">Loading the legal lane workspace...</div>
   </div>
-
-  <div class="bento">
-
-    <!-- PROGRAM OVERVIEW -->
-    <div class="card g c12" style="overflow:hidden;">
-      <div class="sec-label">Program Overview</div>
-      <div class="para-overview-grid">
-        <div class="para-stat">
-          <div class="para-stat-num">3</div>
-          <div class="para-stat-label">Semesters Total</div>
-        </div>
-        <div class="para-stat">
-          <div class="para-stat-num">$2,300</div>
-          <div class="para-stat-label">Per Semester</div>
-        </div>
-        <div class="para-stat">
-          <div class="para-stat-num">$6,900</div>
-          <div class="para-stat-label">Total Tuition</div>
-        </div>
-        <div class="para-stat">
-          <div class="para-stat-num">$195</div>
-          <div class="para-stat-label">Technology Fee (Sem 1)</div>
-        </div>
-        <div class="para-stat">
-          <div class="para-stat-num">~$7,095</div>
-          <div class="para-stat-label">Total Investment</div>
-        </div>
-        <div class="para-stat">
-          <div class="para-stat-num">Jun '26</div>
-          <div class="para-stat-label">Target Start Date</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PAYMENT PLAN -->
-    <div class="card g c6" style="overflow:hidden;">
-      <div class="sec-label">💰 Cost & Payment Options</div>
-      <div class="para-items">
-        <div class="para-item">
-          <div class="para-item-icon">🏦</div>
-          <div>
-            <div class="para-item-title">FIU Installment Plan</div>
-            <div class="para-item-body">Either 3 payments of 33% or 4 payments of 25% per semester. $15 service fee applies. Keeps each payment manageable.</div>
-          </div>
-        </div>
-        <div class="para-item">
-          <div class="para-item-icon">💼</div>
-          <div>
-            <div class="para-item-title">Voya Tuition Reimbursement</div>
-            <div class="para-item-body">Check your Voya employee benefits — many financial services companies cover professional development. This program qualifies. Ask HR directly.</div>
-          </div>
-        </div>
-        <div class="para-item">
-          <div class="para-item-icon">🌴</div>
-          <div>
-            <div class="para-item-title">CareerSource Florida Grant</div>
-            <div class="para-item-body">Florida workforce development grants sometimes cover professional certificate programs. Call your local CareerSource office once you're settled in Miramar/Pembroke Pines.</div>
-          </div>
-        </div>
-        <div class="para-item">
-          <div class="para-item-icon">🎓</div>
-          <div>
-            <div class="para-item-title">Financial Aid</div>
-            <div class="para-item-body">Limited but worth asking about. Contact LSI directly to ask what applies to non-credit professional programs specifically.</div>
-          </div>
-        </div>
-      </div>
-      <!-- Payment tracker -->
-      <div class="para-pay-tracker">
-        <div class="sec-label" style="margin-top:1rem;">Payment Tracker</div>
-        <div class="para-pay-row">
-          <span class="para-pay-label">Semester 1 ($2,300 + $195 tech)</span>
-          <div class="para-pay-status" onclick="cyclePayStatus(this)" data-states='["Not Started","Saving","Paid"]'>Not Started</div>
-        </div>
-        <div class="para-pay-row">
-          <span class="para-pay-label">Semester 2 ($2,300)</span>
-          <div class="para-pay-status" onclick="cyclePayStatus(this)" data-states='["Not Started","Saving","Paid"]'>Not Started</div>
-        </div>
-        <div class="para-pay-row">
-          <span class="para-pay-label">Semester 3 ($2,300)</span>
-          <div class="para-pay-status" onclick="cyclePayStatus(this)" data-states='["Not Started","Saving","Paid"]'>Not Started</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PRE-WORK CHECKLIST -->
-    <div class="card g c6" style="overflow:hidden;">
-      <div class="sec-label">🎯 Before June — Pre-Work Checklist</div>
-      <div class="para-checklist" id="para-checklist">
-        <div class="para-check-item" onclick="toggleParaCheck(this)">
-          <div class="para-check-circle"></div>
-          <div>
-            <div class="para-check-title">Get comfortable with LexisNexis</div>
-            <div class="para-check-sub">Watch YouTube tutorials — you'll use it in class. Look like a pro on day one.</div>
-          </div>
-        </div>
-        <div class="para-check-item" onclick="toggleParaCheck(this)">
-          <div class="para-check-circle"></div>
-          <div>
-            <div class="para-check-title">Start following legal news</div>
-            <div class="para-check-sub">Above the Law · SCOTUSblog · Florida court news. Make legal thinking feel natural.</div>
-          </div>
-        </div>
-        <div class="para-check-item" onclick="toggleParaCheck(this)">
-          <div class="para-check-circle"></div>
-          <div>
-            <div class="para-check-title">Lock in your workspace</div>
-            <div class="para-check-sub">Online program = your environment is everything. Set up a dedicated, distraction-free study space before June.</div>
-          </div>
-        </div>
-        <div class="para-check-item" onclick="toggleParaCheck(this)">
-          <div class="para-check-circle"></div>
-          <div>
-            <div class="para-check-title">Contact LSI about financial aid</div>
-            <div class="para-check-sub">Ask specifically about non-credit professional programs. Don't assume — ask.</div>
-          </div>
-        </div>
-        <div class="para-check-item" onclick="toggleParaCheck(this)">
-          <div class="para-check-circle"></div>
-          <div>
-            <div class="para-check-title">Ask Voya HR about tuition reimbursement</div>
-            <div class="para-check-sub">Check your employee benefits portal or email HR directly. Could cover a full semester.</div>
-          </div>
-        </div>
-        <div class="para-check-item" onclick="toggleParaCheck(this)">
-          <div class="para-check-circle"></div>
-          <div>
-            <div class="para-check-title">Call CareerSource Florida</div>
-            <div class="para-check-sub">Once settled in Miramar/Pembroke Pines. Workforce development grants can cover professional certificates.</div>
-          </div>
-        </div>
-        <div class="para-check-item" onclick="toggleParaCheck(this)">
-          <div class="para-check-circle"></div>
-          <div>
-            <div class="para-check-title">Confirm enrollment / registration date with FIU LSI</div>
-            <div class="para-check-sub">Make sure your seat is locked in. Don't leave it open-ended.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- READING LIST -->
-    <div class="card g c12" style="overflow:hidden;">
-      <div class="sec-label">📚 What to Read Before June</div>
-      <div class="para-books-grid">
-
-        <div class="para-book-card" onclick="toggleBook(this)">
-          <div class="para-book-tag">Start Here · Foundational</div>
-          <div class="para-book-title">Black's Law Dictionary</div>
-          <div class="para-book-author">— The definitive legal reference</div>
-          <div class="para-book-why">Over 55,000 law-related terms. New paralegals should prioritize this first. Get familiar with the language before anything else — legal vocabulary is half the battle.</div>
-          <div class="para-book-status" onclick="cycleBookStatus(event,this)" data-states='["Not Started","In Progress","Complete"]'>Not Started</div>
-        </div>
-
-        <div class="para-book-card" onclick="toggleBook(this)">
-          <div class="para-book-tag">Start Here · Foundational</div>
-          <div class="para-book-title">Introduction to Law for Paralegals</div>
-          <div class="para-book-author">Currier &amp; Eimermann</div>
-          <div class="para-book-why">Covers the role of the paralegal, sources and classification of law, court system structure, and an overview of litigation. Basically the roadmap for everything you'll study.</div>
-          <div class="para-book-status" onclick="cycleBookStatus(event,this)" data-states='["Not Started","In Progress","Complete"]'>Not Started</div>
-        </div>
-
-        <div class="para-book-card" onclick="toggleBook(this)">
-          <div class="para-book-tag">Level Up · Legal Writing</div>
-          <div class="para-book-title">The Redbook</div>
-          <div class="para-book-author">Bryan A. Garner</div>
-          <div class="para-book-why">Specifically designed for legal document preparation — grammar, punctuation, and style rules for legal writing. Legal writing is a whole different beast. You'll need this fast.</div>
-          <div class="para-book-status" onclick="cycleBookStatus(event,this)" data-states='["Not Started","In Progress","Complete"]'>Not Started</div>
-        </div>
-
-        <div class="para-book-card" onclick="toggleBook(this)">
-          <div class="para-book-tag">Big Picture · Orientation</div>
-          <div class="para-book-title">Law 101</div>
-          <div class="para-book-author">Jay M. Feinman</div>
-          <div class="para-book-why">Plain-English overview of how American law actually works. Great for orientation before you dive into the technical material. Makes everything less intimidating.</div>
-          <div class="para-book-status" onclick="cycleBookStatus(event,this)" data-states='["Not Started","In Progress","Complete"]'>Not Started</div>
-        </div>
-
-        <div class="para-book-card" onclick="toggleBook(this)">
-          <div class="para-book-tag">Big Picture · Orientation</div>
-          <div class="para-book-title">Introduction to Paralegalism</div>
-          <div class="para-book-author">Statsky &amp; Tepper</div>
-          <div class="para-book-why">Hands-on skills and real-world context — identifying legal issues, breaking rules into elements, applying rules to facts. Practical from page one.</div>
-          <div class="para-book-status" onclick="cycleBookStatus(event,this)" data-states='["Not Started","In Progress","Complete"]'>Not Started</div>
-        </div>
-
-        <div class="para-book-card para-book-notes-card">
-          <div class="para-book-tag">Study Notes</div>
-          <div class="para-book-title" style="margin-bottom:.6rem;">Reading Notes &amp; Reflections</div>
-          <textarea class="para-notes-area" placeholder="Jot down key terms, questions, passages that hit different, things to look up..."></textarea>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- STUDY NOTES -->
-    <div class="card g c12" style="overflow:hidden;">
-      <div class="sec-label">🖊 Study Notes &amp; Journal</div>
-      <div class="para-notes-layout">
-        <div class="para-notes-sidebar">
-          <div class="para-note-tabs">
-            <button class="para-tab on" onclick="switchParaTab('lexis',this)">LexisNexis</button>
-            <button class="para-tab" onclick="switchParaTab('vocab',this)">Legal Vocab</button>
-            <button class="para-tab" onclick="switchParaTab('questions',this)">Questions</button>
-            <button class="para-tab" onclick="switchParaTab('general',this)">General</button>
-          </div>
-          <div class="para-tab-hint">Use these to organize your pre-study notes before June.</div>
-        </div>
-        <div class="para-notes-editor">
-          <textarea class="para-study-note" id="para-note-lexis" placeholder="LexisNexis practice notes — tutorials watched, features explored, tips..."></textarea>
-          <textarea class="para-study-note hidden" id="para-note-vocab" placeholder="Legal vocabulary — terms, definitions, context, examples..."></textarea>
-          <textarea class="para-study-note hidden" id="para-note-questions" placeholder="Questions to ask on day one, things that are unclear, topics to research..."></textarea>
-          <textarea class="para-study-note hidden" id="para-note-general" placeholder="General study notes, reflections, anything that doesn't fit elsewhere..."></textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- INTERNSHIP PLACEMENT -->
-    <div class="card g c12" style="overflow:hidden;">
-      <div class="sec-label">🏥 Practicum Placement · Medical Administration</div>
-      <div class="para-overview-grid" style="grid-template-columns:repeat(4,1fr);">
-        <div class="para-stat">
-          <div class="para-stat-num">May</div>
-          <div class="para-stat-label">Start Date</div>
-        </div>
-        <div class="para-stat">
-          <div class="para-stat-num">In-House</div>
-          <div class="para-stat-label">Placement Type</div>
-        </div>
-        <div class="para-stat">
-          <div class="para-stat-num">Medical</div>
-          <div class="para-stat-label">Specialization</div>
-        </div>
-        <div class="para-stat">
-          <div class="para-stat-num">Remote</div>
-          <div class="para-stat-label">Format</div>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem;">
-        <div>
-          <div class="sec-label" style="margin-bottom:.75rem;">Placement Details</div>
-          <div class="para-items">
-            <div class="para-item">
-              <div class="para-item-icon">⚖️</div>
-              <div>
-                <div class="para-item-title">Specialization</div>
-                <div class="para-item-body">Medical Administration — leveraging Voya insurance/benefits background. HIPAA compliance, medical records, healthcare contracts, billing disputes.</div>
-              </div>
-            </div>
-            <div class="para-item">
-              <div class="para-item-icon">📧</div>
-              <div>
-                <div class="para-item-title">Coach Email</div>
-                <div class="para-item-body">Awaiting placement details from FIU LSI coach. Update once received.</div>
-              </div>
-            </div>
-            <div class="para-item">
-              <div class="para-item-icon">🏢</div>
-              <div>
-                <div class="para-item-title">Placement Organization</div>
-                <div class="para-item-body rev-editable" contenteditable="true">TBD — awaiting coach confirmation</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="sec-label" style="margin-bottom:.75rem;">Practicum Goals</div>
-          <div class="para-checklist">
-            <div class="para-check-item" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle"></div>
-              <div>
-                <div class="para-check-title">Learn HIPAA compliance basics before Day 1</div>
-                <div class="para-check-sub">PHI, breach notification, covered entities — your flashcard deck has this covered.</div>
-              </div>
-            </div>
-            <div class="para-check-item" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle"></div>
-              <div>
-                <div class="para-check-title">Understand ICD & CPT codes</div>
-                <div class="para-check-sub">Medical billing language is essential in healthcare legal work.</div>
-              </div>
-            </div>
-            <div class="para-check-item" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle"></div>
-              <div>
-                <div class="para-check-title">Study medical malpractice basics</div>
-                <div class="para-check-sub">Standard of care, negligence, informed consent — core medical law concepts.</div>
-              </div>
-            </div>
-            <div class="para-check-item" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle"></div>
-              <div>
-                <div class="para-check-title">Build relationship with supervising attorney</div>
-                <div class="para-check-sub">Ask questions. Show up prepared. Be memorable for the right reasons.</div>
-              </div>
-            </div>
-            <div class="para-check-item" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle"></div>
-              <div>
-                <div class="para-check-title">Document everything for your resume</div>
-                <div class="para-check-sub">Every task, every skill, every software used. Build your legal resume in real time.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div style="margin-top:1rem;">
-        <div class="sec-label" style="margin-bottom:.5rem;">Practicum Notes</div>
-        <textarea class="para-notes-area" style="min-height:80px;" placeholder="Notes from your coach, placement details, supervisor info, anything important..."></textarea>
-      </div>
-    </div>
-
-    <!-- VOYA CAREER TRACKER -->
-    <div class="card g c12" style="overflow:hidden;">
-      <div class="sec-label">💼 Voya → Legal Department · Career Transition Tracker</div>
-
-      <!-- Phase timeline -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.5rem;">
-
-        <div class="para-item" style="flex-direction:column;align-items:flex-start;gap:.5rem;border:1px solid rgba(10,114,102,0.2);">
-          <div style="display:flex;align-items:center;gap:.5rem;width:100%;">
-            <div style="font-size:.48rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;padding:.2rem .6rem;border-radius:4px;background:var(--tint);border:1px solid rgba(13,148,136,0.25);color:var(--teal);">Phase 1</div>
-            <div style="font-size:.6rem;font-weight:500;color:var(--ink);">Right Now</div>
-          </div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:400;color:var(--ink);">Plant the Flag</div>
-          <div class="para-checklist" style="gap:.35rem;width:100%;">
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Update Voya internal profile with FIU LSI enrollment</div>
-            </div>
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Identify Voya's Legal, Compliance & Regulatory depts on LinkedIn</div>
-            </div>
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Note internal job postings — learn their language</div>
-            </div>
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Ask Voya HR about tuition reimbursement benefit</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="para-item" style="flex-direction:column;align-items:flex-start;gap:.5rem;border:1px solid rgba(10,114,102,0.15);">
-          <div style="display:flex;align-items:center;gap:.5rem;width:100%;">
-            <div style="font-size:.48rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;padding:.2rem .6rem;border-radius:4px;background:rgba(161,121,0,0.08);border:1px solid rgba(161,121,0,0.2);color:#8A6800;">Phase 2</div>
-            <div style="font-size:.6rem;font-weight:500;color:var(--ink);">May 2026</div>
-          </div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:400;color:var(--ink);">Activate Credentials</div>
-          <div class="para-checklist" style="gap:.35rem;width:100%;">
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Add practicum start to Voya profile & LinkedIn immediately</div>
-            </div>
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Update resume: paralegal intern in medical administration</div>
-            </div>
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Have casual career conversation with manager re: development goals</div>
-            </div>
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Continue performing at full capacity at Voya — don't slip</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="para-item" style="flex-direction:column;align-items:flex-start;gap:.5rem;border:1px solid rgba(10,114,102,0.12);">
-          <div style="display:flex;align-items:center;gap:.5rem;width:100%;">
-            <div style="font-size:.48rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;padding:.2rem .6rem;border-radius:4px;background:rgba(161,121,0,0.08);border:1px solid rgba(161,121,0,0.2);color:#8A6800;">Phase 3</div>
-            <div style="font-size:.6rem;font-weight:500;color:var(--ink);">Month 6</div>
-          </div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:400;color:var(--ink);">Make the Move</div>
-          <div class="para-checklist" style="gap:.35rem;width:100%;">
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Formally express interest in Voya legal/compliance dept to HR</div>
-            </div>
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Target: Legal Ops Specialist · Compliance Analyst · Paralegal · Regulatory Affairs</div>
-            </div>
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Build internal relationships in target departments</div>
-            </div>
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Apply to any relevant internal postings</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="para-item" style="flex-direction:column;align-items:flex-start;gap:.5rem;border:1px solid rgba(10,114,102,0.1);">
-          <div style="display:flex;align-items:center;gap:.5rem;width:100%;">
-            <div style="font-size:.48rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;padding:.2rem .6rem;border-radius:4px;background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.2);color:#15622D;">Phase 4</div>
-            <div style="font-size:.6rem;font-weight:500;color:var(--ink);">June 2027</div>
-          </div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:400;color:var(--ink);">Certified. Positioned.</div>
-          <div class="para-checklist" style="gap:.35rem;width:100%;">
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">FIU LSI Certificate in hand</div>
-            </div>
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Apply internally with certificate + internship on resume</div>
-            </div>
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Negotiate from position of strength — not asking for a chance</div>
-            </div>
-            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
-              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
-              <div class="para-check-title" style="font-size:.62rem;">Target salary: benchmark against AMEX comp + legal lane premium</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Target roles + notes -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-        <div>
-          <div class="sec-label" style="margin-bottom:.75rem;">Target Roles at Voya</div>
-          <div class="para-items">
-            <div class="para-item">
-              <div class="para-item-icon">⭐</div>
-              <div>
-                <div class="para-item-title">Legal Operations Specialist</div>
-                <div class="para-item-body">Supports legal department processes, document management, and legal project coordination. Direct use of paralegal skills.</div>
-              </div>
-            </div>
-            <div class="para-item">
-              <div class="para-item-icon">⭐</div>
-              <div>
-                <div class="para-item-title">Compliance Analyst</div>
-                <div class="para-item-body">Monitors regulatory requirements, reviews policies, and ensures company adherence to laws. Your insurance/benefits background is a direct advantage here.</div>
-              </div>
-            </div>
-            <div class="para-item">
-              <div class="para-item-icon">⭐</div>
-              <div>
-                <div class="para-item-title">Regulatory Affairs Associate</div>
-                <div class="para-item-body">Works with legal and compliance on regulatory filings and government relations. High visibility, growth track.</div>
-              </div>
-            </div>
-            <div class="para-item">
-              <div class="para-item-icon">⭐</div>
-              <div>
-                <div class="para-item-title">Paralegal (In-House)</div>
-                <div class="para-item-body">Direct paralegal role within Voya's legal department. The end goal — with certificate + experience, you're a fully qualified candidate.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="sec-label" style="margin-bottom:.75rem;">Your Competitive Edge</div>
-          <div class="para-items">
-            <div class="para-item">
-              <div class="para-item-icon">✦</div>
-              <div>
-                <div class="para-item-title">Already Inside the Company</div>
-                <div class="para-item-body">Internal transfers always beat external hires. You know the culture, the systems, and the people. That's not nothing — that's everything.</div>
-              </div>
-            </div>
-            <div class="para-item">
-              <div class="para-item-icon">✦</div>
-              <div>
-                <div class="para-item-title">Insurance + Benefits Fluency</div>
-                <div class="para-item-body">Claims & benefits operations = you already speak the language of Voya's legal and compliance teams. Your background is directly transferable.</div>
-              </div>
-            </div>
-            <div class="para-item">
-              <div class="para-item-icon">✦</div>
-              <div>
-                <div class="para-item-title">Medical Admin Internship</div>
-                <div class="para-item-body">Healthcare paralegal experience is directly relevant to Voya's benefits and insurance legal work. HIPAA, billing, compliance — all overlap with what they do.</div>
-              </div>
-            </div>
-            <div class="para-item">
-              <div class="para-item-icon">✦</div>
-              <div>
-                <div class="para-item-title">FIU LSI Certificate</div>
-                <div class="para-item-body">ABA-guideline compliant, LexisNexis trained, taught by judges and working attorneys. That credential carries real weight in a corporate legal department.</div>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top:.75rem;">
-            <div class="sec-label" style="margin-bottom:.5rem;">Strategy Notes</div>
-            <textarea class="para-notes-area" style="min-height:80px;" placeholder="Internal contacts made, conversations had, postings watched, timeline updates..."></textarea>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /bento -->
 </div>
 
 
 <!-- ════════ HOME HUB ════════ -->
-<div class="page" id="page-home">
-  <div class="pg-header">
-    <div>
-      <div class="eyebrow">Moving Home · Miramar / Pembroke Pines</div>
-      <h1>Home</h1>
-    </div>
-    <div style="text-align:right;padding-bottom:.35rem;">
-      <div class="sub">You + Mom · A new chapter</div>
-      <div class="mantra">"Going home on purpose, on timeline, and on your terms."</div>
-    </div>
-  </div>
-
-  <div class="bento">
-
-    <!-- FINANCIAL SNAPSHOT -->
-    <div class="card g c12">
-      <div class="sec-label">💰 Monthly Financial Snapshot</div>
-      <div class="home-finance-grid">
-
-        <!-- Income column -->
-        <div class="home-fin-col">
-          <div class="home-fin-col-label">Monthly Income</div>
-          <div class="home-fin-row">
-            <span class="home-fin-name">Voya (P)</span>
-            <span class="home-fin-amount rev-editable" data-hkey="fin-amount-1" data-hkey="fin-amount-2" contenteditable="true">$2,600</span>
-          </div>
-          <div class="home-fin-row">
-            <span class="home-fin-name">Mom's SSD</span>
-            <span class="home-fin-amount rev-editable" data-hkey="fin-amount-2" data-hkey="fin-amount-3" contenteditable="true">$0</span>
-            <span class="home-fin-hint">Add her monthly amount</span>
-          </div>
-          <div class="home-fin-row">
-            <span class="home-fin-name">Side Streams (P)</span>
-            <span class="home-fin-amount rev-editable" data-hkey="fin-amount-3" data-hkey="fin-amount-4" contenteditable="true">$0</span>
-          </div>
-          <div class="home-fin-total-row">
-            <span class="home-fin-total-label">Total Household Income</span>
-            <span class="home-fin-total" id="home-total-income">$2,600</span>
-          </div>
-        </div>
-
-        <!-- Expenses column -->
-        <div class="home-fin-col">
-          <div class="home-fin-col-label">Monthly Expenses</div>
-          <div class="home-fin-row">
-            <span class="home-fin-name">Rent</span>
-            <span class="home-fin-amount rev-editable" data-hkey="fin-amount-4" data-hkey="fin-amount-5" contenteditable="true">$0</span>
-          </div>
-          <div class="home-fin-row">
-            <span class="home-fin-name">Utilities (electric, water, internet)</span>
-            <span class="home-fin-amount rev-editable" data-hkey="fin-amount-5" data-hkey="fin-amount-6" contenteditable="true">$0</span>
-          </div>
-          <div class="home-fin-row">
-            <span class="home-fin-name">Groceries</span>
-            <span class="home-fin-amount rev-editable" data-hkey="fin-amount-6" data-hkey="fin-amount-7" contenteditable="true">$0</span>
-          </div>
-          <div class="home-fin-row">
-            <span class="home-fin-name">Mom's medications / medical</span>
-            <span class="home-fin-amount rev-editable" data-hkey="fin-amount-7" data-hkey="fin-amount-8" contenteditable="true">$0</span>
-          </div>
-          <div class="home-fin-row">
-            <span class="home-fin-name">Transportation</span>
-            <span class="home-fin-amount rev-editable" data-hkey="fin-amount-8" data-hkey="fin-amount-9" contenteditable="true">$0</span>
-          </div>
-          <div class="home-fin-row">
-            <span class="home-fin-name">Personal / misc</span>
-            <span class="home-fin-amount rev-editable" data-hkey="fin-amount-9" data-hkey="fin-amount-10" contenteditable="true">$0</span>
-          </div>
-          <div class="home-fin-row home-fin-row-add" id="home-expense-extra"></div>
-          <div class="home-fin-total-row">
-            <span class="home-fin-total-label">Total Expenses</span>
-            <span class="home-fin-total" id="home-total-expenses">$0</span>
-          </div>
-        </div>
-
-        <!-- Left over column -->
-        <div class="home-fin-col home-fin-col-summary">
-          <div class="home-fin-col-label">What's Left</div>
-          <div class="home-leftover-big" id="home-leftover" data-hkey="leftover-display">$2,600</div>
-          <div class="home-leftover-label">After expenses</div>
-          <div class="home-leftover-bar-wrap">
-            <div class="home-leftover-bar" id="home-leftover-bar" style="width:100%"></div>
-          </div>
-          <div class="home-leftover-sub" id="home-leftover-sub">100% of income remaining</div>
-
-          <div class="home-fin-divider"></div>
-
-          <div class="home-fin-col-label" style="margin-top:.5rem;">Budget Goals</div>
-          <div class="home-budget-goal">
-            <span class="home-budget-goal-label">Emergency Fund Target</span>
-            <span class="home-budget-goal-val rev-editable" data-hkey="budget-goal-1" contenteditable="true">$3,000</span>
-          </div>
-          <div class="home-budget-goal">
-            <span class="home-budget-goal-label">Paralegal Tuition Savings</span>
-            <span class="home-budget-goal-val rev-editable" data-hkey="budget-goal-2" contenteditable="true">$2,300</span>
-          </div>
-          <div class="home-budget-goal">
-            <span class="home-budget-goal-label">Monthly Personal Savings Target</span>
-            <span class="home-budget-goal-val rev-editable" data-hkey="budget-goal-3" contenteditable="true">$300</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Budget note -->
-      <div class="home-budget-note-wrap">
-        <textarea class="home-budget-note" data-hkey="budget-note" placeholder="Budget notes — what's changing this month, what you're watching, anything that needs attention..."></textarea>
-      </div>
-    </div>
-
-    <!-- APARTMENT SCENARIO PLANNER -->
-    <div class="card g c12">
-      <div class="sec-label">🏠 Apartment Budget Scenarios</div>
-      <div class="apt-intro">Numbers aren't locked in yet — that's fine. Run the scenarios here so you know exactly what rent range works before you sign anything.</div>
-
-      <div class="apt-scenario-grid">
-
-        <!-- SCENARIO A -->
-        <div class="apt-scenario">
-          <div class="apt-s-header">
-            <div class="apt-s-label">Scenario A</div>
-            <div class="apt-s-name rev-editable" data-hkey="apt-name-1" contenteditable="true">Budget Option</div>
-          </div>
-          <div class="apt-s-row"><span class="apt-s-key">Rent</span><span class="apt-s-val rev-editable" data-hkey="apt-val-1" contenteditable="true">$1,200</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Utilities est.</span><span class="apt-s-val rev-editable" data-hkey="apt-val-2" contenteditable="true">$180</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Groceries</span><span class="apt-s-val rev-editable" data-hkey="apt-val-3" contenteditable="true">$400</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Mom medical</span><span class="apt-s-val rev-editable" data-hkey="apt-val-4" contenteditable="true">$100</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Transport</span><span class="apt-s-val rev-editable" data-hkey="apt-val-5" contenteditable="true">$150</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Personal</span><span class="apt-s-val rev-editable" data-hkey="apt-val-6" contenteditable="true">$200</span></div>
-          <div class="apt-s-divider"></div>
-          <div class="apt-s-row apt-s-total-row">
-            <span class="apt-s-key">Total Expenses</span>
-            <span class="apt-s-total apt-calc">$2,230</span>
-          </div>
-          <div class="apt-s-row apt-s-left-row">
-            <span class="apt-s-key">Left from $2,600</span>
-            <span class="apt-s-left apt-calc-left">$370</span>
-          </div>
-          <div class="apt-s-row" style="margin-top:.4rem;">
-            <span class="apt-s-key">+ Mom's SSD</span>
-            <span class="apt-s-val rev-editable" data-hkey="apt-val-7" contenteditable="true">$0</span>
-          </div>
-          <div class="apt-s-verdict" data-threshold="200">✓ Workable</div>
-          <textarea class="apt-s-notes" data-hkey="apt-s-notes-1" placeholder="Notes on this scenario..."></textarea>
-        </div>
-
-        <!-- SCENARIO B -->
-        <div class="apt-scenario">
-          <div class="apt-s-header">
-            <div class="apt-s-label">Scenario B</div>
-            <div class="apt-s-name rev-editable" data-hkey="apt-name-2" contenteditable="true">Mid Range</div>
-          </div>
-          <div class="apt-s-row"><span class="apt-s-key">Rent</span><span class="apt-s-val rev-editable" data-hkey="apt-val-8" contenteditable="true">$1,450</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Utilities est.</span><span class="apt-s-val rev-editable" data-hkey="apt-val-9" contenteditable="true">$200</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Groceries</span><span class="apt-s-val rev-editable" data-hkey="apt-val-10" contenteditable="true">$400</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Mom medical</span><span class="apt-s-val rev-editable" data-hkey="apt-val-11" contenteditable="true">$100</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Transport</span><span class="apt-s-val rev-editable" data-hkey="apt-val-12" contenteditable="true">$150</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Personal</span><span class="apt-s-val rev-editable" data-hkey="apt-val-13" contenteditable="true">$200</span></div>
-          <div class="apt-s-divider"></div>
-          <div class="apt-s-row apt-s-total-row">
-            <span class="apt-s-key">Total Expenses</span>
-            <span class="apt-s-total apt-calc">$2,500</span>
-          </div>
-          <div class="apt-s-row apt-s-left-row">
-            <span class="apt-s-key">Left from $2,600</span>
-            <span class="apt-s-left apt-calc-left">$100</span>
-          </div>
-          <div class="apt-s-row" style="margin-top:.4rem;">
-            <span class="apt-s-key">+ Mom's SSD</span>
-            <span class="apt-s-val rev-editable" data-hkey="apt-val-14" contenteditable="true">$0</span>
-          </div>
-          <div class="apt-s-verdict" data-threshold="200">⚠ Tight</div>
-          <textarea class="apt-s-notes" data-hkey="apt-s-notes-2" placeholder="Notes on this scenario..."></textarea>
-        </div>
-
-        <!-- SCENARIO C -->
-        <div class="apt-scenario">
-          <div class="apt-s-header">
-            <div class="apt-s-label">Scenario C</div>
-            <div class="apt-s-name rev-editable" data-hkey="apt-name-3" contenteditable="true">Stretch Option</div>
-          </div>
-          <div class="apt-s-row"><span class="apt-s-key">Rent</span><span class="apt-s-val rev-editable" data-hkey="apt-val-15" contenteditable="true">$1,650</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Utilities est.</span><span class="apt-s-val rev-editable" data-hkey="apt-val-16" contenteditable="true">$220</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Groceries</span><span class="apt-s-val rev-editable" data-hkey="apt-val-17" contenteditable="true">$400</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Mom medical</span><span class="apt-s-val rev-editable" data-hkey="apt-val-18" contenteditable="true">$100</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Transport</span><span class="apt-s-val rev-editable" data-hkey="apt-val-19" contenteditable="true">$150</span></div>
-          <div class="apt-s-row"><span class="apt-s-key">Personal</span><span class="apt-s-val rev-editable" data-hkey="apt-val-20" contenteditable="true">$200</span></div>
-          <div class="apt-s-divider"></div>
-          <div class="apt-s-row apt-s-total-row">
-            <span class="apt-s-key">Total Expenses</span>
-            <span class="apt-s-total apt-calc">$2,720</span>
-          </div>
-          <div class="apt-s-row apt-s-left-row">
-            <span class="apt-s-key">Left from $2,600</span>
-            <span class="apt-s-left apt-calc-left">-$120</span>
-          </div>
-          <div class="apt-s-row" style="margin-top:.4rem;">
-            <span class="apt-s-key">+ Mom's SSD</span>
-            <span class="apt-s-val rev-editable" data-hkey="apt-val-21" contenteditable="true">$0</span>
-          </div>
-          <div class="apt-s-verdict" data-threshold="200">⚠ Needs SSD</div>
-          <textarea class="apt-s-notes" data-hkey="apt-s-notes-3" placeholder="Notes on this scenario — only viable if Mom's SSD covers the gap..."></textarea>
-        </div>
-
-      </div>
-
-      <!-- Rule of thumb -->
-      <div class="apt-rule-wrap">
-        <div class="apt-rule-label">The 30% Rule Check</div>
-        <div class="apt-rule-body">On $2,600/month your ideal rent ceiling is <strong>$780</strong> (30%). With Mom's SSD added, that ceiling rises. The sweet spot for a 2BR in Miramar/Pembroke Pines right now is roughly <strong>$1,200–$1,600</strong> depending on the complex. Anything above $1,600 needs to be offset by side stream income or Mom's SSD to keep breathing room.</div>
-      </div>
-
-      <!-- Apartment search tracker -->
-      <div class="apt-search-wrap">
-        <div class="sec-label" style="margin-top:1rem;">Apartment Search Tracker</div>
-        <div class="apt-search-list" id="apt-search-list"></div>
-        <div class="apt-search-add-row">
-          <input class="apt-add-input" id="apt-name" placeholder="Apartment name / address..." />
-          <input class="apt-add-input" id="apt-rent" placeholder="Monthly rent" style="width:110px;flex:none;" />
-          <input class="apt-add-input" id="apt-beds" placeholder="Beds" style="width:70px;flex:none;" />
-          <select class="apt-add-input apt-status-sel" id="apt-status" style="width:110px;flex:none;">
-            <option>Interested</option>
-            <option>Toured</option>
-            <option>Applied</option>
-            <option>Rejected</option>
-            <option>Top Pick</option>
-          </select>
-          <button class="home-todo-btn" onclick="addAptSearch()">Add</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- RELOCATION TIMELINE -->
-    <div class="card g c6">
-      <div class="sec-label">🗓 Relocation Timeline</div>
-      <div class="home-timeline">
-        <div class="home-tl-item" onclick="toggleTL(this)">
-          <div class="home-tl-dot"></div>
-          <div class="home-tl-content">
-            <div class="home-tl-title">Research neighborhoods in Miramar / Pembroke Pines</div>
-            <div class="home-tl-sub">33025 · 33027 · 33029 zip codes — proximity to FIU LSI</div>
-          </div>
-        </div>
-        <div class="home-tl-item" onclick="toggleTL(this)">
-          <div class="home-tl-dot"></div>
-          <div class="home-tl-content">
-            <div class="home-tl-title">Set a soft move date</div>
-            <div class="home-tl-sub">Target: before June 2026 enrollment</div>
-          </div>
-        </div>
-        <div class="home-tl-item" onclick="toggleTL(this)">
-          <div class="home-tl-dot"></div>
-          <div class="home-tl-content">
-            <div class="home-tl-title">Start apartment search</div>
-            <div class="home-tl-sub">Zillow · Apartments.com · Facebook Marketplace · local groups</div>
-          </div>
-        </div>
-        <div class="home-tl-item" onclick="toggleTL(this)">
-          <div class="home-tl-dot"></div>
-          <div class="home-tl-content">
-            <div class="home-tl-title">Confirm Voya remote status or transfer options</div>
-            <div class="home-tl-sub">Is your role fully remote? If not, what's the plan?</div>
-          </div>
-        </div>
-        <div class="home-tl-item" onclick="toggleTL(this)">
-          <div class="home-tl-dot"></div>
-          <div class="home-tl-content">
-            <div class="home-tl-title">Apply for FL driver's license &amp; update address</div>
-            <div class="home-tl-sub">Within 30 days of moving to Florida</div>
-          </div>
-        </div>
-        <div class="home-tl-item" onclick="toggleTL(this)">
-          <div class="home-tl-dot"></div>
-          <div class="home-tl-content">
-            <div class="home-tl-title">Set up utilities in new place</div>
-            <div class="home-tl-sub">FPL (electric) · city water · internet (AT&T / Xfinity in Broward)</div>
-          </div>
-        </div>
-        <div class="home-tl-item" onclick="toggleTL(this)">
-          <div class="home-tl-dot"></div>
-          <div class="home-tl-content">
-            <div class="home-tl-title">Mom's benefit address update</div>
-            <div class="home-tl-sub">SSA.gov — update address for SSD payments. Do this immediately after move.</div>
-          </div>
-        </div>
-        <div class="home-tl-item" onclick="toggleTL(this)">
-          <div class="home-tl-dot"></div>
-          <div class="home-tl-content">
-            <div class="home-tl-title">Transfer / establish Mom's healthcare in FL</div>
-            <div class="home-tl-sub">Medicare supplement plan, primary care doctor, any specialist referrals</div>
-          </div>
-        </div>
-        <div class="home-tl-item" onclick="toggleTL(this)">
-          <div class="home-tl-dot"></div>
-          <div class="home-tl-content">
-            <div class="home-tl-title">Contact CareerSource Florida re: grants</div>
-            <div class="home-tl-sub">After settling — workforce development grants for paralegal program</div>
-          </div>
-        </div>
-        <div class="home-tl-item" onclick="toggleTL(this)">
-          <div class="home-tl-dot"></div>
-          <div class="home-tl-content">
-            <div class="home-tl-title">Enroll at FIU LSI for Summer 2026</div>
-            <div class="home-tl-sub">Confirm registration date, submit enrollment, pay first semester</div>
-          </div>
-        </div>
-      </div>
-      <div class="home-tl-progress" id="home-tl-progress">0 of 10 complete</div>
-    </div>
-
-    <!-- MOM'S INFO + HOUSEHOLD -->
-    <div class="card g c6">
-      <div class="sec-label">🏠 Household &amp; Mom's Info</div>
-
-      <!-- SSD Info -->
-      <div class="home-section-label">Social Security Disability</div>
-      <div class="home-info-grid">
-        <div class="home-info-cell">
-          <div class="home-info-label">Monthly SSD Amount</div>
-          <div class="home-info-val rev-editable" contenteditable="true">Add amount</div>
-        </div>
-        <div class="home-info-cell">
-          <div class="home-info-label">Payment Date</div>
-          <div class="home-info-val rev-editable" contenteditable="true">e.g. 2nd Wednesday</div>
-        </div>
-        <div class="home-info-cell">
-          <div class="home-info-label">Medicare / Medicaid</div>
-          <div class="home-info-val rev-editable" contenteditable="true">Plan type</div>
-        </div>
-        <div class="home-info-cell">
-          <div class="home-info-label">SSA Contact / Case #</div>
-          <div class="home-info-val rev-editable" contenteditable="true">1-800-772-1213</div>
-        </div>
-      </div>
-
-      <div class="home-fin-divider" style="margin:1rem 0;"></div>
-
-      <!-- Medical info -->
-      <div class="home-section-label">Medical &amp; Prescriptions</div>
-      <textarea class="home-medical-notes" data-hkey="medical-notes-1" placeholder="Mom's doctors, prescriptions, pharmacy, insurance cards, specialist info, appointment schedule — keep it all here..."></textarea>
-
-      <div class="home-fin-divider" style="margin:1rem 0;"></div>
-
-      <!-- Household to-do -->
-      <div class="home-section-label">Household To-Do</div>
-      <div class="home-todo-list" id="home-todo-list"></div>
-      <div class="home-todo-add-row">
-        <input class="home-todo-input" id="home-todo-input" placeholder="Add a household task..." />
-        <button class="home-todo-btn" onclick="addHomeTodo()">Add</button>
-      </div>
-
-      <div class="home-fin-divider" style="margin:1rem 0;"></div>
-
-      <!-- Notes -->
-      <div class="home-section-label">General Notes</div>
-      <textarea class="home-medical-notes" data-hkey="medical-notes-2" placeholder="Lease terms, landlord contact, building rules, anything important about the new place..."></textarea>
-    </div>
-
-    <!-- AFFIRMATION -->
-    <div class="quote-card" style="grid-column:span 12;">
-      <div class="q-body">"Going home is not a step back. It's a strategic move. You're building the foundation that everything else stands on."</div>
-      <div class="q-attr">P's Command Center · Home Chapter</div>
-    </div>
-
+<div class="page page-shell-loading" id="page-home" data-page-lazy="true" data-page-loaded="false" aria-busy="true">
+  <div class="page-shell-card">
+    <div class="page-shell-kicker">Loading Hub</div>
+    <div class="page-shell-title">Home</div>
+    <div class="page-shell-copy">Loading the home planning command center...</div>
   </div>
 </div>
 
@@ -7318,12 +6043,16 @@ async function loadAllUserData() {
       loadHomeData();
       loadTabOrder();
       initTabDrag();
-      renderNotesList();
-      if (notes.length > 0) loadNote(notes[0]);
-      renderBoard();
-      initVisionBoard();
-      renderHomeTodos();
-      renderAptSearch();
+      if (isPageMarkupReady('notes')) {
+        renderNotesList();
+        if (notes.length > 0) loadNote(notes[0]);
+      }
+      if (isPageMarkupReady('life-board')) renderBoard();
+      if (isPageMarkupReady('vision')) initVisionBoard();
+      if (isPageMarkupReady('home')) {
+        renderHomeTodos();
+        renderAptSearch();
+      }
       // Apply saved theme
       const savedTheme = rows.find(r => r.section === 'theme');
       if (savedTheme?.data) {
@@ -7378,15 +6107,15 @@ function resetWorkspaceUi(options = {}) {
   if (typeof userChallenges !== 'undefined') userChallenges = [];
   if (typeof commProfile !== 'undefined') commProfile = { name:'', handle:'', bio:'', color:'#0A7266', photoUrl:'' };
 
-  if (typeof newNote === 'function') newNote();
-  if (typeof renderNotesList === 'function') renderNotesList();
+  if (typeof newNote === 'function' && isPageMarkupReady('notes')) newNote();
+  if (typeof renderNotesList === 'function' && isPageMarkupReady('notes')) renderNotesList();
   if (typeof renderGoals === 'function') renderGoals();
   if (typeof updateGoalCount === 'function') updateGoalCount();
-  if (typeof renderBoard === 'function') renderBoard(typeof boardFilter !== 'undefined' ? boardFilter : undefined);
-  if (typeof renderHomeTodos === 'function') renderHomeTodos();
-  if (typeof renderAptSearch === 'function') renderAptSearch();
-  if (typeof updateHomeBudget === 'function') updateHomeBudget();
-  if (typeof renderCal === 'function') renderCal();
+  if (typeof renderBoard === 'function' && isPageMarkupReady('life-board')) renderBoard(typeof boardFilter !== 'undefined' ? boardFilter : undefined);
+  if (typeof renderHomeTodos === 'function' && isPageMarkupReady('home')) renderHomeTodos();
+  if (typeof renderAptSearch === 'function' && isPageMarkupReady('home')) renderAptSearch();
+  if (typeof updateHomeBudget === 'function' && isPageMarkupReady('home')) updateHomeBudget();
+  if (typeof renderCal === 'function' && isPageMarkupReady('calendar')) renderCal();
   if (typeof updateCommProfile === 'function') updateCommProfile();
   if (typeof switchCommView === 'function') switchCommView('feed');
   else if (typeof renderFeed === 'function') renderFeed();
@@ -8357,6 +7086,34 @@ function emitPageChange(pageId, page, trigger) {
   } catch (e) {}
 }
 
+function isPageMarkupReady(pageId) {
+  const page = document.getElementById('page-' + pageId);
+  return !page || page.dataset.pageLazy !== 'true' || page.dataset.pageLoaded === 'true';
+}
+
+function runPageActivation(pageId, page) {
+  normalizePageHeaderTitles(page || document);
+  if (pageId === 'life-board') renderBoard();
+  if (pageId === 'notes') {
+    renderNotesList();
+    const note = notes.find(x => x.id === activeNoteId) || notes[0];
+    if (note) loadNote(note);
+  }
+  if (pageId === 'vision') {
+    animateVision();
+    setTimeout(initVisionBoard, 50);
+  }
+  if (pageId === 'calendar') renderCal();
+  if (pageId === 'community') setTimeout(initCommunity, 50);
+  if (pageId === 'home') {
+    loadHomeData();
+    renderHomeTodos();
+    renderAptSearch();
+    updateHomeBudget();
+    updateTLProgress();
+  }
+}
+
 // NAV
 function showPage(id, btn) {
   const targetId = canAccessPage(id) ? id : 'dashboard';
@@ -8364,18 +7121,41 @@ function showPage(id, btn) {
     ? btn
     : (document.querySelector('.nav-tab[data-page="dashboard"]') || btn);
   ensureLateHubPagesTopLevel();
+  const page = document.getElementById('page-' + targetId);
+
+  if (
+    page &&
+    page.dataset.pageLazy === 'true' &&
+    page.dataset.pageLoaded !== 'true' &&
+    typeof window.ensurePageReady === 'function'
+  ) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('on'));
+    page.classList.add('active');
+    if (targetBtn) targetBtn.classList.add('on');
+
+    window.ensurePageReady(targetId)
+      .then(() => {
+        const resolvedBtn = document.querySelector(`.nav-tab[data-page="${targetId}"]`) || targetBtn;
+        showPage(targetId, resolvedBtn);
+      })
+      .catch((error) => {
+        const kicker = page.querySelector('.page-shell-kicker');
+        const copy = page.querySelector('.page-shell-copy');
+        if (kicker) kicker.textContent = 'Load Error';
+        if (copy) copy.textContent = error?.message || 'Could not load this page right now.';
+        if (typeof safeShowToast === 'function') {
+          safeShowToast(error?.message || 'Could not load this page right now.');
+        }
+      });
+    return targetId;
+  }
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('on'));
-  const page = document.getElementById('page-' + targetId);
   if (page) page.classList.add('active');
   if (targetBtn)  targetBtn.classList.add('on');
-  normalizePageHeaderTitles(page || document);
-  if (targetId === 'life-board') renderBoard();
-  if (targetId === 'vision') {
-    animateVision();
-    setTimeout(initVisionBoard, 50);
-  }
-  if (targetId === 'community')  setTimeout(initCommunity, 50);
+  runPageActivation(targetId, page);
   emitPageChange(targetId, page, targetBtn);
   return targetId;
 }
@@ -9242,6 +8022,11 @@ function addVisionBoardStockAsset(assetId) {
 }
 
 function initVisionBoard() {
+  const hasVisionMarkup = !!(
+    document.getElementById('vision-studio-root') ||
+    document.getElementById('vision-board-canvas')
+  );
+  if (!hasVisionMarkup) return;
   if (document.getElementById('vision-studio-root') && window.VisionStudio && typeof window.VisionStudio.mount === 'function') {
     window.VisionStudio.mount();
     return;
@@ -11860,10 +10645,8 @@ if (document.readyState !== 'loading') {
   }
 })();
 </script>
+<script src="./pcc-page-loader.js"></script>
 <script src="./pcc-hub-upgrade.js"></script>
-<script src="./pcc-community-upgrade.js"></script>
-<script src="./pcc-community-social-upgrade.js"></script>
-<script src="./pcc-vision-studio.js"></script>
 <style id="hub-editable-style">
 .hub-editable-block,
 .hub-inline-edit,

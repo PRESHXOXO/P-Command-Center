@@ -1,0 +1,35 @@
+<div class="pg-header">
+    <div><div class="eyebrow">Schedule</div><h1 id="cal-page-title">—</h1></div>
+    <div style="text-align:right;padding-bottom:.35rem;"><div class="sub">Time is the only non-renewable resource</div></div>
+  </div>
+  <div class="cal-layout">
+    <div class="cal-grid-wrap">
+      <div class="cal-month-nav">
+        <button class="cal-nav-btn" onclick="globalMonthShift(-1)">‹</button>
+        <div class="cal-month-title" id="cal-title">—</div>
+        <button class="cal-nav-btn" onclick="globalMonthShift(1)">›</button>
+      </div>
+      <div class="cal-days-header">
+        <div class="cal-day-name">Sun</div><div class="cal-day-name">Mon</div><div class="cal-day-name">Tue</div>
+        <div class="cal-day-name">Wed</div><div class="cal-day-name">Thu</div><div class="cal-day-name">Fri</div><div class="cal-day-name">Sat</div>
+      </div>
+      <div class="cal-days" id="cal-days"></div>
+    </div>
+    <div class="cal-sidebar-col">
+      <div class="events-card">
+        <div class="sec-label">Events This Month</div>
+        <div class="event-list" id="events-list"></div>
+      </div>
+      <div class="add-event-card">
+        <div class="sec-label">Add to Schedule</div>
+        <div class="add-event-form">
+          <input class="add-input" id="evt-title" placeholder="Event or deadline..." />
+          <div class="add-row">
+            <input class="add-input" id="evt-date" type="date" />
+            <input class="add-input" id="evt-tag" placeholder="Tag (e.g. Business)" />
+          </div>
+          <button class="add-btn" onclick="addEvent()">Add to Calendar</button>
+        </div>
+      </div>
+    </div>
+  </div>

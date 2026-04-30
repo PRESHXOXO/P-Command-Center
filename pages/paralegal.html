@@ -1,0 +1,511 @@
+<div class="pg-header">
+    <div>
+      <div class="eyebrow">FIU Legal Studies Institute</div>
+      <h1>Paralegal</h1>
+    </div>
+    <div style="text-align:right;padding-bottom:.35rem;">
+      <div class="sub">Summer 2026 · Miramar / Pembroke Pines</div>
+      <div class="mantra">"The legal lane is already yours."</div>
+    </div>
+  </div>
+
+  <div class="bento">
+
+    <!-- PROGRAM OVERVIEW -->
+    <div class="card g c12" style="overflow:hidden;">
+      <div class="sec-label">Program Overview</div>
+      <div class="para-overview-grid">
+        <div class="para-stat">
+          <div class="para-stat-num">3</div>
+          <div class="para-stat-label">Semesters Total</div>
+        </div>
+        <div class="para-stat">
+          <div class="para-stat-num">$2,300</div>
+          <div class="para-stat-label">Per Semester</div>
+        </div>
+        <div class="para-stat">
+          <div class="para-stat-num">$6,900</div>
+          <div class="para-stat-label">Total Tuition</div>
+        </div>
+        <div class="para-stat">
+          <div class="para-stat-num">$195</div>
+          <div class="para-stat-label">Technology Fee (Sem 1)</div>
+        </div>
+        <div class="para-stat">
+          <div class="para-stat-num">~$7,095</div>
+          <div class="para-stat-label">Total Investment</div>
+        </div>
+        <div class="para-stat">
+          <div class="para-stat-num">Jun '26</div>
+          <div class="para-stat-label">Target Start Date</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENT PLAN -->
+    <div class="card g c6" style="overflow:hidden;">
+      <div class="sec-label">💰 Cost & Payment Options</div>
+      <div class="para-items">
+        <div class="para-item">
+          <div class="para-item-icon">🏦</div>
+          <div>
+            <div class="para-item-title">FIU Installment Plan</div>
+            <div class="para-item-body">Either 3 payments of 33% or 4 payments of 25% per semester. $15 service fee applies. Keeps each payment manageable.</div>
+          </div>
+        </div>
+        <div class="para-item">
+          <div class="para-item-icon">💼</div>
+          <div>
+            <div class="para-item-title">Voya Tuition Reimbursement</div>
+            <div class="para-item-body">Check your Voya employee benefits — many financial services companies cover professional development. This program qualifies. Ask HR directly.</div>
+          </div>
+        </div>
+        <div class="para-item">
+          <div class="para-item-icon">🌴</div>
+          <div>
+            <div class="para-item-title">CareerSource Florida Grant</div>
+            <div class="para-item-body">Florida workforce development grants sometimes cover professional certificate programs. Call your local CareerSource office once you're settled in Miramar/Pembroke Pines.</div>
+          </div>
+        </div>
+        <div class="para-item">
+          <div class="para-item-icon">🎓</div>
+          <div>
+            <div class="para-item-title">Financial Aid</div>
+            <div class="para-item-body">Limited but worth asking about. Contact LSI directly to ask what applies to non-credit professional programs specifically.</div>
+          </div>
+        </div>
+      </div>
+      <!-- Payment tracker -->
+      <div class="para-pay-tracker">
+        <div class="sec-label" style="margin-top:1rem;">Payment Tracker</div>
+        <div class="para-pay-row">
+          <span class="para-pay-label">Semester 1 ($2,300 + $195 tech)</span>
+          <div class="para-pay-status" onclick="cyclePayStatus(this)" data-states='["Not Started","Saving","Paid"]'>Not Started</div>
+        </div>
+        <div class="para-pay-row">
+          <span class="para-pay-label">Semester 2 ($2,300)</span>
+          <div class="para-pay-status" onclick="cyclePayStatus(this)" data-states='["Not Started","Saving","Paid"]'>Not Started</div>
+        </div>
+        <div class="para-pay-row">
+          <span class="para-pay-label">Semester 3 ($2,300)</span>
+          <div class="para-pay-status" onclick="cyclePayStatus(this)" data-states='["Not Started","Saving","Paid"]'>Not Started</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRE-WORK CHECKLIST -->
+    <div class="card g c6" style="overflow:hidden;">
+      <div class="sec-label">🎯 Before June — Pre-Work Checklist</div>
+      <div class="para-checklist" id="para-checklist">
+        <div class="para-check-item" onclick="toggleParaCheck(this)">
+          <div class="para-check-circle"></div>
+          <div>
+            <div class="para-check-title">Get comfortable with LexisNexis</div>
+            <div class="para-check-sub">Watch YouTube tutorials — you'll use it in class. Look like a pro on day one.</div>
+          </div>
+        </div>
+        <div class="para-check-item" onclick="toggleParaCheck(this)">
+          <div class="para-check-circle"></div>
+          <div>
+            <div class="para-check-title">Start following legal news</div>
+            <div class="para-check-sub">Above the Law · SCOTUSblog · Florida court news. Make legal thinking feel natural.</div>
+          </div>
+        </div>
+        <div class="para-check-item" onclick="toggleParaCheck(this)">
+          <div class="para-check-circle"></div>
+          <div>
+            <div class="para-check-title">Lock in your workspace</div>
+            <div class="para-check-sub">Online program = your environment is everything. Set up a dedicated, distraction-free study space before June.</div>
+          </div>
+        </div>
+        <div class="para-check-item" onclick="toggleParaCheck(this)">
+          <div class="para-check-circle"></div>
+          <div>
+            <div class="para-check-title">Contact LSI about financial aid</div>
+            <div class="para-check-sub">Ask specifically about non-credit professional programs. Don't assume — ask.</div>
+          </div>
+        </div>
+        <div class="para-check-item" onclick="toggleParaCheck(this)">
+          <div class="para-check-circle"></div>
+          <div>
+            <div class="para-check-title">Ask Voya HR about tuition reimbursement</div>
+            <div class="para-check-sub">Check your employee benefits portal or email HR directly. Could cover a full semester.</div>
+          </div>
+        </div>
+        <div class="para-check-item" onclick="toggleParaCheck(this)">
+          <div class="para-check-circle"></div>
+          <div>
+            <div class="para-check-title">Call CareerSource Florida</div>
+            <div class="para-check-sub">Once settled in Miramar/Pembroke Pines. Workforce development grants can cover professional certificates.</div>
+          </div>
+        </div>
+        <div class="para-check-item" onclick="toggleParaCheck(this)">
+          <div class="para-check-circle"></div>
+          <div>
+            <div class="para-check-title">Confirm enrollment / registration date with FIU LSI</div>
+            <div class="para-check-sub">Make sure your seat is locked in. Don't leave it open-ended.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- READING LIST -->
+    <div class="card g c12" style="overflow:hidden;">
+      <div class="sec-label">📚 What to Read Before June</div>
+      <div class="para-books-grid">
+
+        <div class="para-book-card" onclick="toggleBook(this)">
+          <div class="para-book-tag">Start Here · Foundational</div>
+          <div class="para-book-title">Black's Law Dictionary</div>
+          <div class="para-book-author">— The definitive legal reference</div>
+          <div class="para-book-why">Over 55,000 law-related terms. New paralegals should prioritize this first. Get familiar with the language before anything else — legal vocabulary is half the battle.</div>
+          <div class="para-book-status" onclick="cycleBookStatus(event,this)" data-states='["Not Started","In Progress","Complete"]'>Not Started</div>
+        </div>
+
+        <div class="para-book-card" onclick="toggleBook(this)">
+          <div class="para-book-tag">Start Here · Foundational</div>
+          <div class="para-book-title">Introduction to Law for Paralegals</div>
+          <div class="para-book-author">Currier &amp; Eimermann</div>
+          <div class="para-book-why">Covers the role of the paralegal, sources and classification of law, court system structure, and an overview of litigation. Basically the roadmap for everything you'll study.</div>
+          <div class="para-book-status" onclick="cycleBookStatus(event,this)" data-states='["Not Started","In Progress","Complete"]'>Not Started</div>
+        </div>
+
+        <div class="para-book-card" onclick="toggleBook(this)">
+          <div class="para-book-tag">Level Up · Legal Writing</div>
+          <div class="para-book-title">The Redbook</div>
+          <div class="para-book-author">Bryan A. Garner</div>
+          <div class="para-book-why">Specifically designed for legal document preparation — grammar, punctuation, and style rules for legal writing. Legal writing is a whole different beast. You'll need this fast.</div>
+          <div class="para-book-status" onclick="cycleBookStatus(event,this)" data-states='["Not Started","In Progress","Complete"]'>Not Started</div>
+        </div>
+
+        <div class="para-book-card" onclick="toggleBook(this)">
+          <div class="para-book-tag">Big Picture · Orientation</div>
+          <div class="para-book-title">Law 101</div>
+          <div class="para-book-author">Jay M. Feinman</div>
+          <div class="para-book-why">Plain-English overview of how American law actually works. Great for orientation before you dive into the technical material. Makes everything less intimidating.</div>
+          <div class="para-book-status" onclick="cycleBookStatus(event,this)" data-states='["Not Started","In Progress","Complete"]'>Not Started</div>
+        </div>
+
+        <div class="para-book-card" onclick="toggleBook(this)">
+          <div class="para-book-tag">Big Picture · Orientation</div>
+          <div class="para-book-title">Introduction to Paralegalism</div>
+          <div class="para-book-author">Statsky &amp; Tepper</div>
+          <div class="para-book-why">Hands-on skills and real-world context — identifying legal issues, breaking rules into elements, applying rules to facts. Practical from page one.</div>
+          <div class="para-book-status" onclick="cycleBookStatus(event,this)" data-states='["Not Started","In Progress","Complete"]'>Not Started</div>
+        </div>
+
+        <div class="para-book-card para-book-notes-card">
+          <div class="para-book-tag">Study Notes</div>
+          <div class="para-book-title" style="margin-bottom:.6rem;">Reading Notes &amp; Reflections</div>
+          <textarea class="para-notes-area" placeholder="Jot down key terms, questions, passages that hit different, things to look up..."></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- STUDY NOTES -->
+    <div class="card g c12" style="overflow:hidden;">
+      <div class="sec-label">🖊 Study Notes &amp; Journal</div>
+      <div class="para-notes-layout">
+        <div class="para-notes-sidebar">
+          <div class="para-note-tabs">
+            <button class="para-tab on" onclick="switchParaTab('lexis',this)">LexisNexis</button>
+            <button class="para-tab" onclick="switchParaTab('vocab',this)">Legal Vocab</button>
+            <button class="para-tab" onclick="switchParaTab('questions',this)">Questions</button>
+            <button class="para-tab" onclick="switchParaTab('general',this)">General</button>
+          </div>
+          <div class="para-tab-hint">Use these to organize your pre-study notes before June.</div>
+        </div>
+        <div class="para-notes-editor">
+          <textarea class="para-study-note" id="para-note-lexis" placeholder="LexisNexis practice notes — tutorials watched, features explored, tips..."></textarea>
+          <textarea class="para-study-note hidden" id="para-note-vocab" placeholder="Legal vocabulary — terms, definitions, context, examples..."></textarea>
+          <textarea class="para-study-note hidden" id="para-note-questions" placeholder="Questions to ask on day one, things that are unclear, topics to research..."></textarea>
+          <textarea class="para-study-note hidden" id="para-note-general" placeholder="General study notes, reflections, anything that doesn't fit elsewhere..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERNSHIP PLACEMENT -->
+    <div class="card g c12" style="overflow:hidden;">
+      <div class="sec-label">🏥 Practicum Placement · Medical Administration</div>
+      <div class="para-overview-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="para-stat">
+          <div class="para-stat-num">May</div>
+          <div class="para-stat-label">Start Date</div>
+        </div>
+        <div class="para-stat">
+          <div class="para-stat-num">In-House</div>
+          <div class="para-stat-label">Placement Type</div>
+        </div>
+        <div class="para-stat">
+          <div class="para-stat-num">Medical</div>
+          <div class="para-stat-label">Specialization</div>
+        </div>
+        <div class="para-stat">
+          <div class="para-stat-num">Remote</div>
+          <div class="para-stat-label">Format</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem;">
+        <div>
+          <div class="sec-label" style="margin-bottom:.75rem;">Placement Details</div>
+          <div class="para-items">
+            <div class="para-item">
+              <div class="para-item-icon">⚖️</div>
+              <div>
+                <div class="para-item-title">Specialization</div>
+                <div class="para-item-body">Medical Administration — leveraging Voya insurance/benefits background. HIPAA compliance, medical records, healthcare contracts, billing disputes.</div>
+              </div>
+            </div>
+            <div class="para-item">
+              <div class="para-item-icon">📧</div>
+              <div>
+                <div class="para-item-title">Coach Email</div>
+                <div class="para-item-body">Awaiting placement details from FIU LSI coach. Update once received.</div>
+              </div>
+            </div>
+            <div class="para-item">
+              <div class="para-item-icon">🏢</div>
+              <div>
+                <div class="para-item-title">Placement Organization</div>
+                <div class="para-item-body rev-editable" contenteditable="true">TBD — awaiting coach confirmation</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="sec-label" style="margin-bottom:.75rem;">Practicum Goals</div>
+          <div class="para-checklist">
+            <div class="para-check-item" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle"></div>
+              <div>
+                <div class="para-check-title">Learn HIPAA compliance basics before Day 1</div>
+                <div class="para-check-sub">PHI, breach notification, covered entities — your flashcard deck has this covered.</div>
+              </div>
+            </div>
+            <div class="para-check-item" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle"></div>
+              <div>
+                <div class="para-check-title">Understand ICD & CPT codes</div>
+                <div class="para-check-sub">Medical billing language is essential in healthcare legal work.</div>
+              </div>
+            </div>
+            <div class="para-check-item" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle"></div>
+              <div>
+                <div class="para-check-title">Study medical malpractice basics</div>
+                <div class="para-check-sub">Standard of care, negligence, informed consent — core medical law concepts.</div>
+              </div>
+            </div>
+            <div class="para-check-item" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle"></div>
+              <div>
+                <div class="para-check-title">Build relationship with supervising attorney</div>
+                <div class="para-check-sub">Ask questions. Show up prepared. Be memorable for the right reasons.</div>
+              </div>
+            </div>
+            <div class="para-check-item" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle"></div>
+              <div>
+                <div class="para-check-title">Document everything for your resume</div>
+                <div class="para-check-sub">Every task, every skill, every software used. Build your legal resume in real time.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:1rem;">
+        <div class="sec-label" style="margin-bottom:.5rem;">Practicum Notes</div>
+        <textarea class="para-notes-area" style="min-height:80px;" placeholder="Notes from your coach, placement details, supervisor info, anything important..."></textarea>
+      </div>
+    </div>
+
+    <!-- VOYA CAREER TRACKER -->
+    <div class="card g c12" style="overflow:hidden;">
+      <div class="sec-label">💼 Voya → Legal Department · Career Transition Tracker</div>
+
+      <!-- Phase timeline -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.5rem;">
+
+        <div class="para-item" style="flex-direction:column;align-items:flex-start;gap:.5rem;border:1px solid rgba(10,114,102,0.2);">
+          <div style="display:flex;align-items:center;gap:.5rem;width:100%;">
+            <div style="font-size:.48rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;padding:.2rem .6rem;border-radius:4px;background:var(--tint);border:1px solid rgba(13,148,136,0.25);color:var(--teal);">Phase 1</div>
+            <div style="font-size:.6rem;font-weight:500;color:var(--ink);">Right Now</div>
+          </div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:400;color:var(--ink);">Plant the Flag</div>
+          <div class="para-checklist" style="gap:.35rem;width:100%;">
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Update Voya internal profile with FIU LSI enrollment</div>
+            </div>
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Identify Voya's Legal, Compliance & Regulatory depts on LinkedIn</div>
+            </div>
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Note internal job postings — learn their language</div>
+            </div>
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Ask Voya HR about tuition reimbursement benefit</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="para-item" style="flex-direction:column;align-items:flex-start;gap:.5rem;border:1px solid rgba(10,114,102,0.15);">
+          <div style="display:flex;align-items:center;gap:.5rem;width:100%;">
+            <div style="font-size:.48rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;padding:.2rem .6rem;border-radius:4px;background:rgba(161,121,0,0.08);border:1px solid rgba(161,121,0,0.2);color:#8A6800;">Phase 2</div>
+            <div style="font-size:.6rem;font-weight:500;color:var(--ink);">May 2026</div>
+          </div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:400;color:var(--ink);">Activate Credentials</div>
+          <div class="para-checklist" style="gap:.35rem;width:100%;">
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Add practicum start to Voya profile & LinkedIn immediately</div>
+            </div>
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Update resume: paralegal intern in medical administration</div>
+            </div>
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Have casual career conversation with manager re: development goals</div>
+            </div>
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Continue performing at full capacity at Voya — don't slip</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="para-item" style="flex-direction:column;align-items:flex-start;gap:.5rem;border:1px solid rgba(10,114,102,0.12);">
+          <div style="display:flex;align-items:center;gap:.5rem;width:100%;">
+            <div style="font-size:.48rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;padding:.2rem .6rem;border-radius:4px;background:rgba(161,121,0,0.08);border:1px solid rgba(161,121,0,0.2);color:#8A6800;">Phase 3</div>
+            <div style="font-size:.6rem;font-weight:500;color:var(--ink);">Month 6</div>
+          </div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:400;color:var(--ink);">Make the Move</div>
+          <div class="para-checklist" style="gap:.35rem;width:100%;">
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Formally express interest in Voya legal/compliance dept to HR</div>
+            </div>
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Target: Legal Ops Specialist · Compliance Analyst · Paralegal · Regulatory Affairs</div>
+            </div>
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Build internal relationships in target departments</div>
+            </div>
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Apply to any relevant internal postings</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="para-item" style="flex-direction:column;align-items:flex-start;gap:.5rem;border:1px solid rgba(10,114,102,0.1);">
+          <div style="display:flex;align-items:center;gap:.5rem;width:100%;">
+            <div style="font-size:.48rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;padding:.2rem .6rem;border-radius:4px;background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.2);color:#15622D;">Phase 4</div>
+            <div style="font-size:.6rem;font-weight:500;color:var(--ink);">June 2027</div>
+          </div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:400;color:var(--ink);">Certified. Positioned.</div>
+          <div class="para-checklist" style="gap:.35rem;width:100%;">
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">FIU LSI Certificate in hand</div>
+            </div>
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Apply internally with certificate + internship on resume</div>
+            </div>
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Negotiate from position of strength — not asking for a chance</div>
+            </div>
+            <div class="para-check-item" style="padding:.4rem .6rem;" onclick="toggleParaCheck(this)">
+              <div class="para-check-circle" style="width:1rem;height:1rem;"></div>
+              <div class="para-check-title" style="font-size:.62rem;">Target salary: benchmark against AMEX comp + legal lane premium</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Target roles + notes -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div>
+          <div class="sec-label" style="margin-bottom:.75rem;">Target Roles at Voya</div>
+          <div class="para-items">
+            <div class="para-item">
+              <div class="para-item-icon">⭐</div>
+              <div>
+                <div class="para-item-title">Legal Operations Specialist</div>
+                <div class="para-item-body">Supports legal department processes, document management, and legal project coordination. Direct use of paralegal skills.</div>
+              </div>
+            </div>
+            <div class="para-item">
+              <div class="para-item-icon">⭐</div>
+              <div>
+                <div class="para-item-title">Compliance Analyst</div>
+                <div class="para-item-body">Monitors regulatory requirements, reviews policies, and ensures company adherence to laws. Your insurance/benefits background is a direct advantage here.</div>
+              </div>
+            </div>
+            <div class="para-item">
+              <div class="para-item-icon">⭐</div>
+              <div>
+                <div class="para-item-title">Regulatory Affairs Associate</div>
+                <div class="para-item-body">Works with legal and compliance on regulatory filings and government relations. High visibility, growth track.</div>
+              </div>
+            </div>
+            <div class="para-item">
+              <div class="para-item-icon">⭐</div>
+              <div>
+                <div class="para-item-title">Paralegal (In-House)</div>
+                <div class="para-item-body">Direct paralegal role within Voya's legal department. The end goal — with certificate + experience, you're a fully qualified candidate.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="sec-label" style="margin-bottom:.75rem;">Your Competitive Edge</div>
+          <div class="para-items">
+            <div class="para-item">
+              <div class="para-item-icon">✦</div>
+              <div>
+                <div class="para-item-title">Already Inside the Company</div>
+                <div class="para-item-body">Internal transfers always beat external hires. You know the culture, the systems, and the people. That's not nothing — that's everything.</div>
+              </div>
+            </div>
+            <div class="para-item">
+              <div class="para-item-icon">✦</div>
+              <div>
+                <div class="para-item-title">Insurance + Benefits Fluency</div>
+                <div class="para-item-body">Claims & benefits operations = you already speak the language of Voya's legal and compliance teams. Your background is directly transferable.</div>
+              </div>
+            </div>
+            <div class="para-item">
+              <div class="para-item-icon">✦</div>
+              <div>
+                <div class="para-item-title">Medical Admin Internship</div>
+                <div class="para-item-body">Healthcare paralegal experience is directly relevant to Voya's benefits and insurance legal work. HIPAA, billing, compliance — all overlap with what they do.</div>
+              </div>
+            </div>
+            <div class="para-item">
+              <div class="para-item-icon">✦</div>
+              <div>
+                <div class="para-item-title">FIU LSI Certificate</div>
+                <div class="para-item-body">ABA-guideline compliant, LexisNexis trained, taught by judges and working attorneys. That credential carries real weight in a corporate legal department.</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:.75rem;">
+            <div class="sec-label" style="margin-bottom:.5rem;">Strategy Notes</div>
+            <textarea class="para-notes-area" style="min-height:80px;" placeholder="Internal contacts made, conversations had, postings watched, timeline updates..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /bento -->

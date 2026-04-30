@@ -1,0 +1,29 @@
+<div class="pg-header">
+    <div><div class="eyebrow">Notes</div><h1>Capture</h1></div>
+    <div style="text-align:right;padding-bottom:.35rem;"><div class="sub">Ideas · Reflections · Strategy</div></div>
+  </div>
+  <div class="quick-row">
+    <div class="quick-card"><div class="quick-label">Brain Dump</div><textarea class="quick-input" placeholder="Whatever's on your mind right now..."></textarea></div>
+    <div class="quick-card"><div class="quick-label">Today's Win</div><textarea class="quick-input" placeholder="What did you do today that deserves recognition..."></textarea></div>
+    <div class="quick-card"><div class="quick-label">One Thing Tomorrow</div><textarea class="quick-input" placeholder="The single most important thing tomorrow..."></textarea></div>
+  </div>
+  <div class="notes-layout">
+    <div class="notes-sidebar">
+      <div class="notes-sidebar-label">Saved Notes</div>
+      <div class="notes-scroll" id="notes-list"></div>
+      <button class="note-new-btn" onclick="newNote()">+ New Note</button>
+    </div>
+    <div class="note-editor-card">
+      <input class="note-title-input" id="note-title" placeholder="Note title..." />
+      <div class="note-divider"></div>
+      <textarea class="note-body-input" id="note-body" placeholder="Start writing... strategy, reflections, ideas, gratitude — whatever needs a home."></textarea>
+      <div class="note-divider"></div>
+      <div class="note-toolbar">
+        <input class="note-tags-input" id="note-tags" placeholder="Tags: business, personal, ideas..." />
+        <div class="note-actions">
+          <button class="note-delete-btn" onclick="deleteNote()">Delete</button>
+          <button class="note-save-btn" onclick="saveNote()">Save Note</button>
+        </div>
+      </div>
+    </div>
+  </div>
