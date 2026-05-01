@@ -119,54 +119,49 @@ body{
   .nav{
     top:1rem;
     left:1rem;
-    right:auto;
-    bottom:1rem;
-    width:var(--os-sidebar-width);
+    right:1rem;
+    bottom:auto;
     min-height:auto;
-    padding:1rem;
+    padding:.95rem 1rem 1rem;
     border:1px solid var(--os-panel-border);
     border-radius:2rem;
     background:var(--os-panel-bg-strong);
     box-shadow:var(--os-shadow);
-    justify-content:space-between;
     overflow:hidden;
+    gap:.85rem;
   }
 
   .nav-top-row{
     height:auto;
-    padding:0;
-    align-items:stretch;
+    padding:0 .15rem;
+    align-items:center;
     gap:1rem;
   }
 
   .nav-brand{
-    padding:.2rem .25rem .6rem;
-    font-size:1.55rem;
-    line-height:1.02;
+    padding:0;
+    font-size:1.5rem;
+    line-height:.96;
     letter-spacing:.03em;
+    white-space:nowrap;
   }
 
   .nav-right{
-    margin-left:0;
-    width:100%;
-    display:grid;
-    grid-template-columns:1fr;
-    gap:.72rem;
-    align-items:stretch;
-  }
-
-  .theme-toggle,
-  .nav-month-ctrl,
-  .nav-settings-btn,
-  .nav-logout-btn{
-    width:100%;
+    margin-left:auto;
+    width:auto;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    gap:.65rem;
+    align-items:center;
   }
 
   .theme-toggle{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:.8rem .95rem;
+    min-width:8.1rem;
+    padding:.65rem .85rem;
     border-radius:1rem;
     background:rgba(255,255,255,0.08);
     border:1px solid rgba(255,255,255,0.16);
@@ -174,10 +169,10 @@ body{
 
   .nav-month-ctrl{
     display:grid;
-    grid-template-columns:2.25rem minmax(0,1fr) 2.25rem;
+    grid-template-columns:2.1rem minmax(6rem, auto) 2.1rem;
     align-items:center;
-    gap:.5rem;
-    padding:.6rem;
+    gap:.45rem;
+    padding:.52rem .56rem;
     border-radius:1rem;
     background:rgba(255,255,255,0.08);
     border:1px solid rgba(255,255,255,0.16);
@@ -185,14 +180,14 @@ body{
 
   .nav-month-label{
     min-width:0;
-    font-size:.68rem;
-    letter-spacing:.18em;
+    font-size:.66rem;
+    letter-spacing:.16em;
   }
 
   .nav-month-btn,
   .nav-settings-btn,
   .nav-logout-btn{
-    min-height:2.75rem;
+    min-height:2.45rem;
     border-radius:1rem;
     border:1px solid rgba(255,255,255,0.18);
     background:rgba(255,255,255,0.08);
@@ -201,6 +196,8 @@ body{
 
   .nav-settings-btn,
   .nav-logout-btn{
+    width:2.45rem;
+    height:2.45rem;
     display:inline-flex;
     align-items:center;
     justify-content:center;
@@ -208,10 +205,10 @@ body{
   }
 
   .nav-date{
-    text-align:center;
-    font-size:.58rem;
-    letter-spacing:.18em;
-    padding:.25rem 0;
+    padding:0 .2rem;
+    font-size:.6rem;
+    letter-spacing:.16em;
+    white-space:nowrap;
   }
 
   .nav-hamburger{
@@ -222,9 +219,9 @@ body{
     display:flex;
     flex:1 1 auto;
     min-height:0;
-    padding:0;
-    margin-top:1rem;
-    overflow:visible;
+    padding-top:.25rem;
+    border-top:1px solid rgba(255,255,255,0.12);
+    overflow:hidden;
   }
 
   .nav-tabs-wrap::before,
@@ -236,33 +233,34 @@ body{
   .nav-tabs{
     flex:1 1 auto;
     min-height:0;
-    padding:0;
-    gap:.4rem;
-    flex-direction:column;
-    overflow-y:auto;
-    overflow-x:hidden;
+    padding:.18rem 0 0;
+    gap:.42rem;
+    flex-direction:row;
+    overflow-y:hidden;
+    overflow-x:auto;
     justify-content:flex-start !important;
+    align-items:center;
   }
 
   .nav-tab{
-    width:100%;
-    padding:.88rem 1rem;
-    border-radius:1.1rem;
+    width:auto;
+    padding:.76rem .98rem;
+    border-radius:1rem;
     border:1px solid transparent;
     border-bottom-color:transparent;
-    font-size:.69rem;
+    font-size:.67rem;
     letter-spacing:.14em;
     display:flex;
     align-items:center;
-    justify-content:flex-start;
-    gap:.72rem;
+    justify-content:center;
+    gap:.6rem;
     background:transparent;
   }
 
   .nav-tab::before{
     content:"";
-    width:.52rem;
-    height:.52rem;
+    width:.5rem;
+    height:.5rem;
     flex:none;
     border-radius:999px;
     background:rgba(var(--teal-rgb),0.16);
@@ -287,18 +285,21 @@ body{
   }
 
   .nav-tab-add{
-    margin-top:auto;
+    margin-top:0;
+    margin-left:auto;
+    flex:none;
     background:linear-gradient(135deg, rgba(var(--teal-rgb),0.16), rgba(var(--teal-rgb),0.08));
   }
 
   .page{
-    max-width:none;
-    margin:0 1.15rem 0 calc(var(--os-sidebar-width) + 2rem);
-    padding:1.15rem 1rem 2.75rem;
+    max-width:min(1520px, calc(100vw - 2rem));
+    margin:0 auto;
+    padding:9.35rem 1.15rem 2.75rem;
   }
 
   #page-vision.page{
-    padding-right:.55rem;
+    max-width:none;
+    padding:8.9rem 0 0;
   }
 }
 

@@ -316,6 +316,311 @@
     return Math.round((state.board.zoom || DEFAULT_ZOOM) * 100) + '%';
   }
 
+  function selectedItem() {
+    return state.items.find(entry => entry.id === state.selectedId) || null;
+  }
+
+  function studioCounts() {
+    return state.items.reduce((acc, item) => {
+      acc.total += 1;
+      if (item.module === 'photo' || item.module === 'frame') acc.photos += 1;
+      if (item.module === 'goal') acc.goals += 1;
+      if (item.module === 'calendar') acc.calendar += 1;
+      if (item.module === 'habit') acc.habits += 1;
+      if (item.module === 'affirmation' || item.module === 'text') acc.words += 1;
+      return acc;
+    }, {
+      total: 0,
+      photos: 0,
+      goals: 0,
+      calendar: 0,
+      habits: 0,
+      words: 0
+    });
+  }
+
+  function itemLabel(item) {
+    if (!item) return 'Module';
+    if (item.module === 'photo') return item.title || 'Photo';
+    if (item.module === 'frame') return item.title || 'Frame';
+    if (item.module === 'goal') return item.variant === 'milestone-map' ? 'Milestone Map' : 'Goal Block';
+    if (item.module === 'habit') return item.variant === 'streak-strip' ? 'Streak Strip' : 'Habit Tracker';
+    if (item.module === 'calendar') return item.mode === 'month' ? 'Month Snapshot' : 'Week Planner';
+    if (item.module === 'affirmation') return item.variant === 'intention-card' ? 'Intention Card' : 'Affirmation Card';
+    if (item.module === 'decor') {
+      switch (item.variant) {
+        case 'glass-panel': return 'Glass Panel';
+        case 'spotlight-wash': return 'Spotlight Wash';
+        case 'soft-divider': return 'Soft Divider';
+        case 'petal-spray': return 'Petal Spray';
+        case 'silk-ribbon': return 'Silk Ribbon';
+        case 'mood-aura': return 'Mood Aura';
+        default: return 'Accent';
+      }
+    }
+    if (item.variant === 'headline') return 'Headline';
+    if (item.variant === 'micro-label') return 'Micro Label';
+    return 'Note Card';
+  }
+
+  function itemSupportCopy(item) {
+    if (!item) return 'Select something on the board to edit it with more precision.';
+    switch (item.module) {
+      case 'photo':
+        return 'Use imagery as atmosphere, proof, or a destination. Resize it generously and let other modules overlap it.';
+      case 'frame':
+        return 'Frames are useful for more intentional storytelling. Swap the image inside without changing the board structure.';
+      case 'goal':
+        return 'Goal blocks work best when they stay short, directional, and easy to scan from a distance.';
+      case 'habit':
+        return 'Keep habit modules compact so they support the board instead of taking it over.';
+      case 'calendar':
+        return 'Planning widgets are strongest when they anchor one area of the board and create order for the rest.';
+      case 'affirmation':
+        return 'Words should feel grounded and credible. Write language you actually want to re-read.';
+      case 'decor':
+        return 'Accents are there to create mood, rhythm, and composition without overwhelming the working content.';
+      default:
+        return 'Text modules create the editorial voice of the board. Keep them simple and intentional.';
+    }
+  }
+
+  function inspectorPreview(item) {
+    if (!item) return '';
+    if ((item.module === 'photo' || item.module === 'frame') && item.src) {
+      return `
+        <div class="vs-inspector-preview">
+          <img src="${escapeHtmlAttr(item.src)}" alt="${escapeHtmlAttr(item.title || itemLabel(item))}" />
+        </div>
+      `;
+    }
+    return `
+      <div class="vs-inspector-preview is-placeholder">
+        <div class="vs-inspector-preview-mark">${escapeHtml(itemLabel(item).slice(0, 1).toUpperCase())}</div>
+        <div class="vs-inspector-preview-copy">${escapeHtml(itemSupportCopy(item))}</div>
+      </div>
+    `;
+  }
+
+  function renderTemplateCards() {
+    return `
+      <div class="vs-template-grid">
+        <button class="vs-template-card" type="button" data-action="starter-editorial">
+          <span class="vs-template-kicker">Starter</span>
+          <span class="vs-template-title">Editorial Glow</span>
+          <span class="vs-template-copy">Atmosphere first. Images, framing, and space for your own language.</span>
+        </button>
+        <button class="vs-template-card" type="button" data-action="starter-focus-map">
+          <span class="vs-template-kicker">Starter</span>
+          <span class="vs-template-title">Focus Map</span>
+          <span class="vs-template-copy">A sharper mix of goals, planning, and weekly rhythm for active execution.</span>
+        </button>
+        <button class="vs-template-card" type="button" data-action="starter-mood-story">
+          <span class="vs-template-kicker">Starter</span>
+          <span class="vs-template-title">Mood Story</span>
+          <span class="vs-template-copy">A softer composition for inspiration, texture, notes, and emotional direction.</span>
+        </button>
+      </div>
+    `;
+  }
+
+  function starterLayoutItems(kind) {
+    const softPaper = PHOTO_MAP['soft-paper'] || PHOTO_BANK[0];
+    const clouds = PHOTO_MAP['pink-clouds'] || PHOTO_BANK[0];
+    const marble = PHOTO_MAP['blush-marble'] || PHOTO_BANK[0];
+    const plant = PHOTO_MAP['plant-shadow'] || PHOTO_BANK[0];
+    const rose = PHOTO_MAP['rose-veil'] || PHOTO_BANK[0];
+    const editorial = [
+      {
+        module: 'photo',
+        variant: 'photo',
+        src: clouds.src,
+        title: clouds.title,
+        credit: 'Free image',
+        source: clouds.source,
+        x: 220,
+        y: 180,
+        w: 700,
+        h: 460,
+        lockAspect: true,
+        aspectRatio: clouds.width / clouds.height
+      },
+      { module: 'text', variant: 'headline', x: 1040, y: 210, w: 760, h: 230, title: '', body: '' },
+      { module: 'decor', variant: 'glass-panel', x: 980, y: 500, w: 820, h: 320, lockAspect: false },
+      { module: 'affirmation', variant: 'affirmation-card', x: 1115, y: 565, w: 520, h: 240, text: '', caption: '' },
+      { module: 'frame', variant: 'glass-frame', x: 1880, y: 210, w: 430, h: 300, title: '', caption: '', src: softPaper.src },
+      { module: 'decor', variant: 'silk-ribbon', x: 1770, y: 690, w: 330, h: 190, lockAspect: true },
+      { module: 'decor', variant: 'mood-aura', x: 1480, y: 1000, w: 360, h: 260, lockAspect: true }
+    ];
+    const focus = [
+      {
+        module: 'photo',
+        variant: 'photo',
+        src: plant.src,
+        title: plant.title,
+        credit: 'Free image',
+        source: plant.source,
+        x: 240,
+        y: 250,
+        w: 560,
+        h: 420,
+        lockAspect: true,
+        aspectRatio: plant.width / plant.height
+      },
+      { module: 'goal', variant: 'goal-focus', x: 900, y: 220, w: 430, h: 320, title: '', focus: '', steps: ['', '', ''] },
+      { module: 'calendar', variant: 'week-planner', x: 1385, y: 220, w: 760, h: 290, title: '', mode: 'week', week: weekNotes() },
+      { module: 'habit', variant: 'streak-strip', x: 900, y: 610, w: 560, h: 170, title: '', mode: 'strip', days: [false, false, false, false, false, false, false] },
+      { module: 'text', variant: 'headline', x: 240, y: 760, w: 660, h: 210, title: '', body: '' },
+      { module: 'affirmation', variant: 'intention-card', x: 1510, y: 620, w: 440, h: 220, text: '', caption: '' },
+      { module: 'decor', variant: 'spotlight-wash', x: 1790, y: 900, w: 380, h: 260, lockAspect: false }
+    ];
+    const moodStory = [
+      {
+        module: 'photo',
+        variant: 'photo',
+        src: marble.src,
+        title: marble.title,
+        credit: 'Free image',
+        source: marble.source,
+        x: 1550,
+        y: 230,
+        w: 540,
+        h: 620,
+        lockAspect: true,
+        aspectRatio: marble.width / marble.height
+      },
+      { module: 'frame', variant: 'polaroid-frame', x: 320, y: 220, w: 420, h: 520, title: '', caption: '', src: rose.src },
+      { module: 'text', variant: 'note-card', x: 835, y: 250, w: 430, h: 320, title: '', body: '' },
+      { module: 'affirmation', variant: 'affirmation-card', x: 820, y: 640, w: 530, h: 250, text: '', caption: '' },
+      { module: 'text', variant: 'micro-label', x: 345, y: 800, w: 260, h: 118, title: '', body: '' },
+      { module: 'decor', variant: 'petal-spray', x: 1370, y: 920, w: 360, h: 220, lockAspect: true },
+      { module: 'decor', variant: 'bloom', x: 2020, y: 930, w: 240, h: 190, lockAspect: true }
+    ];
+    const seed = kind === 'focus-map'
+      ? focus
+      : kind === 'mood-story'
+        ? moodStory
+        : editorial;
+    return seed.map((item, index) => normalizeItem(item, index)).filter(Boolean);
+  }
+
+  function applyStarterLayout(kind) {
+    const incoming = starterLayoutItems(kind);
+    if (!incoming.length) return;
+    if (state.items.length && !window.confirm('Replace the current board with this starter composition?')) return;
+    state.items = incoming;
+    state.selectedId = incoming[0]?.id || null;
+    state.board.scrollLeft = DEFAULT_SCROLL.left;
+    state.board.scrollTop = DEFAULT_SCROLL.top;
+    renderBoard();
+    restoreScroll();
+    queueSave();
+    notify('Starter layout ready.');
+  }
+
+  function renderInspectorPanel() {
+    const item = selectedItem();
+    const counts = studioCounts();
+    if (!item) {
+      return `
+        <div class="vs-inspector-scroll">
+          <section class="vs-inspector-section">
+            <div class="vs-kicker">Studio</div>
+            <h3 class="vs-inspector-title">Board overview</h3>
+            <p class="vs-inspector-copy">This studio is meant to feel spacious, visual, and useful. Start blank or load a starter composition and make it yours quickly.</p>
+            <div class="vs-inspector-stats">
+              <div class="vs-inspector-stat">
+                <span class="vs-inspector-stat-label">Modules</span>
+                <strong>${counts.total}</strong>
+              </div>
+              <div class="vs-inspector-stat">
+                <span class="vs-inspector-stat-label">Photos</span>
+                <strong>${counts.photos}</strong>
+              </div>
+              <div class="vs-inspector-stat">
+                <span class="vs-inspector-stat-label">Goals</span>
+                <strong>${counts.goals}</strong>
+              </div>
+              <div class="vs-inspector-stat">
+                <span class="vs-inspector-stat-label">Words</span>
+                <strong>${counts.words}</strong>
+              </div>
+            </div>
+          </section>
+          <section class="vs-inspector-section">
+            <div class="vs-kicker">Start here</div>
+            <h3 class="vs-inspector-title">Starter compositions</h3>
+            <p class="vs-inspector-copy">Use structure without inheriting fake content. Each layout gives you a cleaner editorial starting point.</p>
+            ${renderTemplateCards()}
+          </section>
+          <section class="vs-inspector-section">
+            <div class="vs-kicker">Controls</div>
+            <div class="vs-inspector-chip-row">
+              <span class="vs-inspector-chip">${zoomLabel()} zoom</span>
+              <span class="vs-inspector-chip">${state.snapEnabled ? 'Snap enabled' : 'Free placement'}</span>
+              <span class="vs-inspector-chip">${counts.calendar} planner block${counts.calendar === 1 ? '' : 's'}</span>
+            </div>
+          </section>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="vs-inspector-scroll">
+        <section class="vs-inspector-section">
+          <div class="vs-kicker">Selection</div>
+          <h3 class="vs-inspector-title">${escapeHtml(itemLabel(item))}</h3>
+          <p class="vs-inspector-copy">${escapeHtml(itemSupportCopy(item))}</p>
+          ${inspectorPreview(item)}
+          <div class="vs-inspector-stats">
+            <div class="vs-inspector-stat">
+              <span class="vs-inspector-stat-label">Width</span>
+              <strong>${Math.round(item.w)}px</strong>
+            </div>
+            <div class="vs-inspector-stat">
+              <span class="vs-inspector-stat-label">Height</span>
+              <strong>${Math.round(item.h)}px</strong>
+            </div>
+            <div class="vs-inspector-stat">
+              <span class="vs-inspector-stat-label">Layer</span>
+              <strong>${Math.round(item.z)}</strong>
+            </div>
+            <div class="vs-inspector-stat">
+              <span class="vs-inspector-stat-label">Position</span>
+              <strong>${Math.round(item.x)}, ${Math.round(item.y)}</strong>
+            </div>
+          </div>
+        </section>
+        <section class="vs-inspector-section">
+          <label class="vs-inspector-field">
+            <span class="vs-inspector-field-label">Rotation</span>
+            <div class="vs-inspector-range-row">
+              <input type="range" min="-24" max="24" step="1" value="${Math.round(item.rotate || 0)}" data-selected-rotate="true" />
+              <span class="vs-inspector-range-value">${Math.round(item.rotate || 0)}deg</span>
+            </div>
+          </label>
+          <label class="vs-inspector-check">
+            <input type="checkbox" data-selected-lock-aspect="true"${item.lockAspect ? ' checked' : ''} />
+            <span>Keep proportions while resizing</span>
+          </label>
+          <div class="vs-inspector-actions">
+            <button class="vs-inspector-btn" type="button" data-action="center-selection">Center</button>
+            <button class="vs-inspector-btn" type="button" data-action="duplicate-selection">Duplicate</button>
+            <button class="vs-inspector-btn" type="button" data-action="layer-up-selection">Bring forward</button>
+            <button class="vs-inspector-btn" type="button" data-action="layer-down-selection">Send back</button>
+            ${(item.module === 'photo' || item.module === 'frame') ? '<button class="vs-inspector-btn" type="button" data-action="replace-selected-image">Replace image</button>' : ''}
+            <button class="vs-inspector-btn danger" type="button" data-action="delete-selection">Delete</button>
+          </div>
+        </section>
+      </div>
+    `;
+  }
+
+  function renderInspector() {
+    if (!state.refs.inspector) return;
+    state.refs.inspector.innerHTML = renderInspectorPanel();
+  }
+
   function mapLegacyAccent(variant) {
     switch (variant) {
       case 'ribbon': return 'silk-ribbon';
@@ -741,7 +1046,7 @@
           </div>
           <div class="vs-appbar-center">
             <input id="vs-board-title" class="vs-board-title-input" type="text" value="${escapeHtmlAttr(state.board.title || DEFAULT_TITLE)}" placeholder="Untitled vision board" />
-            <div class="vs-board-title-sub">Royal blue studio - auto-saved - freeform planning canvas</div>
+            <div class="vs-board-title-sub">Auto-saved creative workspace for goals, imagery, planning, and direction.</div>
           </div>
           <div class="vs-appbar-actions">
             <button class="vs-top-btn" type="button" data-action="quick-headline">Text</button>
@@ -761,7 +1066,7 @@
               <div>
                 <div class="vs-kicker">Library</div>
                 <h2 class="vs-title">${escapeHtml(category.label)}</h2>
-                <p class="vs-subtitle">${escapeHtml(category.copy)}. Drag pieces onto the artboard or click to drop them in.</p>
+                <p class="vs-subtitle">${escapeHtml(category.copy)}. Drag pieces onto the artboard or click to drop them in without breaking your flow.</p>
               </div>
               <div class="vs-pane-badge">${state.items.length} module${state.items.length === 1 ? '' : 's'}</div>
             </div>
@@ -777,15 +1082,15 @@
             <div class="vs-library">
               <div class="vs-library-head">
                 <div class="vs-library-title">${escapeHtml(category.label)} Bank</div>
-                <div class="vs-library-caption">Curated for a branded vision board editor.</div>
+                <div class="vs-library-caption">A more art-directed set of pieces for real composition work.</div>
               </div>
               <div class="vs-library-grid" id="vs-library-grid">${renderLibraryGrid()}</div>
             </div>
           </aside>
           <div class="vs-stage-shell">
             <div class="vs-stage-topbar">
-              <div class="vs-stage-pill">Editor mode</div>
-              <div class="vs-stage-copy">Drag, resize, layer, and compose across a full studio workspace.</div>
+              <div class="vs-stage-pill">Studio mode</div>
+              <div class="vs-stage-copy">Compose freely across the board, then use the inspector for cleaner control over the selected module.</div>
               <div class="vs-stage-actions">
                 <button class="vs-stage-btn" type="button" data-action="reset-view">Reset View</button>
                 <button class="vs-stage-btn danger" type="button" data-action="clear-board">Clear Board</button>
@@ -814,7 +1119,10 @@
               </div>
             </div>
           </div>
-          </div>
+          <aside class="vs-inspector-pane">
+            <div class="vs-inspector-shell" id="vs-inspector">${renderInspectorPanel()}</div>
+          </aside>
+        </div>
       </section>
     `;
   }
@@ -850,9 +1158,14 @@
     return `
       <div class="vs-empty">
         <div class="vs-empty-inner">
-          <div class="vs-empty-mark">+</div>
-          <div class="vs-empty-title">Build your board your way.</div>
-          <div class="vs-empty-copy">Pull in photos, frames, planning blocks, and words from the left. The editor starts clean on purpose so every layer feels intentional.</div>
+          <div class="vs-empty-mark">Studio</div>
+          <div class="vs-empty-title">Build a board that actually feels like your future.</div>
+          <div class="vs-empty-copy">Start clean, pull from the library, or load a starter composition that gives you structure without fake demo content.</div>
+          <div class="vs-empty-actions">
+            <button class="vs-empty-btn primary" type="button" data-action="starter-editorial">Editorial Glow</button>
+            <button class="vs-empty-btn" type="button" data-action="starter-focus-map">Focus Map</button>
+            <button class="vs-empty-btn" type="button" data-action="upload-board-photo">Upload Images</button>
+          </div>
         </div>
       </div>
     `;
@@ -863,11 +1176,11 @@
       <div class="vs-item-toolbar">
         <div class="vs-item-badge">${escapeHtml(label)}</div>
         <div class="vs-item-actions">
-          <button class="vs-icon-btn vs-drag-handle" type="button" data-drag-handle="${escapeHtmlAttr(item.id)}">${actionSvg('grip')}</button>
-          <button class="vs-icon-btn" type="button" data-layer-up="${escapeHtmlAttr(item.id)}">${actionSvg('up')}</button>
-          <button class="vs-icon-btn" type="button" data-layer-down="${escapeHtmlAttr(item.id)}">${actionSvg('down')}</button>
-          <button class="vs-icon-btn" type="button" data-duplicate-item="${escapeHtmlAttr(item.id)}">${actionSvg('copy')}</button>
-          <button class="vs-icon-btn" type="button" data-delete-item="${escapeHtmlAttr(item.id)}">${actionSvg('trash')}</button>
+          <button class="vs-icon-btn vs-drag-handle" type="button" data-drag-handle="${escapeHtmlAttr(item.id)}" aria-label="Move module" title="Move module">${actionSvg('grip')}</button>
+          <button class="vs-icon-btn" type="button" data-layer-up="${escapeHtmlAttr(item.id)}" aria-label="Bring module forward" title="Bring forward">${actionSvg('up')}</button>
+          <button class="vs-icon-btn" type="button" data-layer-down="${escapeHtmlAttr(item.id)}" aria-label="Send module back" title="Send backward">${actionSvg('down')}</button>
+          <button class="vs-icon-btn" type="button" data-duplicate-item="${escapeHtmlAttr(item.id)}" aria-label="Duplicate module" title="Duplicate">${actionSvg('copy')}</button>
+          <button class="vs-icon-btn" type="button" data-delete-item="${escapeHtmlAttr(item.id)}" aria-label="Delete module" title="Delete">${actionSvg('trash')}</button>
         </div>
       </div>
     `;
@@ -1130,6 +1443,7 @@
       state.refs.paneBadge.textContent = state.items.length + ' module' + (state.items.length === 1 ? '' : 's');
     }
     if (state.refs.footerTitle) state.refs.footerTitle.textContent = state.board.title || DEFAULT_TITLE;
+    renderInspector();
   }
 
   function setZoom(nextZoom, options) {
@@ -1180,7 +1494,8 @@
       zoomRange: state.root.querySelector('#vs-zoom-range'),
       zoomValue: state.root.querySelector('#vs-zoom-value'),
       paneBadge: state.root.querySelector('.vs-pane-badge'),
-      footerTitle: state.root.querySelector('.vs-stage-footer-copy strong')
+      footerTitle: state.root.querySelector('.vs-stage-footer-copy strong'),
+      inspector: state.root.querySelector('#vs-inspector')
     };
   }
 
@@ -1247,6 +1562,15 @@
     clone.z = state.items.reduce((largest, item) => Math.max(largest, item.z || 0), 0) + 1;
     state.items.push(clone);
     state.selectedId = clone.id;
+    renderBoard();
+    queueSave();
+  }
+
+  function centerSelectedItem() {
+    const item = selectedItem();
+    if (!item) return;
+    item.x = round((BOARD_WIDTH - item.w) / 2);
+    item.y = round((BOARD_HEIGHT - item.h) / 2);
     renderBoard();
     queueSave();
   }
@@ -1464,6 +1788,15 @@
           state.pendingUploadTarget = null;
           openUpload();
           return;
+        case 'starter-editorial':
+          applyStarterLayout('editorial');
+          return;
+        case 'starter-focus-map':
+          applyStarterLayout('focus-map');
+          return;
+        case 'starter-mood-story':
+          applyStarterLayout('mood-story');
+          return;
         case 'quick-headline':
           addItem(spawnFromLibrary('headline'));
           return;
@@ -1505,6 +1838,35 @@
           state.selectedId = null;
           renderBoard();
           queueSave();
+          return;
+        case 'center-selection':
+          centerSelectedItem();
+          return;
+        case 'duplicate-selection':
+          if (state.selectedId) duplicateItem(state.selectedId);
+          return;
+        case 'layer-up-selection':
+          if (state.selectedId) {
+            bringToFront(state.selectedId);
+            renderBoard();
+            queueSave();
+          }
+          return;
+        case 'layer-down-selection':
+          if (state.selectedId) {
+            sendBackward(state.selectedId);
+            renderBoard();
+            queueSave();
+          }
+          return;
+        case 'delete-selection':
+          if (state.selectedId) deleteItem(state.selectedId);
+          return;
+        case 'replace-selected-image':
+          if (state.selectedId) {
+            state.pendingUploadTarget = state.selectedId;
+            openUpload();
+          }
           return;
         default:
           return;
@@ -1571,6 +1933,24 @@
     }
     if (event.target === state.refs.zoomRange) {
       setZoom(toNumber(event.target.value, DEFAULT_ZOOM));
+      queueSave();
+      return;
+    }
+    if (event.target.matches('[data-selected-rotate]')) {
+      const item = selectedItem();
+      if (!item) return;
+      item.rotate = clamp(toNumber(event.target.value, 0), -24, 24);
+      const itemNode = state.refs.board ? state.refs.board.querySelector(`[data-item-id="${item.id}"]`) : null;
+      if (itemNode) itemNode.style.setProperty('--vs-rotation', item.rotate + 'deg');
+      const valueNode = event.target.parentElement?.querySelector('.vs-inspector-range-value');
+      if (valueNode) valueNode.textContent = Math.round(item.rotate || 0) + 'deg';
+      queueSave();
+      return;
+    }
+    if (event.target.matches('[data-selected-lock-aspect]')) {
+      const item = selectedItem();
+      if (!item) return;
+      item.lockAspect = !!event.target.checked;
       queueSave();
       return;
     }
@@ -1684,16 +2064,20 @@
       return;
     }
     if (state.pendingUploadTarget) {
-      const target = state.items.find(item => item.id === state.pendingUploadTarget && item.module === 'frame');
+      const target = state.items.find(item => item.id === state.pendingUploadTarget && (item.module === 'frame' || item.module === 'photo'));
       if (target) {
         const first = accepted[0];
         if (first.size <= INPUT_MAX_BYTES) {
           const result = await compressImage(first);
           target.src = result.src;
           target.aspectRatio = result.ratio;
+          if (target.module === 'photo') {
+            target.h = clamp(round(target.w / Math.max(result.ratio, 0.45)), 140, BOARD_HEIGHT - target.y - BOARD_PADDING);
+            target.lockAspect = true;
+          }
           renderBoard();
           queueSave();
-          notify('Frame updated.');
+          notify(target.module === 'frame' ? 'Frame updated.' : 'Image replaced.');
         }
       }
       state.pendingUploadTarget = null;

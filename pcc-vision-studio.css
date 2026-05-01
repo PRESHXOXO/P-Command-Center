@@ -1365,8 +1365,8 @@
   display:grid;
   grid-template-columns:auto minmax(260px,1fr) auto;
   align-items:center;
-  gap:1rem;
-  padding:.9rem 1.15rem;
+  gap:1.15rem;
+  padding:1rem 1.25rem;
   color:#fff;
   background:
     radial-gradient(circle at top left, rgba(255,255,255,0.24), transparent 24%),
@@ -1381,6 +1381,11 @@
   display:flex;
   align-items:center;
   gap:.75rem;
+}
+
+.vision-studio-root .vs-appbar-actions{
+  flex-wrap:wrap;
+  justify-content:flex-end;
 }
 
 .vision-studio-root .vs-appbar-center{
@@ -1464,8 +1469,9 @@
   align-items:center;
   justify-content:center;
   gap:.35rem;
-  border-radius:14px;
-  padding:.76rem .95rem;
+  min-height:44px;
+  border-radius:16px;
+  padding:.78rem 1rem;
   font:inherit;
   font-size:.8rem;
   font-weight:700;
@@ -1495,12 +1501,12 @@
 .vision-studio-root .vs-editor-body{
   min-height:0;
   display:grid;
-  grid-template-columns:92px 360px minmax(0,1fr);
+  grid-template-columns:88px 330px minmax(0,1fr) 310px;
 }
 
 .vision-studio-root .vs-rail{
   min-height:0;
-  padding:1rem .6rem;
+  padding:1rem .55rem 1rem .7rem;
   background:linear-gradient(180deg, rgba(7,11,31,0.94), rgba(9,14,36,0.98));
   border-right:1px solid var(--vs-stage-border);
 }
@@ -1566,7 +1572,7 @@
   display:flex;
   flex-direction:column;
   gap:.85rem;
-  padding:1.05rem 1rem 1rem;
+  padding:1rem .95rem 1rem;
   background:
     linear-gradient(180deg, rgba(10,15,40,0.96), rgba(9,14,35,0.985)),
     radial-gradient(circle at top right, rgba(130, 154, 255, 0.12), transparent 24%);
@@ -1680,8 +1686,8 @@
 
 .vision-studio-root .vs-library-grid{
   display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:.85rem;
+  grid-template-columns:minmax(0, 1fr);
+  gap:.78rem;
   min-height:0;
   max-height:none;
   overflow:auto;
@@ -1706,9 +1712,12 @@
 }
 
 .vision-studio-root .vs-library-card{
+  display:grid;
+  grid-template-columns:132px minmax(0,1fr);
+  align-items:center;
   gap:.7rem;
-  padding:.72rem;
-  border-radius:22px;
+  padding:.78rem;
+  border-radius:24px;
   background:rgba(255,255,255,0.05);
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,0.08),
@@ -1723,7 +1732,7 @@
 }
 
 .vision-studio-root .vs-library-preview{
-  height:132px;
+  height:136px;
   border-radius:18px;
 }
 
@@ -1754,6 +1763,7 @@
     radial-gradient(circle at 15% 0%, rgba(131, 92, 255, 0.08), transparent 22%),
     radial-gradient(circle at 82% 12%, rgba(72, 122, 255, 0.12), transparent 24%),
     linear-gradient(180deg, var(--vs-stage-ink-2), var(--vs-stage-ink));
+  border-right:1px solid var(--vs-stage-border);
 }
 
 .vision-studio-root .vs-stage-topbar,
@@ -1810,14 +1820,14 @@
 
 .vision-studio-root .vs-stage{
   min-height:0;
-  padding:1.15rem 1.2rem 1.25rem;
+  padding:1rem 1rem 1.15rem;
 }
 
 .vision-studio-root .vs-viewport-shell{
   position:relative;
   height:100%;
   min-height:0;
-  border-radius:34px;
+  border-radius:38px;
   overflow:hidden;
   background:
     radial-gradient(circle at 12% 10%, rgba(121, 156, 255, 0.16), transparent 16%),
@@ -1832,7 +1842,7 @@
   position:relative;
   height:100%;
   margin:0;
-  padding:2.4rem 2.8rem 3rem;
+  padding:2.6rem 3rem 3.2rem;
   overflow:auto;
   border:none;
   border-radius:0;
@@ -1840,7 +1850,7 @@
     linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
     transparent;
-  background-size:48px 48px, 48px 48px, auto;
+  background-size:56px 56px, 56px 56px, auto;
   box-shadow:none;
   scroll-behavior:smooth;
   scrollbar-gutter:stable both-edges;
@@ -1859,7 +1869,7 @@
   height:1700px;
   transform:scale(var(--vs-scale, 1));
   transform-origin:top left;
-  border-radius:42px;
+  border-radius:48px;
   overflow:hidden;
   background:
     radial-gradient(circle at 18% 12%, rgba(163, 188, 255, 0.18), transparent 20%),
@@ -1872,6 +1882,282 @@
     inset 0 0 0 1px rgba(87, 109, 184, 0.08),
     inset 0 1px 0 rgba(255,255,255,0.94),
     var(--vs-board-shadow);
+}
+
+.vision-studio-root .vs-inspector-pane{
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  background:
+    linear-gradient(180deg, rgba(10,15,40,0.97), rgba(9,14,36,0.99)),
+    radial-gradient(circle at top left, rgba(170, 184, 255, 0.12), transparent 26%);
+  color:#f3f7ff;
+}
+
+.vision-studio-root .vs-inspector-shell,
+.vision-studio-root .vs-inspector-scroll{
+  min-height:0;
+  height:100%;
+}
+
+.vision-studio-root .vs-inspector-scroll{
+  overflow:auto;
+  padding:1rem;
+  display:flex;
+  flex-direction:column;
+  gap:.9rem;
+}
+
+.vision-studio-root .vs-inspector-section{
+  display:flex;
+  flex-direction:column;
+  gap:.78rem;
+  padding:.95rem;
+  border-radius:24px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.vision-studio-root .vs-inspector-title{
+  margin:0;
+  color:#ffffff;
+  font-size:1.28rem;
+  line-height:1.05;
+  font-family:var(--font-display, 'Cormorant Garamond', serif);
+}
+
+.vision-studio-root .vs-inspector-copy{
+  color:rgba(228,236,255,0.72);
+  font-size:.8rem;
+  line-height:1.62;
+}
+
+.vision-studio-root .vs-inspector-stats{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:.7rem;
+}
+
+.vision-studio-root .vs-inspector-stat{
+  display:grid;
+  gap:.22rem;
+  padding:.72rem .78rem;
+  border-radius:18px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+.vision-studio-root .vs-inspector-stat-label{
+  color:rgba(199,216,255,0.6);
+  font-size:.64rem;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.vision-studio-root .vs-inspector-stat strong{
+  color:#ffffff;
+  font-size:1rem;
+  font-weight:700;
+}
+
+.vision-studio-root .vs-inspector-preview{
+  overflow:hidden;
+  border-radius:22px;
+  min-height:180px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
+  border:1px solid rgba(255,255,255,0.1);
+}
+
+.vision-studio-root .vs-inspector-preview img{
+  width:100%;
+  height:100%;
+  min-height:180px;
+  object-fit:cover;
+  display:block;
+}
+
+.vision-studio-root .vs-inspector-preview.is-placeholder{
+  display:grid;
+  place-items:center;
+  gap:.85rem;
+  padding:1rem;
+  text-align:center;
+}
+
+.vision-studio-root .vs-inspector-preview-mark{
+  display:grid;
+  place-items:center;
+  width:58px;
+  height:58px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.12);
+  color:#ffffff;
+  font-size:1.3rem;
+  font-weight:700;
+}
+
+.vision-studio-root .vs-inspector-preview-copy{
+  color:rgba(228,236,255,0.76);
+  font-size:.78rem;
+  line-height:1.55;
+}
+
+.vision-studio-root .vs-inspector-field{
+  display:grid;
+  gap:.45rem;
+}
+
+.vision-studio-root .vs-inspector-field-label{
+  color:rgba(215,228,255,0.72);
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.vision-studio-root .vs-inspector-range-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:.7rem;
+  align-items:center;
+}
+
+.vision-studio-root .vs-inspector-range-row input[type="range"]{
+  width:100%;
+  accent-color:#96b4ff;
+}
+
+.vision-studio-root .vs-inspector-range-value{
+  min-width:60px;
+  text-align:center;
+  padding:.55rem .65rem;
+  border-radius:999px;
+  background:rgba(255,255,255,0.07);
+  color:#f8fbff;
+  font-size:.72rem;
+  font-weight:700;
+}
+
+.vision-studio-root .vs-inspector-check{
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  color:rgba(231,239,255,0.82);
+  font-size:.76rem;
+}
+
+.vision-studio-root .vs-inspector-check input{
+  width:16px;
+  height:16px;
+  accent-color:#9ab5ff;
+}
+
+.vision-studio-root .vs-inspector-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.55rem;
+}
+
+.vision-studio-root .vs-inspector-btn,
+.vision-studio-root .vs-empty-btn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  padding:.72rem .92rem;
+  border-radius:16px;
+  background:rgba(255,255,255,0.08);
+  color:#f4f8ff;
+  font:inherit;
+  font-size:.76rem;
+  font-weight:700;
+  letter-spacing:.04em;
+  transition:transform .16s ease, background .16s ease, box-shadow .16s ease;
+}
+
+.vision-studio-root .vs-inspector-btn:hover,
+.vision-studio-root .vs-empty-btn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,0.12);
+}
+
+.vision-studio-root .vs-inspector-btn.danger{
+  background:rgba(255,90,120,0.14);
+  color:#ffdce8;
+}
+
+.vision-studio-root .vs-template-grid{
+  display:grid;
+  gap:.72rem;
+}
+
+.vision-studio-root .vs-template-card{
+  display:grid;
+  gap:.3rem;
+  width:100%;
+  padding:1rem;
+  border:none;
+  cursor:pointer;
+  text-align:left;
+  border-radius:22px;
+  color:#ffffff;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.11), rgba(255,255,255,0.05)),
+    radial-gradient(circle at top right, rgba(154, 181, 255, 0.22), transparent 54%);
+  border:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 18px 34px rgba(5,10,28,0.18);
+  transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.vision-studio-root .vs-template-card:hover{
+  transform:translateY(-2px);
+  border-color:rgba(189,206,255,0.22);
+  box-shadow:0 22px 42px rgba(5,10,28,0.24);
+}
+
+.vision-studio-root .vs-template-kicker{
+  color:rgba(191,206,255,0.64);
+  font-size:.62rem;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+
+.vision-studio-root .vs-template-title{
+  font-size:1rem;
+  font-weight:700;
+  color:#ffffff;
+}
+
+.vision-studio-root .vs-template-copy{
+  color:rgba(224,233,255,0.74);
+  font-size:.76rem;
+  line-height:1.5;
+}
+
+.vision-studio-root .vs-inspector-chip-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.48rem;
+}
+
+.vision-studio-root .vs-inspector-chip{
+  display:inline-flex;
+  align-items:center;
+  min-height:1.9rem;
+  padding:.42rem .62rem;
+  border-radius:999px;
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.08);
+  color:#dbe6ff;
+  font-size:.68rem;
+  font-weight:700;
+  letter-spacing:.06em;
 }
 
 .vision-studio-root .vs-board::before{
@@ -1945,13 +2231,20 @@
 }
 
 .vision-studio-root .vs-empty{
-  inset:8% 9%;
+  inset:7% 7%;
   border:1px dashed rgba(76, 108, 205, 0.18);
   background:linear-gradient(180deg, rgba(255,255,255,0.82), rgba(243,247,255,0.72));
   backdrop-filter:blur(10px);
 }
 
+.vision-studio-root .vs-empty-inner{
+  max-width:640px;
+  gap:.9rem;
+}
+
 .vision-studio-root .vs-empty-mark{
+  min-width:84px;
+  padding:0 1.2rem;
   background:linear-gradient(145deg, rgba(60,101,223,0.12), rgba(163,129,255,0.12));
   color:#3157c2;
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.85);
@@ -1963,6 +2256,24 @@
 
 .vision-studio-root .vs-empty-copy{
   color:#5870a4;
+}
+
+.vision-studio-root .vs-empty-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.6rem;
+  justify-content:center;
+}
+
+.vision-studio-root .vs-empty-btn{
+  background:rgba(49,85,194,0.08);
+  color:#2040a0;
+}
+
+.vision-studio-root .vs-empty-btn.primary{
+  background:linear-gradient(145deg, #2b50cf, #7ba2ff);
+  color:#ffffff;
+  box-shadow:0 18px 30px rgba(39,74,186,0.18);
 }
 
 .vision-studio-root .vs-guide{
@@ -2066,13 +2377,38 @@
   border-color:#3e62d1;
 }
 
+.vision-studio-root button:focus-visible,
+.vision-studio-root input:focus-visible,
+.vision-studio-root [contenteditable="true"]:focus-visible{
+  outline:none;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,0.22),
+    0 0 0 5px rgba(104, 148, 255, 0.22);
+}
+
 @media (max-width: 1320px){
   .vision-studio-root .vs-editor-body{
-    grid-template-columns:84px 320px minmax(0,1fr);
+    grid-template-columns:84px 300px minmax(0,1fr) 280px;
   }
 
   .vision-studio-root .vs-library-grid{
     grid-template-columns:1fr;
+  }
+}
+
+@media (max-width: 1240px){
+  .vision-studio-root .vs-editor-body{
+    grid-template-columns:84px 300px minmax(0,1fr);
+  }
+
+  .vision-studio-root .vs-inspector-pane{
+    grid-column:2 / -1;
+    border-left:none;
+    border-top:1px solid var(--vs-stage-border);
+  }
+
+  .vision-studio-root .vs-stage-shell{
+    border-right:none;
   }
 }
 
@@ -2110,6 +2446,10 @@
   .vision-studio-root .vs-editor-body{
     grid-template-columns:84px minmax(280px, 320px) minmax(0,1fr);
   }
+
+  .vision-studio-root .vs-inspector-pane{
+    grid-column:1 / -1;
+  }
 }
 
 @media (max-width: 900px){
@@ -2134,6 +2474,10 @@
   .vision-studio-root .vs-library-pane{
     border-right:none;
     border-bottom:1px solid var(--vs-stage-border);
+  }
+
+  .vision-studio-root .vs-inspector-pane{
+    border-top:1px solid var(--vs-stage-border);
   }
 
   .vision-studio-root .vs-stage-shell{
