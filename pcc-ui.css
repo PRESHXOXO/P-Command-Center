@@ -1,0 +1,292 @@
+.pcc-sr-only{
+  position:absolute !important;
+  width:1px !important;
+  height:1px !important;
+  padding:0 !important;
+  margin:-1px !important;
+  overflow:hidden !important;
+  clip:rect(0,0,0,0) !important;
+  white-space:nowrap !important;
+  border:0 !important;
+}
+
+.pcc-state-card{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:.7rem;
+  border-radius:24px;
+  border:1px solid rgba(var(--teal-rgb),0.14);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.84), rgba(255,255,255,0.62)),
+    radial-gradient(circle at top right, rgba(var(--teal-rgb),0.1), transparent 48%);
+  box-shadow:0 26px 56px rgba(44,36,32,0.10), inset 0 1px 0 rgba(255,255,255,0.74);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+
+.pcc-state-card.compact{
+  padding:1.2rem 1.25rem;
+  border-radius:20px;
+}
+
+.pcc-state-card.regular{
+  padding:1.9rem 2rem;
+}
+
+.pcc-state-card.centered{
+  align-items:flex-start;
+  text-align:left;
+}
+
+.pcc-state-card.inline{
+  flex-direction:row;
+  align-items:center;
+}
+
+.pcc-state-card.brand{
+  border-color:rgba(var(--teal-rgb),0.2);
+}
+
+.pcc-state-card.danger{
+  border-color:rgba(168,50,67,0.24);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.88), rgba(255,246,248,0.72)),
+    radial-gradient(circle at top right, rgba(168,50,67,0.08), transparent 42%);
+}
+
+.pcc-state-top{
+  display:flex;
+  align-items:flex-start;
+  gap:.9rem;
+  width:100%;
+}
+
+.pcc-state-icon{
+  width:2.6rem;
+  height:2.6rem;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  border-radius:999px;
+  background:rgba(var(--teal-rgb),0.11);
+  color:var(--teal);
+  font-size:1.1rem;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.65);
+}
+
+.pcc-state-card.danger .pcc-state-icon{
+  background:rgba(168,50,67,0.12);
+  color:#a83243;
+}
+
+.pcc-state-spinner{
+  width:1.1rem;
+  height:1.1rem;
+  border-radius:999px;
+  border:2px solid rgba(var(--teal-rgb),0.18);
+  border-top-color:var(--teal);
+  animation:pccSpin .9s linear infinite;
+}
+
+.pcc-state-meta{
+  min-width:0;
+  flex:1 1 auto;
+}
+
+.pcc-state-kicker{
+  margin:0 0 .34rem 0;
+  font-size:.64rem;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--teal);
+  font-weight:600;
+}
+
+.pcc-state-title{
+  margin:0;
+  font-family:var(--font-display, 'Cormorant Garamond', serif);
+  font-size:1.65rem;
+  line-height:1.05;
+  color:var(--ink);
+}
+
+.pcc-state-copy{
+  margin:0;
+  font-size:.82rem;
+  line-height:1.72;
+  color:var(--charcoal);
+  max-width:56ch;
+}
+
+.pcc-state-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.65rem;
+}
+
+.pcc-btn{
+  appearance:none;
+  border:0;
+  border-radius:999px;
+  min-height:2.75rem;
+  padding:.82rem 1.15rem;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.55rem;
+  font:inherit;
+  font-size:.78rem;
+  font-weight:600;
+  line-height:1;
+  cursor:pointer;
+  transition:transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+}
+
+.pcc-btn:hover{
+  transform:translateY(-1px);
+}
+
+.pcc-btn:focus-visible{
+  outline:2px solid rgba(var(--teal-rgb),0.34);
+  outline-offset:2px;
+}
+
+.pcc-btn[disabled]{
+  cursor:not-allowed;
+  opacity:.72;
+  transform:none;
+}
+
+.pcc-btn.primary{
+  color:#fff;
+  background:linear-gradient(135deg, var(--teal), var(--teal-mid));
+  box-shadow:0 14px 24px rgba(var(--teal-rgb),0.18);
+}
+
+.pcc-btn.secondary{
+  color:var(--ink);
+  background:rgba(255,255,255,0.64);
+  border:1px solid rgba(var(--teal-rgb),0.14);
+}
+
+.pcc-btn.ghost{
+  color:var(--charcoal);
+  background:transparent;
+  border:1px solid rgba(var(--teal-rgb),0.14);
+}
+
+.pcc-btn.danger{
+  color:#fff;
+  background:linear-gradient(135deg, #b63a4f, #8f2637);
+  box-shadow:0 14px 24px rgba(143,38,55,0.18);
+}
+
+.pcc-btn.is-busy::before{
+  content:'';
+  width:.85rem;
+  height:.85rem;
+  border-radius:999px;
+  border:2px solid rgba(255,255,255,0.42);
+  border-top-color:currentColor;
+  animation:pccSpin .9s linear infinite;
+}
+
+.pcc-btn.secondary.is-busy::before,
+.pcc-btn.ghost.is-busy::before{
+  border-color:rgba(var(--teal-rgb),0.18);
+  border-top-color:currentColor;
+}
+
+.pcc-inline-notice{
+  display:none;
+  margin-top:.55rem;
+  padding:.78rem .95rem;
+  border-radius:16px;
+  font-size:.7rem;
+  line-height:1.6;
+  border:1px solid rgba(var(--teal-rgb),0.16);
+  background:rgba(var(--teal-rgb),0.08);
+  color:var(--ink);
+}
+
+.pcc-inline-notice.show{
+  display:block;
+}
+
+.pcc-inline-notice.info{
+  border-color:rgba(var(--teal-rgb),0.16);
+  background:rgba(var(--teal-rgb),0.08);
+}
+
+.pcc-inline-notice.success{
+  border-color:rgba(38,129,85,0.18);
+  background:rgba(38,129,85,0.08);
+}
+
+.pcc-inline-notice.danger{
+  border-color:rgba(168,50,67,0.18);
+  background:rgba(168,50,67,0.08);
+  color:#7d2435;
+}
+
+[data-theme="dark"] .pcc-state-card{
+  background:
+    linear-gradient(145deg, rgba(29,29,31,0.86), rgba(18,18,20,0.76)),
+    radial-gradient(circle at top right, rgba(var(--teal-rgb),0.16), transparent 48%);
+  border-color:rgba(var(--teal-rgb),0.22);
+  box-shadow:0 22px 48px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+[data-theme="dark"] .pcc-btn.secondary{
+  background:rgba(255,255,255,0.06);
+  color:var(--ink);
+}
+
+[data-theme="dark"] .pcc-btn.ghost{
+  background:rgba(255,255,255,0.02);
+}
+
+[data-theme="dark"] .pcc-inline-notice.info{
+  background:rgba(var(--teal-rgb),0.12);
+}
+
+[data-theme="dark"] .pcc-inline-notice.success{
+  background:rgba(38,129,85,0.13);
+  color:#d8f0e5;
+}
+
+[data-theme="dark"] .pcc-inline-notice.danger{
+  background:rgba(168,50,67,0.16);
+  color:#ffd5dd;
+}
+
+.vision-board-empty .pcc-state-card{
+  max-width:460px;
+  margin:1rem auto 0;
+  text-align:center;
+  align-items:center;
+}
+
+.vision-board-empty .pcc-state-top{
+  justify-content:center;
+}
+
+.vision-board-empty .pcc-state-meta{
+  text-align:center;
+}
+
+@media (max-width: 900px){
+  .pcc-state-card.regular{
+    padding:1.4rem 1.2rem;
+  }
+
+  .pcc-state-title{
+    font-size:1.4rem;
+  }
+}
+
+@keyframes pccSpin{
+  to{ transform:rotate(360deg); }
+}

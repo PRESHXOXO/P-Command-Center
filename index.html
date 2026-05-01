@@ -6,6 +6,7 @@
 <title>P's Command Center</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="./pcc-ui.css" rel="stylesheet">
 <style>
 /* ── LIGHT MODE (default) ── */
 :root {
@@ -3900,6 +3901,7 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
 .edit-color-swatch:hover { border-color: var(--ink); transform: scale(1.15); }
 
 </style>
+<link href="./pcc-shell-redesign.css" rel="stylesheet">
 </head>
 <body>
 <script>document.documentElement.setAttribute('data-js-alive','1');</script>
@@ -3959,7 +3961,7 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
     </div>
 
     <!-- Error message -->
-    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-error pcc-inline-notice" id="auth-error" role="alert" aria-live="assertive"></div>
 
     <!-- ── LOGIN FORM ── -->
     <div id="form-login">
@@ -4055,7 +4057,7 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
           <input class="auth-input" id="forgot-email" type="email" placeholder="your@email.com" />
         </div>
         <button class="auth-submit" id="forgot-btn" type="button" onclick="handleForgot()">Send Reset Link</button>
-        <div id="forgot-status" style="display:none;font-size:.58rem;color:var(--teal);line-height:1.55;text-align:center;margin-top:.55rem;"></div>
+        <div id="forgot-status" class="pcc-inline-notice" role="status" aria-live="polite"></div>
         <button class="auth-tab" style="margin-top:.3rem;width:100%;padding:.5rem;" onclick="switchAuthTab('login')">← Back to Login</button>
       </div>
     </div>
@@ -4081,7 +4083,7 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
           </div>
         </div>
         <button class="auth-submit" id="reset-btn" type="button" onclick="handlePasswordReset()">Update Password</button>
-        <div id="reset-status" style="display:none;font-size:.58rem;color:var(--teal);line-height:1.55;text-align:center;margin-top:.55rem;"></div>
+        <div id="reset-status" class="pcc-inline-notice" role="status" aria-live="polite"></div>
         <button class="auth-tab" style="margin-top:.3rem;width:100%;padding:.5rem;" onclick="switchAuthTab('login')">â† Back to Login</button>
       </div>
     </div>
@@ -7140,10 +7142,23 @@ function showPage(id, btn) {
         showPage(targetId, resolvedBtn);
       })
       .catch((error) => {
-        const kicker = page.querySelector('.page-shell-kicker');
-        const copy = page.querySelector('.page-shell-copy');
-        if (kicker) kicker.textContent = 'Load Error';
-        if (copy) copy.textContent = error?.message || 'Could not load this page right now.';
+        if (window.PccUi && typeof window.PccUi.mountStateCard === 'function') {
+          window.PccUi.mountStateCard(page, {
+            state: 'error',
+            tone: 'danger',
+            size: 'regular',
+            layout: 'centered',
+            className: 'page-shell-card',
+            kicker: 'Load Error',
+            title: 'This hub could not open',
+            copy: error?.message || 'Could not load this page right now.'
+          });
+        } else {
+          const kicker = page.querySelector('.page-shell-kicker');
+          const copy = page.querySelector('.page-shell-copy');
+          if (kicker) kicker.textContent = 'Load Error';
+          if (copy) copy.textContent = error?.message || 'Could not load this page right now.';
+        }
         if (typeof safeShowToast === 'function') {
           safeShowToast(error?.message || 'Could not load this page right now.');
         }
@@ -7923,11 +7938,24 @@ function renderVisionBoard() {
   if (!visionBoardItems.length) {
     const empty = document.createElement('div');
     empty.className = 'vision-board-empty';
+    if (window.PccUi && typeof window.PccUi.mountStateCard === 'function') {
+      window.PccUi.mountStateCard(empty, {
+        state: 'empty',
+        tone: 'brand',
+        size: 'compact',
+        layout: 'centered',
+        icon: '✦',
+        kicker: 'Vision Board',
+        title: 'Start With One Image',
+        copy: 'Upload photos, paste screenshots, and add little pieces of language that make the destination feel close enough to touch.'
+      });
+    } else {
     empty.innerHTML = `
       <div class="vision-board-empty-mark">✦</div>
       <div class="vision-board-empty-title">Start With One Image</div>
       <div class="vision-board-empty-copy">Upload photos, paste screenshots, and add little pieces of language that make the destination feel close enough to touch.</div>
     `;
+    }
     canvas.appendChild(empty);
     return;
   }
@@ -9118,11 +9146,21 @@ function showResetPasswordForm(email) {
 // ── Error display ──
 function showAuthError(msg) {
   const el = document.getElementById('auth-error');
+  if (!el) return;
+  if (window.PccUi && typeof window.PccUi.setInlineNotice === 'function') {
+    window.PccUi.setInlineNotice(el, { tone: 'danger', message: msg, live: 'assertive' });
+    return;
+  }
   el.textContent = msg;
   el.classList.add('show');
 }
 function clearAuthError() {
   const el = document.getElementById('auth-error');
+  if (!el) return;
+  if (window.PccUi && typeof window.PccUi.clearInlineNotice === 'function') {
+    window.PccUi.clearInlineNotice(el);
+    return;
+  }
   el.textContent = '';
   el.classList.remove('show');
 }
@@ -9130,6 +9168,14 @@ function clearAuthError() {
 function showForgotStatus(msg) {
   const el = document.getElementById('forgot-status');
   if (!el) return;
+  if (window.PccUi && typeof window.PccUi.setInlineNotice === 'function') {
+    if (!msg) {
+      window.PccUi.clearInlineNotice(el);
+    } else {
+      window.PccUi.setInlineNotice(el, { tone: 'success', message: msg, live: 'polite' });
+    }
+    return;
+  }
   el.textContent = msg || '';
   el.style.display = msg ? 'block' : 'none';
 }
@@ -9138,9 +9184,7 @@ function clearForgotStatus() {
   showForgotStatus('');
   const btn = document.getElementById('forgot-btn');
   if (btn) {
-    btn.disabled = false;
-    btn.classList.remove('loading');
-    btn.textContent = 'Send Reset Link';
+    setAsyncButtonState(btn, { state: 'idle', idleLabel: 'Send Reset Link' });
   }
 }
 
@@ -9175,6 +9219,14 @@ function normalizeRecoveryLinkErrorMessage(msg) {
 function showResetStatus(msg) {
   const el = document.getElementById('reset-status');
   if (!el) return;
+  if (window.PccUi && typeof window.PccUi.setInlineNotice === 'function') {
+    if (!msg) {
+      window.PccUi.clearInlineNotice(el);
+    } else {
+      window.PccUi.setInlineNotice(el, { tone: 'success', message: msg, live: 'polite' });
+    }
+    return;
+  }
   el.textContent = msg || '';
   el.style.display = msg ? 'block' : 'none';
 }
@@ -9333,6 +9385,26 @@ function checkPwStrength(val) {
 // ── Validate email ──
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
+function setAsyncButtonState(button, config) {
+  if (!button) return;
+  if (window.PccUi && typeof window.PccUi.setButtonState === 'function') {
+    window.PccUi.setButtonState(button, config);
+    return;
+  }
+  const idleLabel = config?.idleLabel || 'Submit';
+  const busyLabel = config?.busyLabel || '';
+  const successLabel = config?.successLabel || 'Done';
+  const state = config?.state || 'idle';
+  button.dataset.uiState = state;
+  button.disabled = state === 'busy';
+  button.classList.toggle('loading', state === 'busy');
+  button.textContent = state === 'busy'
+    ? busyLabel
+    : state === 'success'
+      ? successLabel
+      : (config?.label || idleLabel);
+}
+
 // ── LOGIN ──
 async function handleLogin() {
   clearAuthError();
@@ -9343,25 +9415,24 @@ async function handleLogin() {
   if (!email || !pw) { showAuthError('Please fill in all fields.'); return; }
   if (!isValidEmail(email)) { showAuthError('Please enter a valid email address.'); return; }
 
-  btn.disabled = true;
-  btn.classList.add('loading');
-  btn.textContent = '';
+  setAsyncButtonState(btn, {
+    state: 'busy',
+    idleLabel: 'Log In',
+    busyLabel: 'Signing In...',
+    successLabel: 'Done'
+  });
 
   try {
     const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pw });
 
     if (error) {
-      btn.disabled = false;
-      btn.classList.remove('loading');
-      btn.textContent = 'Log In';
+      setAsyncButtonState(btn, { state: 'idle', idleLabel: 'Log In' });
       showAuthError(error.message || 'Login failed. Check your email and password.');
       return;
     }
 
     if (!data || !data.user) {
-      btn.disabled = false;
-      btn.classList.remove('loading');
-      btn.textContent = 'Log In';
+      setAsyncButtonState(btn, { state: 'idle', idleLabel: 'Log In' });
       showAuthError('No account found. Please sign up first.');
       return;
     }
@@ -9369,13 +9440,11 @@ async function handleLogin() {
     const firstName = data.user?.user_metadata?.first_name || '';
     clearRecoverySession();
     saveSession({ email, firstName, id: data.user.id });
-    btn.textContent = 'Done';
+    setAsyncButtonState(btn, { state: 'success', idleLabel: 'Log In', successLabel: 'Done' });
     setTimeout(() => enterApp(firstName), 500);
 
   } catch(e) {
-    btn.disabled = false;
-    btn.classList.remove('loading');
-    btn.textContent = 'Log In';
+    setAsyncButtonState(btn, { state: 'idle', idleLabel: 'Log In' });
     showAuthError('Connection error: ' + e.message);
   }
 }
@@ -9395,9 +9464,12 @@ async function handleSignup() {
   if (pw.length < 8) { showAuthError('Password must be at least 8 characters.'); return; }
   if (pw !== confirm) { showAuthError('Passwords do not match.'); return; }
 
-  btn.disabled = true;
-  btn.classList.add('loading');
-  btn.textContent = '';
+  setAsyncButtonState(btn, {
+    state: 'busy',
+    idleLabel: 'Create Account',
+    busyLabel: 'Creating Account...',
+    successLabel: 'Done'
+  });
 
   let keepButtonState = false;
 
@@ -9424,9 +9496,7 @@ async function handleSignup() {
 
     if (!accessToken) {
       keepButtonState = true;
-      btn.disabled = false;
-      btn.classList.remove('loading');
-      btn.textContent = 'Check Email';
+      setAsyncButtonState(btn, { state: 'idle', idleLabel: 'Check Email', label: 'Check Email' });
       showAuthError('Account created. Check your email to confirm your account before logging in.');
       showToast('Account created. Check your inbox for the confirmation email.');
       const loginEmail = document.getElementById('login-email');
@@ -9437,16 +9507,14 @@ async function handleSignup() {
 
     clearRecoverySession();
     saveSession({ email, firstName: first, lastName: last, id: data.user.id });
-    btn.textContent = 'Done';
+    setAsyncButtonState(btn, { state: 'success', idleLabel: 'Create Account', successLabel: 'Done' });
     keepButtonState = true;
     setTimeout(() => enterApp(first), 500);
   } catch (e) {
     showAuthError('Connection error: ' + (e.message || 'Could not create account.'));
   } finally {
     if (!keepButtonState) {
-      btn.disabled = false;
-      btn.classList.remove('loading');
-      btn.textContent = 'Create Account';
+      setAsyncButtonState(btn, { state: 'idle', idleLabel: 'Create Account' });
     }
   }
 }
@@ -9462,9 +9530,12 @@ async function handleForgot() {
   forgotRequestInFlight = true;
 
   if (btn) {
-    btn.disabled = true;
-    btn.classList.add('loading');
-    btn.textContent = 'Sending...';
+    setAsyncButtonState(btn, {
+      state: 'busy',
+      idleLabel: 'Send Reset Link',
+      busyLabel: 'Sending...',
+      successLabel: 'Resend Reset Link'
+    });
   }
 
   const redirectTo = (
@@ -9482,16 +9553,16 @@ async function handleForgot() {
     }
 
     showForgotStatus("Reset link sent. If it doesn't arrive in a minute, you can resend it here.");
-    if (btn) btn.textContent = 'Resend Reset Link';
+    if (btn) setAsyncButtonState(btn, { state: 'idle', idleLabel: 'Resend Reset Link', label: 'Resend Reset Link' });
     showToast('Reset link sent! Check your inbox. 📬');
   } catch (e) {
     showAuthError(normalizeResetEmailErrorMessage(e?.message));
   } finally {
     forgotRequestInFlight = false;
     if (btn) {
-      btn.disabled = false;
-      btn.classList.remove('loading');
-      if (btn.textContent === 'Sending...') btn.textContent = 'Send Reset Link';
+      if (btn.dataset.uiState === 'busy' || btn.textContent === 'Sending...') {
+        setAsyncButtonState(btn, { state: 'idle', idleLabel: 'Send Reset Link' });
+      }
     }
   }
 }
@@ -9515,9 +9586,12 @@ async function handlePasswordReset() {
   resetRequestInFlight = true;
 
   if (btn) {
-    btn.disabled = true;
-    btn.classList.add('loading');
-    btn.textContent = 'Updating...';
+    setAsyncButtonState(btn, {
+      state: 'busy',
+      idleLabel: 'Update Password',
+      busyLabel: 'Updating...',
+      successLabel: 'Done'
+    });
   }
 
   try {
@@ -9547,9 +9621,9 @@ async function handlePasswordReset() {
   } finally {
     resetRequestInFlight = false;
     if (btn) {
-      btn.disabled = false;
-      btn.classList.remove('loading');
-      if (btn.textContent === 'Updating...') btn.textContent = 'Update Password';
+      if (btn.dataset.uiState === 'busy' || btn.textContent === 'Updating...') {
+        setAsyncButtonState(btn, { state: 'idle', idleLabel: 'Update Password' });
+      }
     }
   }
 }
@@ -10645,6 +10719,7 @@ if (document.readyState !== 'loading') {
   }
 })();
 </script>
+<script src="./pcc-ui.js"></script>
 <script src="./pcc-page-loader.js"></script>
 <script src="./pcc-hub-upgrade.js"></script>
 <style id="hub-editable-style">
@@ -11458,6 +11533,7 @@ if (document.readyState !== 'loading') {
 <script>
 document.documentElement.setAttribute('data-theme-fn', typeof window.openThemePanel);
 </script>
+<script src="./pcc-shell-redesign.js"></script>
 </body>
 
 </html>

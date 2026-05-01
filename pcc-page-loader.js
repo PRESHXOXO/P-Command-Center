@@ -32,6 +32,65 @@
     return document.getElementById('page-' + pageId);
   }
 
+  function getShellCopy(page) {
+    return {
+      kicker: page.dataset.shellKicker || page.querySelector('.page-shell-kicker')?.textContent?.trim() || 'Loading Hub',
+      title: page.dataset.shellTitle || page.querySelector('.page-shell-title')?.textContent?.trim() || 'Loading',
+      copy: page.dataset.shellCopy || page.querySelector('.page-shell-copy')?.textContent?.trim() || 'Preparing this space...'
+    };
+  }
+
+  function renderShellState(page, options = {}) {
+    if (!page || !(window.PccUi && typeof window.PccUi.mountStateCard === 'function')) return;
+    const copy = getShellCopy(page);
+    window.PccUi.mountStateCard(page, {
+      state: options.state || 'loading',
+      tone: options.tone || (options.state === 'error' ? 'danger' : 'brand'),
+      size: 'regular',
+      layout: 'centered',
+      className: 'page-shell-card',
+      kicker: options.kicker || copy.kicker,
+      title: options.title || copy.title,
+      copy: options.copy || copy.copy,
+      icon: options.icon || (options.state === 'error' ? '!' : '✦'),
+      live: options.live || (options.state === 'error' ? 'assertive' : 'polite'),
+      actions: options.actions || []
+    });
+  }
+
+  function resetPageCache(pageId) {
+    delete fragmentPromises[pageId];
+    const page = getPageNode(pageId);
+    if (!page) return page;
+    page.dataset.pageLoaded = 'false';
+    page.setAttribute('aria-busy', 'true');
+    page.classList.add('page-shell-loading');
+    return page;
+  }
+
+  function retryPageLoad(pageId) {
+    const page = resetPageCache(pageId);
+    if (!page) return Promise.resolve(null);
+    renderShellState(page, { state: 'loading' });
+    return ensurePageReady(pageId).catch(() => null);
+  }
+
+  function renderPageError(pageId, error) {
+    const page = resetPageCache(pageId);
+    if (!page) return;
+    page.setAttribute('aria-busy', 'false');
+    renderShellState(page, {
+      state: 'error',
+      title: 'This Hub Needs Another Try',
+      copy: error?.message || 'We could not load this space right now. Try again in a moment.',
+      actions: [{
+        label: 'Try Again',
+        variant: 'primary',
+        onClick: () => { retryPageLoad(pageId); }
+      }]
+    });
+  }
+
   function loadScriptOnce(src) {
     if (scriptPromises[src]) return scriptPromises[src];
     const existing = document.querySelector(`script[src="${src}"]`);
@@ -43,8 +102,13 @@
       const script = document.createElement('script');
       script.src = src;
       script.async = false;
+      script.dataset.pccDynamic = 'true';
       script.onload = () => resolve(script);
-      script.onerror = () => reject(new Error('Could not load script: ' + src));
+      script.onerror = () => {
+        delete scriptPromises[src];
+        script.remove();
+        reject(new Error('Could not load script: ' + src));
+      };
       document.body.appendChild(script);
     });
     return scriptPromises[src];
@@ -61,8 +125,13 @@
       const link = document.createElement('link');
       link.rel = 'stylesheet';
       link.href = href;
+      link.dataset.pccDynamic = 'true';
       link.onload = () => resolve(link);
-      link.onerror = () => reject(new Error('Could not load stylesheet: ' + href));
+      link.onerror = () => {
+        delete stylePromises[href];
+        link.remove();
+        reject(new Error('Could not load stylesheet: ' + href));
+      };
       document.head.appendChild(link);
     });
     return stylePromises[href];
@@ -114,9 +183,14 @@
 
   async function ensurePageReady(pageId) {
     if (!canLazyLoad(pageId)) return getPageNode(pageId);
-    const page = await ensurePageMarkup(pageId);
-    await ensurePageAssets(pageId);
-    return page;
+    try {
+      const page = await ensurePageMarkup(pageId);
+      await ensurePageAssets(pageId);
+      return page;
+    } catch (error) {
+      renderPageError(pageId, error);
+      throw error;
+    }
   }
 
   function prefetchPageMarkup(pageId) {
@@ -151,10 +225,16 @@
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.page-shell-loading[data-page-lazy="true"]').forEach((page) => {
+        renderShellState(page, { state: 'loading' });
+      });
       bindPrefetchHints();
       warmKnownPages();
     });
   } else {
+    document.querySelectorAll('.page-shell-loading[data-page-lazy="true"]').forEach((page) => {
+      renderShellState(page, { state: 'loading' });
+    });
     bindPrefetchHints();
     warmKnownPages();
   }
