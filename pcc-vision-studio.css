@@ -22,6 +22,41 @@
   margin:1rem 0 1.65rem;
 }
 
+.vision-studio-root .vs-fragment-fallback{
+  display:grid;
+  gap:.5rem;
+  place-items:start;
+  max-width:34rem;
+  padding:1.4rem 1.5rem;
+  border-radius:28px;
+  background:linear-gradient(145deg, rgba(255,255,255,0.88), rgba(240,246,255,0.78));
+  border:1px solid rgba(86,116,206,0.14);
+  box-shadow:0 24px 54px rgba(28,47,105,0.12);
+}
+
+.vision-studio-root .vs-fragment-kicker{
+  color:#4f69a8;
+  font-size:.74rem;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+
+.vision-studio-root .vs-fragment-title{
+  margin:0;
+  color:#17327f;
+  font-family:var(--font-display, 'Cormorant Garamond', serif);
+  font-size:2.1rem;
+  line-height:1;
+}
+
+.vision-studio-root .vs-fragment-copy{
+  margin:0;
+  color:#5b6f9d;
+  font-size:.92rem;
+  line-height:1.6;
+}
+
 #page-vision .vision-board-shell,
 #page-vision .vision-grid{
   display:none !important;
@@ -1501,7 +1536,7 @@
 .vision-studio-root .vs-editor-body{
   min-height:0;
   display:grid;
-  grid-template-columns:88px 330px minmax(0,1fr) 310px;
+  grid-template-columns:76px 292px minmax(0,1fr) 272px;
 }
 
 .vision-studio-root .vs-rail{
@@ -1713,7 +1748,7 @@
 
 .vision-studio-root .vs-library-card{
   display:grid;
-  grid-template-columns:132px minmax(0,1fr);
+  grid-template-columns:116px minmax(0,1fr);
   align-items:center;
   gap:.7rem;
   padding:.78rem;
@@ -1732,7 +1767,7 @@
 }
 
 .vision-studio-root .vs-library-preview{
-  height:136px;
+  height:120px;
   border-radius:18px;
 }
 
@@ -1772,7 +1807,7 @@
   align-items:center;
   justify-content:space-between;
   gap:1rem;
-  padding:1rem 1.2rem;
+  padding:.9rem 1rem;
   border-bottom:1px solid var(--vs-stage-border);
 }
 
@@ -1820,7 +1855,7 @@
 
 .vision-studio-root .vs-stage{
   min-height:0;
-  padding:1rem 1rem 1.15rem;
+  padding:.88rem .88rem 1rem;
 }
 
 .vision-studio-root .vs-viewport-shell{
@@ -1842,7 +1877,7 @@
   position:relative;
   height:100%;
   margin:0;
-  padding:2.6rem 3rem 3.2rem;
+  padding:2.1rem 2.35rem 2.7rem;
   overflow:auto;
   border:none;
   border-radius:0;
@@ -2388,7 +2423,7 @@
 
 @media (max-width: 1320px){
   .vision-studio-root .vs-editor-body{
-    grid-template-columns:84px 300px minmax(0,1fr) 280px;
+    grid-template-columns:72px 274px minmax(0,1fr) 248px;
   }
 
   .vision-studio-root .vs-library-grid{
@@ -2398,7 +2433,7 @@
 
 @media (max-width: 1240px){
   .vision-studio-root .vs-editor-body{
-    grid-template-columns:84px 300px minmax(0,1fr);
+    grid-template-columns:72px 274px minmax(0,1fr);
   }
 
   .vision-studio-root .vs-inspector-pane{
@@ -2444,7 +2479,7 @@
   }
 
   .vision-studio-root .vs-editor-body{
-    grid-template-columns:84px minmax(280px, 320px) minmax(0,1fr);
+    grid-template-columns:72px minmax(260px, 300px) minmax(0,1fr);
   }
 
   .vision-studio-root .vs-inspector-pane{

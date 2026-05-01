@@ -19,8 +19,19 @@
     return QUICK_NOTE_PREFIX + '::' + getSessionUserId();
   }
 
-  function goToPage(pageId) {
+  async function goToPage(pageId) {
     const tab = document.querySelector('.nav-tab[data-page="' + pageId + '"]');
+    const page = document.getElementById('page-' + pageId);
+    if (
+      page &&
+      page.dataset.pageLazy === 'true' &&
+      page.dataset.pageLoaded !== 'true' &&
+      typeof window.ensurePageReady === 'function'
+    ) {
+      try {
+        await window.ensurePageReady(pageId);
+      } catch (error) {}
+    }
     if (typeof window.showPage === 'function') {
       window.showPage(pageId, tab || undefined);
     }

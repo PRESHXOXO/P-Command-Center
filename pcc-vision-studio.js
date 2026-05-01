@@ -1398,10 +1398,44 @@
   function renderGuides() {
     return `
       <div class="vs-guides">
-        ${state.guides.vertical.map(value => `<div class="vs-guide is-vertical" style="left:${value}px"></div>`).join('')}
-        ${state.guides.horizontal.map(value => `<div class="vs-guide is-horizontal" style="top:${value}px"></div>`).join('')}
+        ${renderGuideLines()}
       </div>
     `;
+  }
+
+  function renderGuideLines() {
+    return `
+      ${state.guides.vertical.map(value => `<div class="vs-guide is-vertical" style="left:${value}px"></div>`).join('')}
+      ${state.guides.horizontal.map(value => `<div class="vs-guide is-horizontal" style="top:${value}px"></div>`).join('')}
+    `;
+  }
+
+  function getGuideLayer() {
+    if (state.refs.guideLayer && state.refs.guideLayer.isConnected) return state.refs.guideLayer;
+    if (!state.refs.board) return null;
+    state.refs.guideLayer = state.refs.board.querySelector('.vs-guides');
+    return state.refs.guideLayer;
+  }
+
+  function updateGuideLayer() {
+    const layer = getGuideLayer();
+    if (!layer) return;
+    layer.innerHTML = renderGuideLines();
+  }
+
+  function getLiveItemNode(itemId) {
+    if (!state.refs.board || !itemId) return null;
+    return state.refs.board.querySelector(`[data-item-id="${itemId}"]`);
+  }
+
+  function applyItemFrame(node, item) {
+    if (!node || !item) return;
+    node.style.left = item.x + 'px';
+    node.style.top = item.y + 'px';
+    node.style.width = item.w + 'px';
+    node.style.height = item.h + 'px';
+    node.style.zIndex = String(item.z);
+    node.style.setProperty('--vs-rotation', (item.rotate || 0) + 'deg');
   }
 
   function renderBoard() {
@@ -1410,6 +1444,7 @@
       ? state.items.slice().sort((a, b) => a.z - b.z).map(renderItem).join('')
       : renderEmptyState();
     state.refs.board.innerHTML = html + renderGuides();
+    state.refs.guideLayer = state.refs.board.querySelector('.vs-guides');
     updateChrome();
   }
 
@@ -1495,7 +1530,8 @@
       zoomValue: state.root.querySelector('#vs-zoom-value'),
       paneBadge: state.root.querySelector('.vs-pane-badge'),
       footerTitle: state.root.querySelector('.vs-stage-footer-copy strong'),
-      inspector: state.root.querySelector('#vs-inspector')
+      inspector: state.root.querySelector('#vs-inspector'),
+      guideLayer: state.root.querySelector('.vs-guides')
     };
   }
 
@@ -1660,10 +1696,11 @@
 
   function startDrag(event, itemId) {
     const item = state.items.find(entry => entry.id === itemId);
-    const node = event.target.closest('.vs-item');
-    if (!item || !node || event.button !== 0) return;
+    if (!item || event.button !== 0) return;
     bringToFront(item.id);
     state.selectedId = item.id;
+    renderBoard();
+    const node = getLiveItemNode(item.id);
     state.drag = {
       id: item.id,
       node,
@@ -1676,17 +1713,17 @@
       scrollLeft: state.refs.viewport.scrollLeft,
       scrollTop: state.refs.viewport.scrollTop
     };
-    node.classList.add('dragging');
-    renderBoard();
+    if (node) node.classList.add('dragging');
     event.preventDefault();
   }
 
   function startResize(event, itemId) {
     const item = state.items.find(entry => entry.id === itemId);
-    const node = event.target.closest('.vs-item');
-    if (!item || !node || event.button !== 0) return;
+    if (!item || event.button !== 0) return;
     bringToFront(item.id);
     state.selectedId = item.id;
+    renderBoard();
+    const node = getLiveItemNode(item.id);
     state.resize = {
       id: item.id,
       node,
@@ -1701,8 +1738,7 @@
       scrollLeft: state.refs.viewport.scrollLeft,
       scrollTop: state.refs.viewport.scrollTop
     };
-    node.classList.add('resizing');
-    renderBoard();
+    if (node) node.classList.add('resizing');
     event.preventDefault();
   }
 
@@ -1723,19 +1759,28 @@
       autoScroll(event);
       const item = state.items.find(entry => entry.id === state.drag.id);
       if (!item) return;
+      const node = state.drag.node && state.drag.node.isConnected ? state.drag.node : getLiveItemNode(state.drag.id);
+      state.drag.node = node;
       const dx = ((event.clientX - state.drag.startX) + (state.refs.viewport.scrollLeft - state.drag.scrollLeft)) / zoom;
       const dy = ((event.clientY - state.drag.startY) + (state.refs.viewport.scrollTop - state.drag.scrollTop)) / zoom;
       const snapped = computeSnap(item.id, state.drag.originX + dx, state.drag.originY + dy, item.w, item.h);
       item.x = snapped.x;
       item.y = snapped.y;
       state.guides = snapped.guides;
-      renderBoard();
+      if (!node) {
+        renderBoard();
+        return;
+      }
+      applyItemFrame(node, item);
+      updateGuideLayer();
       return;
     }
     if (state.resize) {
       autoScroll(event);
       const item = state.items.find(entry => entry.id === state.resize.id);
       if (!item) return;
+      const node = state.resize.node && state.resize.node.isConnected ? state.resize.node : getLiveItemNode(state.resize.id);
+      state.resize.node = node;
       const dx = ((event.clientX - state.resize.startX) + (state.refs.viewport.scrollLeft - state.resize.scrollLeft)) / zoom;
       const dy = ((event.clientY - state.resize.startY) + (state.refs.viewport.scrollTop - state.resize.scrollTop)) / zoom;
       let nextW = clamp(round(state.resize.originW + dx), 140, BOARD_WIDTH - item.x - BOARD_PADDING);
@@ -1747,11 +1792,18 @@
       item.h = nextH;
       item.aspectRatio = nextW / Math.max(nextH, 1);
       state.guides = { vertical: [], horizontal: [] };
-      renderBoard();
+      if (!node) {
+        renderBoard();
+        return;
+      }
+      applyItemFrame(node, item);
+      updateGuideLayer();
     }
   }
 
   function clearInteractionState() {
+    if (state.drag?.node) state.drag.node.classList.remove('dragging');
+    if (state.resize?.node) state.resize.node.classList.remove('resizing');
     state.drag = null;
     state.resize = null;
     state.guides = { vertical: [], horizontal: [] };
