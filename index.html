@@ -5075,8 +5075,6 @@ html[data-theme-fn="undefined"] .main-script-badge.fail {
 
 <script>
 window.__PCC_CONFIG__ = Object.assign({
-  SUPABASE_URL: 'https://ausgchpdxghtmrdzymmy.supabase.co',
-  API_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1c2djaHBkeGdodG1yZHp5bW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1OTUwMDIsImV4cCI6MjA5MTE3MTAwMn0.8zXw7A4Xf4v7gi1UAhWaW1VvPpYJ3mJa3MTgVWAa3sw',
   ADMIN_EMAIL: 'precious.hearns@yahoo.com'
 }, window.__PCC_CONFIG__ || {});
 </script>
@@ -5084,20 +5082,77 @@ window.__PCC_CONFIG__ = Object.assign({
 <script>
 const PCC_RUNTIME_ENV = (typeof process !== 'undefined' && process && process.env) ? process.env : {};
 const PCC_RUNTIME_CONFIG = (typeof window !== 'undefined' && window.__PCC_CONFIG__) ? window.__PCC_CONFIG__ : {};
-const SUPABASE_URL = PCC_RUNTIME_ENV.SUPABASE_URL
-  || PCC_RUNTIME_CONFIG.SUPABASE_URL
-  || '';
-const SUPABASE_KEY = PCC_RUNTIME_ENV.API_KEY
-  || PCC_RUNTIME_ENV.SUPABASE_ANON_KEY
-  || PCC_RUNTIME_CONFIG.API_KEY
-  || PCC_RUNTIME_CONFIG.SUPABASE_ANON_KEY
-  || '';
+let SUPABASE_URL = '';
+let SUPABASE_KEY = '';
+let runtimeConfigPromise = null;
+
+function applyRuntimeConfig(partial = {}) {
+  if (!partial || typeof partial !== 'object') return;
+  if (typeof window !== 'undefined') {
+    window.__PCC_CONFIG__ = Object.assign(window.__PCC_CONFIG__ || {}, partial);
+  }
+  Object.assign(PCC_RUNTIME_CONFIG, partial);
+  SUPABASE_URL = PCC_RUNTIME_ENV.SUPABASE_URL
+    || PCC_RUNTIME_CONFIG.SUPABASE_URL
+    || '';
+  SUPABASE_KEY = PCC_RUNTIME_ENV.API_KEY
+    || PCC_RUNTIME_ENV.SUPABASE_ANON_KEY
+    || PCC_RUNTIME_CONFIG.API_KEY
+    || PCC_RUNTIME_CONFIG.SUPABASE_ANON_KEY
+    || '';
+}
+
+applyRuntimeConfig(PCC_RUNTIME_CONFIG);
 
 function getSupabaseConfigError() {
   if (SUPABASE_URL && SUPABASE_KEY) return null;
   return {
-    message: 'Missing Supabase configuration. Set process.env.SUPABASE_URL and process.env.API_KEY, or define window.__PCC_CONFIG__ before the app script loads.'
+    message: 'Missing Supabase configuration. Set SUPABASE_URL and API_KEY (or SUPABASE_ANON_KEY) in Vercel, or define window.__PCC_CONFIG__ before the app script loads.'
   };
+}
+
+async function loadRuntimeConfigFromServer() {
+  if (typeof window === 'undefined' || !window.location || !/^https?:$/i.test(window.location.protocol)) return;
+  const response = await fetch('/api/pcc-config', {
+    cache: 'no-store',
+    headers: { 'Accept': 'application/json' }
+  });
+  if (!response.ok) {
+    throw new Error('Could not load runtime config (' + response.status + ').');
+  }
+  const payload = await response.json().catch(() => ({}));
+  applyRuntimeConfig(payload);
+}
+
+async function ensureSupabaseConfig() {
+  if (SUPABASE_URL && SUPABASE_KEY) return null;
+  if (!runtimeConfigPromise) {
+    runtimeConfigPromise = loadRuntimeConfigFromServer().catch((error) => {
+      runtimeConfigPromise = null;
+      throw error;
+    });
+  }
+  try {
+    await runtimeConfigPromise;
+  } catch (error) {}
+  return getSupabaseConfigError();
+}
+
+function normalizeSupabaseFetchError(error, action) {
+  const raw = String(error?.message || '').trim();
+  if (/failed to fetch|networkerror|load failed/i.test(raw)) {
+    if (SUPABASE_URL) {
+      return 'Could not reach Supabase while trying to ' + action + '. Check that SUPABASE_URL points to your live project and that the deployment has the right runtime config.';
+    }
+    return 'Supabase runtime configuration is missing. Add SUPABASE_URL and API_KEY in Vercel so auth can connect.';
+  }
+  return raw || ('Could not ' + action + '.');
+}
+
+if (typeof window !== 'undefined') {
+  setTimeout(() => {
+    ensureSupabaseConfig().catch(() => {});
+  }, 0);
 }
 
 async function readSupabaseResponse(response) {
@@ -5145,7 +5200,7 @@ function persistSupabaseSession(sessionLike) {
 const _supabase = {
   auth: {
     async signUp({ email, password, options }) {
-      const configError = getSupabaseConfigError();
+      const configError = await ensureSupabaseConfig();
       if (configError) return { data:null, error:configError };
       try {
         const r = await fetch(SUPABASE_URL+'/auth/v1/signup', {
@@ -5166,11 +5221,11 @@ const _supabase = {
           error:null
         };
       } catch (e) {
-        return { data:null, error:{message:e.message || 'Signup failed'} };
+        return { data:null, error:{message:normalizeSupabaseFetchError(e, 'create your account')} };
       }
     },
     async signInWithPassword({ email, password }) {
-      const configError = getSupabaseConfigError();
+      const configError = await ensureSupabaseConfig();
       if (configError) return { data:null, error:configError };
       try {
         const r = await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password', {
@@ -5187,7 +5242,7 @@ const _supabase = {
         }
         return { data:{user:d.user, session:d}, error:null };
       } catch (e) {
-        return { data:null, error:{message:e.message || 'Login failed'} };
+        return { data:null, error:{message:normalizeSupabaseFetchError(e, 'sign you in')} };
       }
     },
     async getSession() {
@@ -5199,7 +5254,7 @@ const _supabase = {
     },
     async getUser(accessToken) {
       try {
-        const configError = getSupabaseConfigError();
+        const configError = await ensureSupabaseConfig();
         if (configError) return { data:{ user:null }, error:configError };
         const token = accessToken || JSON.parse(localStorage.getItem('pcc-sb-token') || 'null')?.access_token;
         if (!token) return { data:{ user:null }, error:{ message:'Missing access token' } };
@@ -5220,7 +5275,7 @@ const _supabase = {
     },
     async signOut() {
       try {
-        const configError = getSupabaseConfigError();
+        const configError = await ensureSupabaseConfig();
         if (configError) {
           try { localStorage.removeItem('pcc-sb-token'); } catch(e){}
           return;
@@ -5232,7 +5287,7 @@ const _supabase = {
     },
     async updateUser(attributes = {}) {
       try {
-        const configError = getSupabaseConfigError();
+        const configError = await ensureSupabaseConfig();
         if (configError) return { data:null, error:configError };
         const stored = JSON.parse(localStorage.getItem('pcc-sb-token') || 'null');
         const token = stored?.access_token;
@@ -5260,7 +5315,7 @@ const _supabase = {
     },
     async verifyOtp(params = {}) {
       try {
-        const configError = getSupabaseConfigError();
+        const configError = await ensureSupabaseConfig();
         if (configError) return { data:null, error:configError };
         const payload = { type: params.type || 'recovery' };
         if (params.token_hash) payload.token_hash = params.token_hash;
@@ -5297,12 +5352,12 @@ const _supabase = {
         }
         return { data:{ session, user }, error:null };
       } catch (e) {
-        return { data:null, error:{ message:e.message || 'Could not verify recovery link' } };
+        return { data:null, error:{ message:normalizeSupabaseFetchError(e, 'verify your recovery link') } };
       }
     },
     async resetPasswordForEmail(email, options = {}) {
       try {
-        const configError = getSupabaseConfigError();
+        const configError = await ensureSupabaseConfig();
         if (configError) return { data:null, error:configError };
         const payload = { email };
         if (options?.redirectTo) payload.redirect_to = options.redirectTo;
@@ -5323,11 +5378,11 @@ const _supabase = {
         }
         return { data:d, error:null };
       } catch (e) {
-        return { data:null, error:{ message:e.message || 'Could not send reset email' } };
+        return { data:null, error:{ message:normalizeSupabaseFetchError(e, 'send the reset email') } };
       }
     },
-    signInWithOAuth({provider,options}) {
-      const configError = getSupabaseConfigError();
+    async signInWithOAuth({provider,options}) {
+      const configError = await ensureSupabaseConfig();
       if (configError) return {error:configError};
       window.location.href=SUPABASE_URL+'/auth/v1/authorize?provider='+provider+'&redirect_to='+encodeURIComponent(options?.redirectTo||window.location.origin);
       return {error:null};
@@ -5341,7 +5396,7 @@ const _supabase = {
       eq(c,v){_f.push({c,v});return this;},
       async upsert(row, options = {}) {
         try {
-          const configError = getSupabaseConfigError();
+          const configError = await ensureSupabaseConfig();
           if (configError) return {error:configError};
           const s=JSON.parse(localStorage.getItem('pcc-sb-token'));
           if(!s?.access_token) return {error:{message:'Not authenticated'}};
@@ -5357,11 +5412,11 @@ const _supabase = {
             return {error:{message:getSupabaseErrorMessage(payload.data || payload.raw, 'Save failed')}};
           }
           return { data: payload.data, error:null };
-        } catch(e){return {error:{message:e.message}};}
+        } catch(e){return {error:{message:normalizeSupabaseFetchError(e, 'save your data')}};}
       },
       async single() {
         try {
-          const configError = getSupabaseConfigError();
+          const configError = await ensureSupabaseConfig();
           if (configError) return {data:null,error:configError};
           const s=JSON.parse(localStorage.getItem('pcc-sb-token'));
           if(!s?.access_token) return {data:null,error:null};
@@ -5375,7 +5430,7 @@ const _supabase = {
           }
           const d=payload.data;
           return {data:Array.isArray(d)?d[0]:d,error:null};
-        } catch(e){return {data:null,error:{message:e.message}};}
+        } catch(e){return {data:null,error:{message:normalizeSupabaseFetchError(e, 'load your data')}};}
       }
     };
   }
@@ -5953,7 +6008,7 @@ async function loadFromCloud(section) {
 async function loadAllUserData() {
   const userId = getCurrentUserId();
   if (!userId) return;
-  const configError = getSupabaseConfigError();
+  const configError = await ensureSupabaseConfig();
   if (configError) {
     console.warn(configError.message);
     return;
