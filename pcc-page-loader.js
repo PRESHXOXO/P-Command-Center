@@ -1,4 +1,6 @@
 (function () {
+  const ASSET_VERSION = (window.PCC_ASSET_VERSION || '').trim();
+
   const PAGE_PARTIALS = {
     'life-board': './pages/life-board.html',
     'notes': './pages/notes.html',
@@ -23,6 +25,11 @@
   const fragmentPromises = Object.create(null);
   const scriptPromises = Object.create(null);
   const stylePromises = Object.create(null);
+
+  function versionedPath(path) {
+    if (!ASSET_VERSION) return path;
+    return path + (path.includes('?') ? '&' : '?') + 'v=' + encodeURIComponent(ASSET_VERSION);
+  }
 
   function canLazyLoad(pageId) {
     return !!PAGE_PARTIALS[pageId];
@@ -92,49 +99,51 @@
   }
 
   function loadScriptOnce(src) {
-    if (scriptPromises[src]) return scriptPromises[src];
-    const existing = document.querySelector(`script[src="${src}"]`);
+    const versionedSrc = versionedPath(src);
+    if (scriptPromises[versionedSrc]) return scriptPromises[versionedSrc];
+    const existing = document.querySelector(`script[src="${versionedSrc}"]`);
     if (existing) {
-      scriptPromises[src] = Promise.resolve(existing);
-      return scriptPromises[src];
+      scriptPromises[versionedSrc] = Promise.resolve(existing);
+      return scriptPromises[versionedSrc];
     }
-    scriptPromises[src] = new Promise((resolve, reject) => {
+    scriptPromises[versionedSrc] = new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = src;
+      script.src = versionedSrc;
       script.async = false;
       script.dataset.pccDynamic = 'true';
       script.onload = () => resolve(script);
       script.onerror = () => {
-        delete scriptPromises[src];
+        delete scriptPromises[versionedSrc];
         script.remove();
         reject(new Error('Could not load script: ' + src));
       };
       document.body.appendChild(script);
     });
-    return scriptPromises[src];
+    return scriptPromises[versionedSrc];
   }
 
   function loadStyleOnce(href) {
-    if (stylePromises[href]) return stylePromises[href];
-    const existing = document.querySelector(`link[rel="stylesheet"][href="${href}"]`);
+    const versionedHref = versionedPath(href);
+    if (stylePromises[versionedHref]) return stylePromises[versionedHref];
+    const existing = document.querySelector(`link[rel="stylesheet"][href="${versionedHref}"]`);
     if (existing) {
-      stylePromises[href] = Promise.resolve(existing);
-      return stylePromises[href];
+      stylePromises[versionedHref] = Promise.resolve(existing);
+      return stylePromises[versionedHref];
     }
-    stylePromises[href] = new Promise((resolve, reject) => {
+    stylePromises[versionedHref] = new Promise((resolve, reject) => {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = href;
+      link.href = versionedHref;
       link.dataset.pccDynamic = 'true';
       link.onload = () => resolve(link);
       link.onerror = () => {
-        delete stylePromises[href];
+        delete stylePromises[versionedHref];
         link.remove();
         reject(new Error('Could not load stylesheet: ' + href));
       };
       document.head.appendChild(link);
     });
-    return stylePromises[href];
+    return stylePromises[versionedHref];
   }
 
   async function ensurePageAssets(pageId) {
@@ -165,7 +174,7 @@
     if (page.dataset.pageLoaded === 'true') return page;
     if (fragmentPromises[pageId]) return fragmentPromises[pageId];
 
-    fragmentPromises[pageId] = fetch(PAGE_PARTIALS[pageId], { cache: 'force-cache' })
+    fragmentPromises[pageId] = fetch(versionedPath(PAGE_PARTIALS[pageId]), { cache: 'no-store' })
       .then(async (response) => {
         if (!response.ok) {
           throw new Error('Could not load the ' + pageId + ' page (' + response.status + ').');
