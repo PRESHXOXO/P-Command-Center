@@ -117,7 +117,7 @@
     applyFontVars(next.font);
     saveTheme(next);
     const toggle = document.getElementById('vision-theme-toggle');
-    if (toggle) toggle.textContent = next.mode === 'dark' ? 'Light Mode' : 'Dark Mode';
+    if (toggle) toggle.textContent = next.mode === 'dark' ? 'Light' : 'Dark';
   }
 
   function getStoredAuthSession() {

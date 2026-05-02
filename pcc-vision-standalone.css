@@ -45,14 +45,14 @@ body[data-vision-standalone="true"]{
 
 .vision-standalone-utility-bar{
   position:fixed;
-  top:1rem;
-  left:1rem;
-  right:1rem;
+  top:.85rem;
+  left:.85rem;
+  right:.85rem;
   z-index:20;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:1rem;
+  gap:.75rem;
   pointer-events:none;
 }
 
@@ -70,19 +70,19 @@ body[data-vision-standalone="true"]{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  min-height:42px;
-  padding:.72rem .92rem;
+  min-height:38px;
+  padding:.6rem .82rem;
   border-radius:999px;
   background:var(--vision-shell-surface);
   border:1px solid var(--vision-shell-border);
-  box-shadow:var(--vision-shell-shadow);
+  box-shadow:0 16px 38px rgba(5,10,28,0.22);
   backdrop-filter:blur(18px);
   -webkit-backdrop-filter:blur(18px);
   color:var(--vision-shell-text);
   font:inherit;
-  font-size:.76rem;
+  font-size:.7rem;
   font-weight:700;
-  letter-spacing:.08em;
+  letter-spacing:.12em;
   text-transform:uppercase;
   transition:transform .18s ease, background .18s ease, border-color .18s ease;
 }
@@ -115,16 +115,16 @@ html[data-theme="light"] .vision-standalone-btn:hover{
 .vision-standalone-user{
   display:inline-flex;
   align-items:center;
-  min-height:42px;
-  padding:.72rem .92rem;
+  min-height:38px;
+  padding:.6rem .82rem;
   border-radius:999px;
   background:var(--vision-shell-surface);
   border:1px solid var(--vision-shell-border);
-  box-shadow:var(--vision-shell-shadow);
+  box-shadow:0 16px 38px rgba(5,10,28,0.22);
   backdrop-filter:blur(18px);
   -webkit-backdrop-filter:blur(18px);
   color:var(--vision-shell-muted);
-  font-size:.74rem;
+  font-size:.7rem;
   font-weight:600;
 }
 
@@ -150,11 +150,35 @@ body[data-vision-standalone="true"] .vision-studio-root .vs-editor{
 }
 
 body[data-vision-standalone="true"] .vision-studio-root .vs-appbar{
-  padding-top:5.2rem;
+  grid-template-columns:minmax(0, 1fr) auto;
+  padding:1rem 1.2rem .86rem;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root .vs-appbar-left{
+  display:none;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root .vs-appbar-center{
+  justify-items:start;
+  text-align:left;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root .vs-board-title-input{
+  width:min(100%, 660px);
+  padding:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  text-align:left;
+  font-size:2rem;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root .vs-board-title-sub{
+  font-size:.68rem;
 }
 
 body[data-vision-standalone="true"] .vision-studio-root .vs-editor-body{
-  min-height:calc(100vh - 132px);
+  min-height:calc(100vh - 108px);
 }
 
 body[data-vision-standalone="true"] .vision-studio-root .vs-stage-shell{
@@ -162,7 +186,7 @@ body[data-vision-standalone="true"] .vision-studio-root .vs-stage-shell{
 }
 
 body[data-vision-standalone="true"] .vision-studio-root .vs-viewport-shell{
-  min-height:calc(100vh - 236px);
+  min-height:calc(100vh - 198px);
 }
 
 @media (max-width:1080px){
@@ -191,7 +215,7 @@ body[data-vision-standalone="true"] .vision-studio-root .vs-viewport-shell{
   }
 
   body[data-vision-standalone="true"] .vision-studio-root .vs-appbar{
-    padding-top:1rem;
+    grid-template-columns:minmax(0, 1fr);
   }
 
   body[data-vision-standalone="true"] .vision-studio-root .vs-editor-body{

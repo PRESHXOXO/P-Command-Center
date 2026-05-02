@@ -374,6 +374,36 @@
     return CATEGORY_DEFS.find(entry => entry.id === state.activeCategory) || CATEGORY_DEFS[0];
   }
 
+  function renderLibraryPane() {
+    const category = currentCategory();
+    return `
+      <div class="vs-library-pane-head">
+        <div>
+          <div class="vs-kicker">Studio Library</div>
+          <h2 class="vs-title">${escapeHtml(category.label)}</h2>
+          <p class="vs-subtitle">${escapeHtml(category.copy)}. Curate first, then place with intention.</p>
+        </div>
+        <div class="vs-pane-badge">${state.items.length} module${state.items.length === 1 ? '' : 's'}</div>
+      </div>
+      <label class="vs-search">
+        <span class="vs-search-icon" aria-hidden="true"></span>
+        <input id="vs-search" type="text" placeholder="Search textures, frames, notes..." value="${escapeHtmlAttr(state.search)}" />
+      </label>
+      <div class="vs-library-meta">
+        <span class="vs-mini-chip">Visual bank</span>
+        <span class="vs-mini-chip">Drag to place</span>
+        <span class="vs-mini-chip">Layer freely</span>
+      </div>
+      <div class="vs-library">
+        <div class="vs-library-head">
+          <div class="vs-library-title">${escapeHtml(category.label)} Bank</div>
+          <div class="vs-library-caption">Built for real composition, not toy decoration.</div>
+        </div>
+        <div class="vs-library-grid" id="vs-library-grid">${renderLibraryGrid()}</div>
+      </div>
+    `;
+  }
+
   function zoomLabel() {
     return Math.round((state.board.zoom || DEFAULT_ZOOM) * 100) + '%';
   }
@@ -1259,7 +1289,7 @@
 
   function renderCategoryButtons() {
     return CATEGORY_DEFS.map(category => `
-      <button class="vs-category-btn${category.id === state.activeCategory ? ' is-active' : ''}" type="button" data-category="${escapeHtmlAttr(category.id)}" title="${escapeHtmlAttr(category.label)}">
+      <button class="vs-category-btn${category.id === state.activeCategory ? ' is-active' : ''}" type="button" data-category="${escapeHtmlAttr(category.id)}" title="${escapeHtmlAttr(category.label)}" aria-pressed="${category.id === state.activeCategory ? 'true' : 'false'}">
         <span class="vs-category-icon">${iconSvg(category.icon)}</span>
         <span class="vs-category-text">
           <span class="vs-category-label">${escapeHtml(category.label)}</span>
@@ -1415,7 +1445,6 @@
   }
 
   function boardShell() {
-    const category = currentCategory();
     const libraryLabel = state.board.libraryCollapsed ? 'Open Library' : 'Hide Library';
     const inspectorLabel = state.board.inspectorCollapsed ? 'Open Inspector' : 'Hide Inspector';
     const focusLabel = state.board.focusMode ? 'Exit Focus' : 'Focus Preview';
@@ -1449,32 +1478,7 @@
           <aside class="vs-rail">
             <div class="vs-rail-stack" id="vs-category-grid">${renderCategoryButtons()}</div>
           </aside>
-          <aside class="vs-library-pane">
-            <div class="vs-library-pane-head">
-              <div>
-                <div class="vs-kicker">Studio Library</div>
-                <h2 class="vs-title">${escapeHtml(category.label)}</h2>
-                <p class="vs-subtitle">${escapeHtml(category.copy)}. Curate first, then place with intention.</p>
-              </div>
-              <div class="vs-pane-badge">${state.items.length} module${state.items.length === 1 ? '' : 's'}</div>
-            </div>
-            <label class="vs-search">
-              <span class="vs-search-icon" aria-hidden="true"></span>
-              <input id="vs-search" type="text" placeholder="Search textures, frames, notes..." value="${escapeHtmlAttr(state.search)}" />
-            </label>
-            <div class="vs-library-meta">
-              <span class="vs-mini-chip">Visual bank</span>
-              <span class="vs-mini-chip">Drag to place</span>
-              <span class="vs-mini-chip">Layer freely</span>
-            </div>
-            <div class="vs-library">
-              <div class="vs-library-head">
-                <div class="vs-library-title">${escapeHtml(category.label)} Bank</div>
-                <div class="vs-library-caption">Built for real composition, not toy decoration.</div>
-              </div>
-              <div class="vs-library-grid" id="vs-library-grid">${renderLibraryGrid()}</div>
-            </div>
-          </aside>
+          <aside class="vs-library-pane" id="vs-library-pane">${renderLibraryPane()}</aside>
           <div class="vs-stage-shell">
             <div class="vs-stage-topbar">
               <div class="vs-stage-pill">Canvas Studio</div>
@@ -1563,7 +1567,7 @@
   function itemToolbar(item, label) {
     return `
       <div class="vs-item-toolbar">
-        <div class="vs-item-badge">${escapeHtml(label)}${item.locked ? ' • Locked' : ''}</div>
+        <div class="vs-item-badge">${escapeHtml(label)}${item.locked ? ' / Locked' : ''}</div>
         <div class="vs-item-actions">
           <button class="vs-icon-btn vs-drag-handle" type="button" data-drag-handle="${escapeHtmlAttr(item.id)}" aria-label="Move module" title="Move module">${actionSvg('grip')}</button>
           <button class="vs-icon-btn" type="button" data-layer-up="${escapeHtmlAttr(item.id)}" aria-label="Bring module forward" title="Bring forward">${actionSvg('up')}</button>
@@ -1717,8 +1721,8 @@
       <div class="vs-item-shell vs-module-note">
         ${itemToolbar(item, 'Note')}
         <div class="vs-content">
-          <div class="vs-note-surface${item.variant === 'glass-note' ? ' is-glass' : item.variant === 'cream-note' ? ' is-cream' : ''}">
-            <div class="vs-note-title">${item.variant === 'glass-note' ? 'Direction' : 'Notes'}</div>
+          <div class="vs-note-surface${item.variant === 'glass-note' ? ' is-glass' : (item.variant === 'cream-note' || item.variant === 'note-card') ? ' is-cream' : ''}">
+            <div class="vs-note-title">${item.variant === 'glass-note' ? 'Direction' : item.variant === 'note-card' ? 'Note Card' : 'Notes'}</div>
             <div class="vs-editable vs-note-body" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="body" data-placeholder="Write something real, useful, or motivating.">${escapeHtml(item.body || '')}</div>
           </div>
         </div>
@@ -2004,6 +2008,7 @@
   function cacheRefs() {
     state.refs = {
       categoryGrid: state.root.querySelector('#vs-category-grid'),
+      libraryPane: state.root.querySelector('#vs-library-pane'),
       libraryGrid: state.root.querySelector('#vs-library-grid'),
       search: state.root.querySelector('#vs-search'),
       upload: state.root.querySelector('#vs-upload-input'),
@@ -2028,9 +2033,15 @@
   }
 
   function updateLibraryUi() {
-    if (!state.refs.libraryGrid) return;
-    state.refs.libraryGrid.className = 'vs-library-grid is-' + state.activeCategory;
-    state.refs.libraryGrid.innerHTML = renderLibraryGrid();
+    if (!state.refs.libraryPane) return;
+    state.refs.libraryPane.innerHTML = renderLibraryPane();
+    state.refs.libraryGrid = state.root.querySelector('#vs-library-grid');
+    state.refs.search = state.root.querySelector('#vs-search');
+    state.refs.paneBadge = state.root.querySelector('.vs-pane-badge');
+    if (state.refs.libraryGrid) {
+      state.refs.libraryGrid.className = 'vs-library-grid is-' + state.activeCategory;
+      state.refs.libraryGrid.scrollTop = 0;
+    }
   }
 
   function restoreScroll() {
@@ -2378,9 +2389,12 @@
 
     const categoryBtn = event.target.closest('[data-category]');
     if (categoryBtn) {
-      state.activeCategory = categoryBtn.dataset.category;
+      const nextCategory = categoryBtn.dataset.category;
+      const changed = nextCategory !== state.activeCategory;
+      state.activeCategory = nextCategory;
       state.board.activeCategory = state.activeCategory;
       state.board.libraryCollapsed = false;
+      if (changed) state.search = '';
       updateCategoryUi();
       updateLibraryUi();
       syncEditorLayoutState();
