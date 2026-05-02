@@ -164,7 +164,7 @@
     root: null,
     mounted: false,
     initialized: false,
-    activeCategory: 'elements',
+    activeCategory: 'photos',
     search: '',
     snapEnabled: true,
     selectedId: null,
@@ -259,20 +259,30 @@
         scrollLeft: DEFAULT_SCROLL.left,
         scrollTop: DEFAULT_SCROLL.top,
         zoom: DEFAULT_ZOOM,
-        title: DEFAULT_TITLE
+        title: DEFAULT_TITLE,
+        activeCategory: 'photos',
+        libraryCollapsed: false,
+        inspectorCollapsed: true
       },
       items: []
     };
   }
 
   function normalizeBoard(board) {
+    const requestedCategory = String(board?.activeCategory || '').trim();
+    const knownCategory = CATEGORY_DEFS.some((entry) => entry.id === requestedCategory)
+      ? requestedCategory
+      : 'photos';
     return {
       width: BOARD_WIDTH,
       height: BOARD_HEIGHT,
       scrollLeft: clamp(toNumber(board?.scrollLeft, DEFAULT_SCROLL.left), 0, BOARD_WIDTH),
       scrollTop: clamp(toNumber(board?.scrollTop, DEFAULT_SCROLL.top), 0, BOARD_HEIGHT),
       zoom: clamp(toNumber(board?.zoom, DEFAULT_ZOOM), MIN_ZOOM, MAX_ZOOM),
-      title: typeof board?.title === 'string' && board.title.trim() ? board.title.trim() : DEFAULT_TITLE
+      title: typeof board?.title === 'string' && board.title.trim() ? board.title.trim() : DEFAULT_TITLE,
+      activeCategory: knownCategory,
+      libraryCollapsed: board?.libraryCollapsed === true,
+      inspectorCollapsed: board?.inspectorCollapsed !== false
     };
   }
 
@@ -510,6 +520,7 @@
     if (state.items.length && !window.confirm('Replace the current board with this starter composition?')) return;
     state.items = incoming;
     state.selectedId = incoming[0]?.id || null;
+    state.board.inspectorCollapsed = !state.selectedId;
     state.board.scrollLeft = DEFAULT_SCROLL.left;
     state.board.scrollTop = DEFAULT_SCROLL.top;
     renderBoard();
@@ -526,8 +537,8 @@
         <div class="vs-inspector-scroll">
           <section class="vs-inspector-section">
             <div class="vs-kicker">Studio</div>
-            <h3 class="vs-inspector-title">Board overview</h3>
-            <p class="vs-inspector-copy">This studio is meant to feel spacious, visual, and useful. Start blank or load a starter composition and make it yours quickly.</p>
+            <h3 class="vs-inspector-title">Keep the canvas in charge.</h3>
+            <p class="vs-inspector-copy">Pull from the library, layer freely across the artboard, and use the inspector only when you want precise control.</p>
             <div class="vs-inspector-stats">
               <div class="vs-inspector-stat">
                 <span class="vs-inspector-stat-label">Modules</span>
@@ -542,23 +553,23 @@
                 <strong>${counts.goals}</strong>
               </div>
               <div class="vs-inspector-stat">
-                <span class="vs-inspector-stat-label">Words</span>
-                <strong>${counts.words}</strong>
+                <span class="vs-inspector-stat-label">Planners</span>
+                <strong>${counts.calendar + counts.habits}</strong>
               </div>
             </div>
           </section>
           <section class="vs-inspector-section">
-            <div class="vs-kicker">Start here</div>
-            <h3 class="vs-inspector-title">Starter compositions</h3>
-            <p class="vs-inspector-copy">Use structure without inheriting fake content. Each layout gives you a cleaner editorial starting point.</p>
+            <div class="vs-kicker">Compositions</div>
+            <h3 class="vs-inspector-title">Start with shape, not filler.</h3>
+            <p class="vs-inspector-copy">Each starter sets the board rhythm first, then leaves the meaning to you.</p>
             ${renderTemplateCards()}
           </section>
           <section class="vs-inspector-section">
-            <div class="vs-kicker">Controls</div>
+            <div class="vs-kicker">Session</div>
             <div class="vs-inspector-chip-row">
               <span class="vs-inspector-chip">${zoomLabel()} zoom</span>
               <span class="vs-inspector-chip">${state.snapEnabled ? 'Snap enabled' : 'Free placement'}</span>
-              <span class="vs-inspector-chip">${counts.calendar} planner block${counts.calendar === 1 ? '' : 's'}</span>
+              <span class="vs-inspector-chip">${counts.words} text layer${counts.words === 1 ? '' : 's'}</span>
             </div>
           </section>
         </div>
@@ -880,7 +891,10 @@
         scrollLeft: state.board.scrollLeft,
         scrollTop: state.board.scrollTop,
         zoom: state.board.zoom,
-        title: state.board.title
+        title: state.board.title,
+        activeCategory: state.activeCategory,
+        libraryCollapsed: !!state.board.libraryCollapsed,
+        inspectorCollapsed: !!state.board.inspectorCollapsed
       },
       items: state.items.map(item => JSON.parse(JSON.stringify(item)))
     };
@@ -1022,9 +1036,10 @@
       return '<div class="vs-empty-copy">No modules match this search yet.</div>';
     }
     return items.map(item => `
-      <button class="vs-library-card" type="button" draggable="true" data-library-id="${escapeHtmlAttr(item.id)}">
+      <button class="vs-library-card${item.category === 'photos' ? ' is-photo' : ' is-module'}" type="button" draggable="true" data-library-id="${escapeHtmlAttr(item.id)}">
         ${renderLibraryPreview(item)}
         <span class="vs-library-body">
+          <span class="vs-library-overline">${escapeHtml(item.category.replace('-', ' '))}</span>
           <span class="vs-library-label">${escapeHtml(item.title)}</span>
           <span class="vs-library-copy">${escapeHtml(item.copy)}</span>
         </span>
@@ -1034,6 +1049,8 @@
 
   function boardShell() {
     const category = currentCategory();
+    const libraryLabel = state.board.libraryCollapsed ? 'Open Library' : 'Hide Library';
+    const inspectorLabel = state.board.inspectorCollapsed ? 'Open Inspector' : 'Hide Inspector';
     return `
       <section class="vs-editor">
         <header class="vs-appbar">
@@ -1046,12 +1063,13 @@
           </div>
           <div class="vs-appbar-center">
             <input id="vs-board-title" class="vs-board-title-input" type="text" value="${escapeHtmlAttr(state.board.title || DEFAULT_TITLE)}" placeholder="Untitled vision board" />
-            <div class="vs-board-title-sub">Auto-saved creative workspace for goals, imagery, planning, and direction.</div>
+            <div class="vs-board-title-sub">Layer imagery, planning, and direction into one living board.</div>
           </div>
           <div class="vs-appbar-actions">
-            <button class="vs-top-btn" type="button" data-action="quick-headline">Text</button>
+            <button class="vs-top-btn" type="button" data-action="toggle-library">${libraryLabel}</button>
+            <button class="vs-top-btn" type="button" data-action="toggle-inspector">${inspectorLabel}</button>
+            <button class="vs-top-btn" type="button" data-action="quick-headline">Headline</button>
             <button class="vs-top-btn" type="button" data-action="quick-goal">Goal</button>
-            <button class="vs-top-btn" type="button" data-action="quick-affirmation">Affirm</button>
             <button class="vs-top-btn primary" type="button" data-action="upload-board-photo">Upload</button>
             <button class="vs-top-btn" type="button" data-action="toggle-snap">${state.snapEnabled ? 'Snap On' : 'Snap Off'}</button>
             <input id="vs-upload-input" type="file" accept="image/*" multiple hidden />
@@ -1066,7 +1084,7 @@
               <div>
                 <div class="vs-kicker">Library</div>
                 <h2 class="vs-title">${escapeHtml(category.label)}</h2>
-                <p class="vs-subtitle">${escapeHtml(category.copy)}. Drag pieces onto the artboard or click to drop them in without breaking your flow.</p>
+                <p class="vs-subtitle">${escapeHtml(category.copy)}. Click to drop, or drag into the exact area you want to build around.</p>
               </div>
               <div class="vs-pane-badge">${state.items.length} module${state.items.length === 1 ? '' : 's'}</div>
             </div>
@@ -1075,28 +1093,37 @@
               <input id="vs-search" type="text" placeholder="Search elements, photos, text..." value="${escapeHtmlAttr(state.search)}" />
             </label>
             <div class="vs-library-meta">
-              <span class="vs-mini-chip">Click to add</span>
+              <span class="vs-mini-chip">Visual bank</span>
               <span class="vs-mini-chip">Drag to place</span>
-              <span class="vs-mini-chip">Resize on board</span>
+              <span class="vs-mini-chip">Resize live</span>
             </div>
             <div class="vs-library">
               <div class="vs-library-head">
                 <div class="vs-library-title">${escapeHtml(category.label)} Bank</div>
-                <div class="vs-library-caption">A more art-directed set of pieces for real composition work.</div>
+                <div class="vs-library-caption">Built for real composition, not demo filler.</div>
               </div>
               <div class="vs-library-grid" id="vs-library-grid">${renderLibraryGrid()}</div>
             </div>
           </aside>
           <div class="vs-stage-shell">
             <div class="vs-stage-topbar">
-              <div class="vs-stage-pill">Studio mode</div>
-              <div class="vs-stage-copy">Compose freely across the board, then use the inspector for cleaner control over the selected module.</div>
+              <div class="vs-stage-pill">Canvas mode</div>
+              <div class="vs-stage-copy">Move fast on the board, then tune selected modules only when you need precision.</div>
               <div class="vs-stage-actions">
+                <button class="vs-stage-btn" type="button" data-action="quick-headline">Add Text</button>
+                <button class="vs-stage-btn" type="button" data-action="quick-goal">Add Goal</button>
+                <button class="vs-stage-btn" type="button" data-action="quick-affirmation">Add Card</button>
                 <button class="vs-stage-btn" type="button" data-action="reset-view">Reset View</button>
                 <button class="vs-stage-btn danger" type="button" data-action="clear-board">Clear Board</button>
               </div>
             </div>
             <div class="vs-stage">
+              <div class="vs-stage-quickdock">
+                <button class="vs-quickdock-btn" type="button" data-action="upload-board-photo">Photo</button>
+                <button class="vs-quickdock-btn" type="button" data-action="quick-headline">Text</button>
+                <button class="vs-quickdock-btn" type="button" data-action="quick-goal">Goal</button>
+                <button class="vs-quickdock-btn" type="button" data-action="quick-affirmation">Affirm</button>
+              </div>
               <div class="vs-viewport-shell">
                 <div class="vs-viewport" id="vs-viewport">
                   <div class="vs-board-scale" id="vs-board-scale">
@@ -1108,7 +1135,7 @@
             <div class="vs-stage-footer">
               <div class="vs-stage-footer-copy">
                 <strong>${escapeHtml(state.board.title || DEFAULT_TITLE)}</strong>
-                <span>Use the grip to move modules so scrolling stays smooth.</span>
+                <span>Drag with the grip, overlap freely, and let the canvas stay in charge.</span>
               </div>
               <div class="vs-zoom-wrap">
                 <button class="vs-zoom-btn" type="button" data-action="zoom-out">-</button>
@@ -1448,6 +1475,17 @@
     updateChrome();
   }
 
+  function syncEditorLayoutState() {
+    if (!state.root) return;
+    state.root.dataset.libraryCollapsed = state.board.libraryCollapsed ? 'true' : 'false';
+    state.root.dataset.inspectorCollapsed = state.board.inspectorCollapsed ? 'true' : 'false';
+    state.root.dataset.hasSelection = state.selectedId ? 'true' : 'false';
+    const libraryToggle = state.root.querySelector('[data-action="toggle-library"]');
+    const inspectorToggle = state.root.querySelector('[data-action="toggle-inspector"]');
+    if (libraryToggle) libraryToggle.textContent = state.board.libraryCollapsed ? 'Open Library' : 'Hide Library';
+    if (inspectorToggle) inspectorToggle.textContent = state.board.inspectorCollapsed ? 'Open Inspector' : 'Hide Inspector';
+  }
+
   function fitZoomValue() {
     const viewport = state.refs.viewport;
     if (!viewport) return DEFAULT_ZOOM;
@@ -1478,6 +1516,7 @@
       state.refs.paneBadge.textContent = state.items.length + ' module' + (state.items.length === 1 ? '' : 's');
     }
     if (state.refs.footerTitle) state.refs.footerTitle.textContent = state.board.title || DEFAULT_TITLE;
+    syncEditorLayoutState();
     renderInspector();
   }
 
@@ -1542,6 +1581,7 @@
 
   function updateLibraryUi() {
     if (!state.refs.libraryGrid) return;
+    state.refs.libraryGrid.className = 'vs-library-grid is-' + state.activeCategory;
     state.refs.libraryGrid.innerHTML = renderLibraryGrid();
   }
 
@@ -1577,6 +1617,7 @@
     state.items.push(item);
     bringToFront(item.id);
     state.selectedId = item.id;
+    state.board.inspectorCollapsed = false;
     renderBoard();
     queueSave();
   }
@@ -1821,8 +1862,12 @@
     const categoryBtn = event.target.closest('[data-category]');
     if (categoryBtn) {
       state.activeCategory = categoryBtn.dataset.category;
+      state.board.activeCategory = state.activeCategory;
+      state.board.libraryCollapsed = false;
       updateCategoryUi();
       updateLibraryUi();
+      syncEditorLayoutState();
+      queueSave();
       return;
     }
 
@@ -1839,6 +1884,16 @@
         case 'upload-board-photo':
           state.pendingUploadTarget = null;
           openUpload();
+          return;
+        case 'toggle-library':
+          state.board.libraryCollapsed = !state.board.libraryCollapsed;
+          syncEditorLayoutState();
+          queueSave();
+          return;
+        case 'toggle-inspector':
+          state.board.inspectorCollapsed = !state.board.inspectorCollapsed;
+          syncEditorLayoutState();
+          queueSave();
           return;
         case 'starter-editorial':
           applyStarterLayout('editorial');
@@ -1968,6 +2023,7 @@
 
     const itemNode = event.target.closest('.vs-item');
     state.selectedId = itemNode ? itemNode.dataset.itemId : null;
+    if (state.selectedId) state.board.inspectorCollapsed = false;
     renderBoard();
   }
 
@@ -2237,6 +2293,7 @@
     state.root = root;
     const incoming = readState();
     state.board = normalizeBoard(incoming.board);
+    state.activeCategory = state.board.activeCategory || 'photos';
     state.items = incoming.items || [];
     rerenderShell();
     state.mounted = true;
