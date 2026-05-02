@@ -308,10 +308,10 @@
         scrollTop: DEFAULT_SCROLL.top,
         zoom: DEFAULT_ZOOM,
         title: DEFAULT_TITLE,
-        activeCategory: 'uploads',
-        background: 'gallery-ivory',
+        activeCategory: 'photos',
+        background: 'linen-stone',
         libraryCollapsed: false,
-        inspectorCollapsed: true,
+        inspectorCollapsed: false,
         focusMode: false
       },
       items: []
@@ -331,9 +331,9 @@
       zoom: clamp(toNumber(board?.zoom, DEFAULT_ZOOM), MIN_ZOOM, MAX_ZOOM),
       title: typeof board?.title === 'string' && board.title.trim() ? board.title.trim() : DEFAULT_TITLE,
       activeCategory: knownCategory,
-      background: BACKGROUND_PRESETS.some((entry) => entry.id === board?.background) ? board.background : 'gallery-ivory',
+      background: BACKGROUND_PRESETS.some((entry) => entry.id === board?.background) ? board.background : 'linen-stone',
       libraryCollapsed: board?.libraryCollapsed === true,
-      inspectorCollapsed: board?.inspectorCollapsed !== false,
+      inspectorCollapsed: false,
       focusMode: board?.focusMode === true
     };
   }
@@ -1479,22 +1479,16 @@
             <div class="vs-stage-topbar">
               <div class="vs-stage-pill">Canvas Studio</div>
               <div class="vs-stage-copy">Start with a photo, a label, a paper object, or a feeling. Let the composition come together in layers.</div>
-              <div class="vs-stage-actions">
-                <button class="vs-stage-btn" type="button" data-action="quick-headline">Add Text</button>
-                <button class="vs-stage-btn" type="button" data-action="quick-note">Add Note</button>
-                <button class="vs-stage-btn" type="button" data-action="quick-goal">Add Goal</button>
-                <button class="vs-stage-btn" type="button" data-action="quick-frame">Add Frame</button>
-                <button class="vs-stage-btn" type="button" data-action="reset-view">Reset View</button>
-                <button class="vs-stage-btn danger" type="button" data-action="clear-board">Clear Board</button>
-              </div>
+              <button class="vs-stage-btn" type="button" data-action="reset-view">Reset View</button>
             </div>
             <div class="vs-stage">
               <div class="vs-stage-quickdock">
                 <button class="vs-quickdock-btn" type="button" data-action="upload-board-photo">Add Image</button>
                 <button class="vs-quickdock-btn" type="button" data-action="quick-headline">Add Text</button>
                 <button class="vs-quickdock-btn" type="button" data-action="quick-note">Add Note</button>
+                <button class="vs-quickdock-btn" type="button" data-action="quick-frame">Add Frame</button>
                 <button class="vs-quickdock-btn" type="button" data-action="quick-goal">Add Goal</button>
-                <button class="vs-quickdock-btn" type="button" data-action="quick-affirmation">Add Card</button>
+                <button class="vs-quickdock-btn" type="button" data-action="quick-affirmation">Add Quote</button>
               </div>
               <div class="vs-viewport-shell">
                 <div class="vs-viewport" id="vs-viewport">
@@ -2043,7 +2037,39 @@
     if (!state.refs.viewport) return;
     state.refs.viewport.scrollLeft = state.board.scrollLeft;
     state.refs.viewport.scrollTop = state.board.scrollTop;
+    ensureVisibleBoardContent();
     updateChrome();
+  }
+
+  function ensureVisibleBoardContent() {
+    const viewport = state.refs.viewport;
+    if (!viewport || !state.items.length) return;
+    const zoom = state.board.zoom || DEFAULT_ZOOM;
+    const left = viewport.scrollLeft / zoom;
+    const top = viewport.scrollTop / zoom;
+    const right = left + (viewport.clientWidth / zoom);
+    const bottom = top + (viewport.clientHeight / zoom);
+    const hasVisibleItem = state.items.some((item) => {
+      const itemRight = item.x + item.w;
+      const itemBottom = item.y + item.h;
+      return itemRight >= left && item.x <= right && itemBottom >= top && item.y <= bottom;
+    });
+    if (hasVisibleItem) return;
+
+    const bounds = state.items.reduce((acc, item) => {
+      acc.left = Math.min(acc.left, item.x);
+      acc.top = Math.min(acc.top, item.y);
+      acc.right = Math.max(acc.right, item.x + item.w);
+      acc.bottom = Math.max(acc.bottom, item.y + item.h);
+      return acc;
+    }, { left: Infinity, top: Infinity, right: 0, bottom: 0 });
+
+    if (!Number.isFinite(bounds.left) || !Number.isFinite(bounds.top)) return;
+    const targetX = Math.max(0, Math.round((((bounds.left + bounds.right) / 2) * zoom) - (viewport.clientWidth / 2)));
+    const targetY = Math.max(0, Math.round((((bounds.top + bounds.bottom) / 2) * zoom) - (viewport.clientHeight / 2)));
+    viewport.scrollLeft = targetX;
+    viewport.scrollTop = targetY;
+    syncScrollPosition();
   }
 
   function bringToFront(itemId) {
@@ -2854,8 +2880,8 @@
   document.addEventListener('pcc:pagecontentloaded', function (event) {
     if (event?.detail?.pageId === 'vision') mount();
   });
-  document.addEventListener('pcc:pagechange', function (event) {
-    if (event?.detail?.targetId === 'vision') mount();
+  window.addEventListener('pcc:pagechange', function (event) {
+    if (event?.detail?.pageId === 'vision') mount();
   });
   if (document.readyState !== 'loading') {
     setTimeout(mount, 180);

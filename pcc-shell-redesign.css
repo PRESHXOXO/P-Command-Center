@@ -299,7 +299,59 @@ body{
 
   #page-vision.page{
     max-width:none;
-    padding:8.9rem 0 0;
+    padding:6.7rem 0 0;
+  }
+}
+
+@media (min-width:1081px){
+  html[data-active-page="vision"] .nav{
+    padding:.56rem .76rem .62rem;
+    border-radius:1.42rem;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.74), rgba(255,255,255,0.52)),
+      radial-gradient(circle at top right, rgba(var(--teal-rgb),0.08), transparent 44%);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+  }
+
+  html[data-active-page="vision"] .nav-top-row{
+    gap:.68rem;
+  }
+
+  html[data-active-page="vision"] .nav-brand{
+    font-size:1.05rem;
+  }
+
+  html[data-active-page="vision"] .theme-toggle{
+    min-width:6.4rem;
+    padding:.44rem .62rem;
+  }
+
+  html[data-active-page="vision"] .nav-month-ctrl{
+    padding:.34rem .38rem;
+    grid-template-columns:1.74rem minmax(4.9rem, auto) 1.74rem;
+  }
+
+  html[data-active-page="vision"] .nav-month-btn,
+  html[data-active-page="vision"] .nav-settings-btn,
+  html[data-active-page="vision"] .nav-logout-btn{
+    min-height:1.92rem;
+    width:1.92rem;
+    height:1.92rem;
+  }
+
+  html[data-active-page="vision"] .nav-tabs-wrap{
+    padding-top:.08rem;
+  }
+
+  html[data-active-page="vision"] .nav-tabs{
+    gap:.22rem;
+    padding:.1rem 0 0;
+  }
+
+  html[data-active-page="vision"] .nav-tab{
+    padding:.54rem .78rem;
+    font-size:.6rem;
   }
 }
 

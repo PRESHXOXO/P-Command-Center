@@ -7156,6 +7156,7 @@ function applyRoleBasedNavigation() {
 
 function emitPageChange(pageId, page, trigger) {
   try {
+    document.documentElement.setAttribute('data-active-page', String(pageId || ''));
     const detail = { pageId, page: page || null, trigger: trigger || null };
     const evt = new CustomEvent('pcc:pagechange', { detail });
     window.dispatchEvent(evt);
