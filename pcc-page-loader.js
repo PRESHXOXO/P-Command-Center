@@ -70,6 +70,7 @@
     const page = getPageNode(pageId);
     if (!page) return page;
     page.dataset.pageLoaded = 'false';
+    page.dataset.pageAssetsLoaded = 'false';
     page.setAttribute('aria-busy', 'true');
     page.classList.add('page-shell-loading');
     return page;
@@ -160,6 +161,7 @@
   function markPageLoaded(pageId, page, html) {
     page.innerHTML = html;
     page.dataset.pageLoaded = 'true';
+    page.dataset.pageAssetsLoaded = 'false';
     page.removeAttribute('aria-busy');
     page.classList.remove('page-shell-loading');
     document.dispatchEvent(new CustomEvent('pcc:pagecontentloaded', {
@@ -195,6 +197,7 @@
     try {
       const page = await ensurePageMarkup(pageId);
       await ensurePageAssets(pageId);
+      page.dataset.pageAssetsLoaded = 'true';
       if (pageId === 'vision' && window.VisionStudio && typeof window.VisionStudio.mount === 'function') {
         window.VisionStudio.mount();
       }

@@ -7202,7 +7202,7 @@ function showPage(id, btn) {
   if (
     page &&
     page.dataset.pageLazy === 'true' &&
-    page.dataset.pageLoaded !== 'true' &&
+    (page.dataset.pageLoaded !== 'true' || page.dataset.pageAssetsLoaded !== 'true') &&
     typeof window.ensurePageReady === 'function'
   ) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));

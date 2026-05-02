@@ -25,7 +25,7 @@
     if (
       page &&
       page.dataset.pageLazy === 'true' &&
-      page.dataset.pageLoaded !== 'true' &&
+      (page.dataset.pageLoaded !== 'true' || page.dataset.pageAssetsLoaded !== 'true') &&
       typeof window.ensurePageReady === 'function'
     ) {
       try {
