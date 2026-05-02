@@ -5088,10 +5088,26 @@ let runtimeConfigPromise = null;
 
 function applyRuntimeConfig(partial = {}) {
   if (!partial || typeof partial !== 'object') return;
+  const normalized = {};
+  Object.entries(partial).forEach(([key, value]) => {
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) return;
+      normalized[key] = trimmed;
+      return;
+    }
+    if (Array.isArray(value)) {
+      if (!value.length) return;
+      normalized[key] = value;
+      return;
+    }
+    if (value == null) return;
+    normalized[key] = value;
+  });
   if (typeof window !== 'undefined') {
-    window.__PCC_CONFIG__ = Object.assign(window.__PCC_CONFIG__ || {}, partial);
+    window.__PCC_CONFIG__ = Object.assign(window.__PCC_CONFIG__ || {}, normalized);
   }
-  Object.assign(PCC_RUNTIME_CONFIG, partial);
+  Object.assign(PCC_RUNTIME_CONFIG, normalized);
   SUPABASE_URL = PCC_RUNTIME_ENV.SUPABASE_URL
     || PCC_RUNTIME_CONFIG.SUPABASE_URL
     || '';
