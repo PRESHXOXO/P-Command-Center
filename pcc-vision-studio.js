@@ -2055,6 +2055,10 @@
   function ensureVisibleBoardContent() {
     const viewport = state.refs.viewport;
     if (!viewport || !state.items.length) return;
+    if (state.selectedId) {
+      revealItemInViewport(state.selectedId, { ifNeeded: true, padding: 60 });
+      return;
+    }
     const zoom = state.board.zoom || DEFAULT_ZOOM;
     const left = viewport.scrollLeft / zoom;
     const top = viewport.scrollTop / zoom;
@@ -2110,6 +2114,7 @@
     state.selectedId = item.id;
     state.board.inspectorCollapsed = false;
     renderBoard();
+    revealItemInViewport(item.id);
     queueSave();
   }
 
@@ -2131,6 +2136,7 @@
     state.items.push(clone);
     state.selectedId = clone.id;
     renderBoard();
+    revealItemInViewport(clone.id);
     queueSave();
   }
 
@@ -2140,6 +2146,7 @@
     item.x = round((BOARD_WIDTH - item.w) / 2);
     item.y = round((BOARD_HEIGHT - item.h) / 2);
     renderBoard();
+    revealItemInViewport(item.id);
     queueSave();
   }
 
@@ -2168,6 +2175,32 @@
     if (!state.refs.viewport) return;
     state.board.scrollLeft = state.refs.viewport.scrollLeft;
     state.board.scrollTop = state.refs.viewport.scrollTop;
+  }
+
+  function revealItemInViewport(itemId, options) {
+    const viewport = state.refs.viewport;
+    const item = state.items.find(entry => entry.id === itemId);
+    if (!viewport || !item) return;
+    const zoom = state.board.zoom || DEFAULT_ZOOM;
+    const viewportLeft = viewport.scrollLeft / zoom;
+    const viewportTop = viewport.scrollTop / zoom;
+    const viewportRight = viewportLeft + (viewport.clientWidth / zoom);
+    const viewportBottom = viewportTop + (viewport.clientHeight / zoom);
+    const itemLeft = item.x;
+    const itemTop = item.y;
+    const itemRight = item.x + item.w;
+    const itemBottom = item.y + item.h;
+    const padding = options?.padding ?? 90;
+    const alreadyVisible = itemLeft >= (viewportLeft + 20)
+      && itemTop >= (viewportTop + 20)
+      && itemRight <= (viewportRight - 20)
+      && itemBottom <= (viewportBottom - 20);
+    if (options?.ifNeeded && alreadyVisible) return;
+    const targetLeft = Math.max(0, ((itemLeft + itemRight) / 2) - ((viewport.clientWidth / zoom) / 2));
+    const targetTop = Math.max(0, ((itemTop + itemBottom) / 2) - ((viewport.clientHeight / zoom) / 2));
+    viewport.scrollLeft = Math.max(0, Math.round((targetLeft - padding) * zoom));
+    viewport.scrollTop = Math.max(0, Math.round((targetTop - padding) * zoom));
+    syncScrollPosition();
   }
 
   function axisSnap(proposals, size, currentStart, kind, activeId) {
@@ -2574,6 +2607,7 @@
     state.selectedId = itemNode ? itemNode.dataset.itemId : null;
     if (state.selectedId) state.board.inspectorCollapsed = false;
     renderBoard();
+    if (state.selectedId) revealItemInViewport(state.selectedId, { ifNeeded: true, padding: 60 });
   }
 
   function handleRootInput(event) {
