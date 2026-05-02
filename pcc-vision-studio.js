@@ -16,16 +16,16 @@
   const DEFAULT_TITLE = "P's Vision Studio";
 
   const CATEGORY_DEFS = [
-    { id: 'elements', label: 'Elements', copy: 'Panels, washes, dividers', icon: 'grid' },
-    { id: 'text', label: 'Text', copy: 'Headlines and notes', icon: 'type' },
-    { id: 'photos', label: 'Photos', copy: 'Free licensed imagery', icon: 'photo' },
-    { id: 'frames', label: 'Frames', copy: 'Drag in stylish frames', icon: 'frame' },
-    { id: 'stickers', label: 'Stickers / Icons', copy: 'Elegant decorative marks', icon: 'spark' },
-    { id: 'goal-blocks', label: 'Goal Blocks', copy: 'Milestones and priorities', icon: 'target' },
-    { id: 'habit-trackers', label: 'Habit Trackers', copy: 'Weekly rhythm widgets', icon: 'habit' },
-    { id: 'calendar-widgets', label: 'Calendar Widgets', copy: 'Planning views', icon: 'calendar' },
-    { id: 'affirmation-cards', label: 'Affirmation Cards', copy: 'Words with presence', icon: 'quote' },
-    { id: 'mood-accents', label: 'Mood Accents', copy: 'Soft glows and florals', icon: 'flower' }
+    { id: 'uploads', label: 'Uploads', copy: 'Your own screenshots, reference images, and saved board media', icon: 'upload' },
+    { id: 'photos', label: 'Photos', copy: 'Free licensed imagery for atmosphere, destination, and lifestyle direction', icon: 'photo' },
+    { id: 'frames', label: 'Frames', copy: 'Editorial containers for photography, screenshots, and art direction', icon: 'frame' },
+    { id: 'textures', label: 'Textures', copy: 'Paper grain, marble, linen, silk, and dimensional surface layers', icon: 'texture' },
+    { id: 'paper', label: 'Paper', copy: 'Tape, torn edges, tags, cards, receipts, and analog composition pieces', icon: 'paper' },
+    { id: 'labels', label: 'Labels', copy: 'Captions, date stamps, arrows, highlights, and quiet guidance marks', icon: 'tag' },
+    { id: 'notes', label: 'Notes', copy: 'Direction cards, planning blocks, quotes, and reflective paper objects', icon: 'note' },
+    { id: 'typography', label: 'Typography', copy: 'Headlines, pull quotes, annotations, and editorial voice', icon: 'type' },
+    { id: 'templates', label: 'Templates', copy: 'Premium starter compositions for moodboards, goals, and visual worlds', icon: 'spark' },
+    { id: 'backgrounds', label: 'Backgrounds', copy: 'Board surfaces and spatial moods for how the composition should feel', icon: 'palette' }
   ];
 
   const PHOTO_BANK = [
@@ -34,6 +34,7 @@
       title: 'Soft Paper',
       copy: 'Bright texture layer',
       source: 'Pexels',
+      libraryCategory: 'textures',
       thumb: 'https://images.pexels.com/photos/5993568/pexels-photo-5993568.jpeg?auto=compress&cs=tinysrgb&w=520',
       src: 'https://images.pexels.com/photos/5993568/pexels-photo-5993568.jpeg?auto=compress&cs=tinysrgb&w=1400',
       width: 360,
@@ -44,6 +45,7 @@
       title: 'Paper Fibers',
       copy: 'Editorial grain',
       source: 'Pexels',
+      libraryCategory: 'textures',
       thumb: 'https://images.pexels.com/photos/5993559/pexels-photo-5993559.jpeg?auto=compress&cs=tinysrgb&w=520',
       src: 'https://images.pexels.com/photos/5993559/pexels-photo-5993559.jpeg?auto=compress&cs=tinysrgb&w=1400',
       width: 360,
@@ -54,6 +56,7 @@
       title: 'Blush Marble',
       copy: 'Luxury surface',
       source: 'Pexels',
+      libraryCategory: 'textures',
       thumb: 'https://images.pexels.com/photos/4709542/pexels-photo-4709542.jpeg?auto=compress&cs=tinysrgb&w=520',
       src: 'https://images.pexels.com/photos/4709542/pexels-photo-4709542.jpeg?auto=compress&cs=tinysrgb&w=1400',
       width: 380,
@@ -64,6 +67,7 @@
       title: 'Plant Shadow',
       copy: 'Quiet light play',
       source: 'Pexels',
+      libraryCategory: 'photos',
       thumb: 'https://images.pexels.com/photos/2821756/pexels-photo-2821756.jpeg?auto=compress&cs=tinysrgb&w=520',
       src: 'https://images.pexels.com/photos/2821756/pexels-photo-2821756.jpeg?auto=compress&cs=tinysrgb&w=1400',
       width: 420,
@@ -74,6 +78,7 @@
       title: 'Fuchsia Satin',
       copy: 'Rich movement',
       source: 'Pexels',
+      libraryCategory: 'textures',
       thumb: 'https://images.pexels.com/photos/6276018/pexels-photo-6276018.jpeg?auto=compress&cs=tinysrgb&w=520',
       src: 'https://images.pexels.com/photos/6276018/pexels-photo-6276018.jpeg?auto=compress&cs=tinysrgb&w=1400',
       width: 360,
@@ -84,6 +89,7 @@
       title: 'Rose Veil',
       copy: 'Soft draped fabric',
       source: 'Pexels',
+      libraryCategory: 'photos',
       thumb: 'https://images.pexels.com/photos/6571742/pexels-photo-6571742.jpeg?auto=compress&cs=tinysrgb&w=520',
       src: 'https://images.pexels.com/photos/6571742/pexels-photo-6571742.jpeg?auto=compress&cs=tinysrgb&w=1400',
       width: 360,
@@ -94,6 +100,7 @@
       title: 'Pink Clouds',
       copy: 'Dreamy sky',
       source: 'Pexels',
+      libraryCategory: 'photos',
       thumb: 'https://images.pexels.com/photos/30614902/pexels-photo-30614902.jpeg?auto=compress&cs=tinysrgb&w=520',
       src: 'https://images.pexels.com/photos/30614902/pexels-photo-30614902.jpeg?auto=compress&cs=tinysrgb&w=1400',
       width: 440,
@@ -104,6 +111,7 @@
       title: 'Twilight Clouds',
       copy: 'Moody gradient sky',
       source: 'Pexels',
+      libraryCategory: 'photos',
       thumb: 'https://images.pexels.com/photos/30505082/pexels-photo-30505082.jpeg?auto=compress&cs=tinysrgb&w=520',
       src: 'https://images.pexels.com/photos/30505082/pexels-photo-30505082.jpeg?auto=compress&cs=tinysrgb&w=1400',
       width: 440,
@@ -114,6 +122,7 @@
       title: 'Pink Swirl',
       copy: 'Abstract motion',
       source: 'Pexels',
+      libraryCategory: 'textures',
       thumb: 'https://images.pexels.com/photos/30903808/pexels-photo-30903808.jpeg?auto=compress&cs=tinysrgb&w=520',
       src: 'https://images.pexels.com/photos/30903808/pexels-photo-30903808.jpeg?auto=compress&cs=tinysrgb&w=1400',
       width: 360,
@@ -122,35 +131,61 @@
   ];
 
   const STATIC_LIBRARY = [
-    { id: 'glass-panel', category: 'elements', title: 'Glass Panel', copy: 'Floating panel layer', preview: 'glass-panel' },
-    { id: 'spotlight-wash', category: 'elements', title: 'Spotlight Wash', copy: 'Blue aura backdrop', preview: 'spotlight-wash' },
-    { id: 'soft-divider', category: 'elements', title: 'Soft Divider', copy: 'Spacing and structure', preview: 'soft-divider' },
-    { id: 'headline', category: 'text', title: 'Headline', copy: 'Large editorial statement', preview: 'headline' },
-    { id: 'note-card', category: 'text', title: 'Note Card', copy: 'Freeform thought block', preview: 'note-card' },
-    { id: 'micro-label', category: 'text', title: 'Micro Label', copy: 'Small uppercase caption', preview: 'micro-label' },
-    { id: 'arch-frame', category: 'frames', title: 'Arch Frame', copy: 'Elegant portrait frame', preview: 'arch-frame' },
-    { id: 'polaroid-frame', category: 'frames', title: 'Polaroid Frame', copy: 'Soft instant-photo feel', preview: 'polaroid-frame' },
-    { id: 'glass-frame', category: 'frames', title: 'Glass Frame', copy: 'Modern airy frame', preview: 'glass-frame' },
-    { id: 'butterfly', category: 'stickers', title: 'Butterfly', copy: 'Airy movement accent', preview: 'butterfly' },
-    { id: 'crown', category: 'stickers', title: 'Crown', copy: 'Luxury marker', preview: 'crown' },
-    { id: 'bow', category: 'stickers', title: 'Bow', copy: 'Soft feminine detail', preview: 'bow' },
-    { id: 'bloom', category: 'stickers', title: 'Bloom', copy: 'Petal cluster', preview: 'bloom' },
-    { id: 'goal-focus', category: 'goal-blocks', title: 'Goal Focus', copy: 'Priority with milestones', preview: 'goal-focus' },
-    { id: 'milestone-map', category: 'goal-blocks', title: 'Milestone Map', copy: 'Three-step plan block', preview: 'milestone-map' },
-    { id: 'weekly-habit', category: 'habit-trackers', title: 'Weekly Habit', copy: '7-day tracker', preview: 'weekly-habit' },
-    { id: 'streak-strip', category: 'habit-trackers', title: 'Streak Strip', copy: 'Compact routine marker', preview: 'streak-strip' },
-    { id: 'week-planner', category: 'calendar-widgets', title: 'Week Planner', copy: 'Seven-column planning view', preview: 'week-planner' },
-    { id: 'month-snapshot', category: 'calendar-widgets', title: 'Month Snapshot', copy: 'Mini monthly overview', preview: 'month-snapshot' },
-    { id: 'affirmation-card', category: 'affirmation-cards', title: 'Affirmation Card', copy: 'Bold reflective statement', preview: 'affirmation-card' },
-    { id: 'intention-card', category: 'affirmation-cards', title: 'Intention Card', copy: 'Grounding daily intention', preview: 'intention-card' },
-    { id: 'mood-aura', category: 'mood-accents', title: 'Mood Aura', copy: 'Glow layer behind modules', preview: 'mood-aura' },
-    { id: 'petal-spray', category: 'mood-accents', title: 'Petal Spray', copy: 'Subtle floral detail', preview: 'petal-spray' },
-    { id: 'silk-ribbon', category: 'mood-accents', title: 'Silk Ribbon', copy: 'Curved luxury accent', preview: 'silk-ribbon' }
+    { id: 'gallery-frame', category: 'frames', title: 'Gallery Frame', copy: 'Clean exhibition mount for hero imagery', preview: 'gallery-frame' },
+    { id: 'polaroid-frame', category: 'frames', title: 'Polaroid Frame', copy: 'Soft instant-photo edge with caption space', preview: 'polaroid-frame' },
+    { id: 'glass-frame', category: 'frames', title: 'Glass Frame', copy: 'Airy glass card for modern image stories', preview: 'glass-frame' },
+    { id: 'torn-edge-frame', category: 'frames', title: 'Torn Edge Frame', copy: 'Organic editorial crop with a paper edge', preview: 'torn-edge-frame' },
+    { id: 'film-strip-frame', category: 'frames', title: 'Film Strip', copy: 'Cinematic sequence frame for reference stills', preview: 'film-strip-frame' },
+    { id: 'phone-frame', category: 'frames', title: 'Phone Screen', copy: 'A luxe device frame for screenshots and routines', preview: 'phone-frame' },
+    { id: 'torn-paper-strip', category: 'paper', title: 'Torn Paper Strip', copy: 'Soft ripped edge for layering over photography', preview: 'torn-paper-strip' },
+    { id: 'tape-strip', category: 'paper', title: 'Tape Strip', copy: 'Matte tape for holding a composition together', preview: 'tape-strip' },
+    { id: 'receipt-slip', category: 'paper', title: 'Receipt Slip', copy: 'A narrow paper object for details or totals', preview: 'receipt-slip' },
+    { id: 'gallery-card', category: 'paper', title: 'Gallery Card', copy: 'Museum label energy for intentional context', preview: 'gallery-card' },
+    { id: 'postcard-edge', category: 'paper', title: 'Postcard Edge', copy: 'Travel-style card with a quiet stamp treatment', preview: 'postcard-edge' },
+    { id: 'luxury-label', category: 'labels', title: 'Luxury Label', copy: 'Minimal uppercase label for naming a section', preview: 'luxury-label' },
+    { id: 'date-stamp', category: 'labels', title: 'Date Stamp', copy: 'Small archival timestamp for grounding a chapter', preview: 'date-stamp' },
+    { id: 'travel-tag', category: 'labels', title: 'Travel Tag', copy: 'Directional tag with room for a location or mood', preview: 'travel-tag' },
+    { id: 'highlight-stroke', category: 'labels', title: 'Highlight Stroke', copy: 'Soft marker band for emphasis without noise', preview: 'highlight-stroke' },
+    { id: 'minimal-arrow', category: 'labels', title: 'Minimal Arrow', copy: 'A quiet cue for sequence, motion, or attention', preview: 'minimal-arrow' },
+    { id: 'cream-note', category: 'notes', title: 'Cream Note', copy: 'Warm paper note for reflection, memory, or intention', preview: 'cream-note' },
+    { id: 'glass-note', category: 'notes', title: 'Black Glass Note', copy: 'Dark glass card for sharper contrast and command', preview: 'glass-note' },
+    { id: 'quote-card', category: 'notes', title: 'Quote Card', copy: 'Large quote object with editorial pull-quote energy', preview: 'quote-card' },
+    { id: 'checklist-card', category: 'notes', title: 'Checklist Card', copy: 'Small planning object for a concise action list', preview: 'checklist-card' },
+    { id: 'goal-focus', category: 'notes', title: 'Goal Block', copy: 'A destination card with room for milestones', preview: 'goal-focus' },
+    { id: 'streak-strip', category: 'notes', title: 'Habit Strip', copy: 'A compact rhythm object for consistent routines', preview: 'streak-strip' },
+    { id: 'week-planner', category: 'notes', title: 'Week Planner', copy: 'A horizontal planning strip for next actions', preview: 'week-planner' },
+    { id: 'affirmation-card', category: 'notes', title: 'Affirmation Card', copy: 'A reflective statement card with presence', preview: 'affirmation-card' },
+    { id: 'editorial-headline', category: 'typography', title: 'Editorial Headline', copy: 'Big, cinematic, magazine-style board language', preview: 'editorial-headline' },
+    { id: 'serif-quote', category: 'typography', title: 'Serif Quote', copy: 'A refined quote block with emotional weight', preview: 'serif-quote' },
+    { id: 'caption-label', category: 'typography', title: 'Caption Label', copy: 'Small uppercase caption for photo and frame notes', preview: 'caption-label' },
+    { id: 'handwritten-note', category: 'typography', title: 'Handwritten Note', copy: 'A looser note style for commentary and feeling', preview: 'handwritten-note' }
+  ];
+
+  const BACKGROUND_PRESETS = [
+    { id: 'gallery-ivory', label: 'Gallery Ivory', copy: 'Soft editorial paper with a clean gallery feeling.', preview: 'gallery-ivory' },
+    { id: 'graphite-studio', label: 'Graphite Studio', copy: 'A dark cinematic board surface with stronger contrast.', preview: 'graphite-studio' },
+    { id: 'linen-stone', label: 'Linen Stone', copy: 'Muted warm texture for home, wellness, and interior boards.', preview: 'linen-stone' },
+    { id: 'dusk-gradient', label: 'Dusk Gradient', copy: 'Lavender-blue light for more atmospheric moodboards.', preview: 'dusk-gradient' },
+    { id: 'mocha-suite', label: 'Mocha Suite', copy: 'A rich cocoa surface for fashion, legacy, and brand boards.', preview: 'mocha-suite' },
+    { id: 'midnight-glass', label: 'Midnight Glass', copy: 'A dark luxe board for cinematic, premium compositions.', preview: 'midnight-glass' }
+  ];
+
+  const TEMPLATE_LIBRARY = [
+    { id: 'founder-era', title: 'Founder Era', kicker: 'Template', copy: 'A premium composition for direction, launches, offers, and a business world that feels lived in.' },
+    { id: 'soft-life-blueprint', title: 'Soft Life Blueprint', kicker: 'Template', copy: 'Textures, calm photos, and breathing room for a gentler but intentional future.' },
+    { id: 'dream-apartment', title: 'Dream Apartment', kicker: 'Template', copy: 'Moodboard surfaces for interiors, textures, home details, and a lived-in dream space.' },
+    { id: 'passport-season', title: 'Passport Season', kicker: 'Template', copy: 'Travel references, movement, and destination framing for a board that feels like motion.' },
+    { id: 'wealth-legacy', title: 'Wealth & Legacy', kicker: 'Template', copy: 'A richer arrangement for long-view goals, money direction, and expansive standards.' },
+    { id: 'creative-director', title: 'Creative Director', kicker: 'Template', copy: 'A fashion-forward, editorial structure for visual direction and aesthetic leadership.' },
+    { id: 'wellness-reset', title: 'Wellness Reset', kicker: 'Template', copy: 'A calmer layout for routines, nourishment, restoration, and body-centered goals.' },
+    { id: 'brand-moodboard', title: 'Brand Moodboard', kicker: 'Template', copy: 'A brand-world starting point with hierarchy, captions, and polished framing.' },
+    { id: 'main-character-year', title: 'Main Character Year', kicker: 'Template', copy: 'A bold visual world for identity, style, memory, and emotionally charged aspiration.' },
+    { id: 'luxury-routine', title: 'Luxury Routine', kicker: 'Template', copy: 'A rhythm-focused board for schedule, rituals, beauty, and elevated daily systems.' }
   ];
 
   const LIBRARY_ITEMS = STATIC_LIBRARY.concat(PHOTO_BANK.map(photo => ({
     id: photo.id,
-    category: 'photos',
+    category: photo.libraryCategory || 'photos',
     title: photo.title,
     copy: photo.copy,
     preview: 'photo',
@@ -164,7 +199,7 @@
     root: null,
     mounted: false,
     initialized: false,
-    activeCategory: 'photos',
+    activeCategory: 'uploads',
     search: '',
     snapEnabled: true,
     selectedId: null,
@@ -181,7 +216,14 @@
     drag: null,
     resize: null,
     guides: { vertical: [], horizontal: [] },
-    saveTimer: null
+    saveTimer: null,
+    saveState: 'saved',
+    history: {
+      past: [],
+      future: [],
+      lastSerialized: '',
+      restoring: false
+    }
   };
 
   function escapeHtml(value) {
@@ -226,14 +268,20 @@
   function iconSvg(name) {
     switch (name) {
       case 'grid': return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2" fill="currentColor"/><rect x="14" y="3" width="7" height="7" rx="2" fill="currentColor" opacity=".8"/><rect x="3" y="14" width="7" height="7" rx="2" fill="currentColor" opacity=".8"/><rect x="14" y="14" width="7" height="7" rx="2" fill="currentColor"/></svg>';
+      case 'upload': return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V5M12 5l-4 4M12 5l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 16v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
       case 'type': return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M12 6v12M8 18h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
       case 'photo': return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="9" cy="10" r="2" fill="currentColor"/><path d="M7 17l4-4 3 3 3-2 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       case 'frame': return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="2" fill="none"/><rect x="8" y="8" width="8" height="8" rx="2" fill="currentColor" opacity=".7"/></svg>';
+      case 'texture': return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7c2-1 4-1 6 0s4 1 6 0 4-1 4 0M4 12c2-1 4-1 6 0s4 1 6 0 4-1 4 0M4 17c2-1 4-1 6 0s4 1 6 0 4-1 4 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+      case 'paper': return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h8l4 4v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2" fill="none"/><path d="M15 3v4h4" stroke="currentColor" stroke-width="2" fill="none"/></svg>';
+      case 'tag': return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3H5a2 2 0 0 0-2 2v6l9 9 9-9-9-8z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><circle cx="7.5" cy="7.5" r="1.5" fill="currentColor"/></svg>';
+      case 'note': return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="2" fill="none"/><path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
       case 'spark': return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.6 6.4L21 11l-6.4 2.6L12 20l-2.6-6.4L3 11l6.4-2.6z" fill="currentColor"/></svg>';
       case 'target': return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/></svg>';
       case 'habit': return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4L19 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="3" width="18" height="18" rx="4" stroke="currentColor" stroke-width="2" fill="none" opacity=".5"/></svg>';
       case 'calendar': return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3" stroke="currentColor" stroke-width="2" fill="none"/><path d="M3 9h18" stroke="currentColor" stroke-width="2"/><path d="M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
       case 'quote': return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 17A4.5 4.5 0 0 1 4 12.5C4 9 6.5 6.7 10 6v2c-2.3.5-3.7 2-3.7 4.1 0 .2 0 .4.1.6H10V17zm9 0A4.5 4.5 0 0 1 13 12.5c0-3.5 2.5-5.8 6-6.5v2c-2.3.5-3.7 2-3.7 4.1 0 .2 0 .4.1.6H19V17z" fill="currentColor"/></svg>';
+      case 'palette': return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18h1.4a2.6 2.6 0 0 0 0-5.2H12a1.8 1.8 0 0 1 0-3.6h1.3A4.7 4.7 0 0 0 18 7.5 4.5 4.5 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="7" cy="10" r="1.2" fill="currentColor"/><circle cx="10" cy="7" r="1.2" fill="currentColor"/><circle cx="14" cy="7.4" r="1.2" fill="currentColor"/><circle cx="16.5" cy="11" r="1.2" fill="currentColor"/></svg>';
       case 'flower': return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6" fill="currentColor"/><ellipse cx="12" cy="6" rx="3" ry="4" fill="currentColor" opacity=".84"/><ellipse cx="18" cy="12" rx="3" ry="4" fill="currentColor" opacity=".84"/><ellipse cx="12" cy="18" rx="3" ry="4" fill="currentColor" opacity=".84"/><ellipse cx="6" cy="12" rx="3" ry="4" fill="currentColor" opacity=".84"/></svg>';
       default: return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg>';
     }
@@ -260,9 +308,11 @@
         scrollTop: DEFAULT_SCROLL.top,
         zoom: DEFAULT_ZOOM,
         title: DEFAULT_TITLE,
-        activeCategory: 'photos',
+        activeCategory: 'uploads',
+        background: 'gallery-ivory',
         libraryCollapsed: false,
-        inspectorCollapsed: true
+        inspectorCollapsed: true,
+        focusMode: false
       },
       items: []
     };
@@ -281,8 +331,10 @@
       zoom: clamp(toNumber(board?.zoom, DEFAULT_ZOOM), MIN_ZOOM, MAX_ZOOM),
       title: typeof board?.title === 'string' && board.title.trim() ? board.title.trim() : DEFAULT_TITLE,
       activeCategory: knownCategory,
+      background: BACKGROUND_PRESETS.some((entry) => entry.id === board?.background) ? board.background : 'gallery-ivory',
       libraryCollapsed: board?.libraryCollapsed === true,
-      inspectorCollapsed: board?.inspectorCollapsed !== false
+      inspectorCollapsed: board?.inspectorCollapsed !== false,
+      focusMode: board?.focusMode === true
     };
   }
 
@@ -352,46 +404,67 @@
   function itemLabel(item) {
     if (!item) return 'Module';
     if (item.module === 'photo') return item.title || 'Photo';
-    if (item.module === 'frame') return item.title || 'Frame';
+    if (item.module === 'frame') {
+      switch (item.variant) {
+        case 'gallery-frame': return 'Gallery Frame';
+        case 'torn-edge-frame': return 'Torn Edge Frame';
+        case 'film-strip-frame': return 'Film Strip';
+        case 'phone-frame': return 'Phone Frame';
+        case 'glass-frame': return 'Glass Frame';
+        default: return item.title || 'Frame';
+      }
+    }
     if (item.module === 'goal') return item.variant === 'milestone-map' ? 'Milestone Map' : 'Goal Block';
     if (item.module === 'habit') return item.variant === 'streak-strip' ? 'Streak Strip' : 'Habit Tracker';
     if (item.module === 'calendar') return item.mode === 'month' ? 'Month Snapshot' : 'Week Planner';
     if (item.module === 'affirmation') return item.variant === 'intention-card' ? 'Intention Card' : 'Affirmation Card';
     if (item.module === 'decor') {
       switch (item.variant) {
-        case 'glass-panel': return 'Glass Panel';
-        case 'spotlight-wash': return 'Spotlight Wash';
-        case 'soft-divider': return 'Soft Divider';
-        case 'petal-spray': return 'Petal Spray';
-        case 'silk-ribbon': return 'Silk Ribbon';
-        case 'mood-aura': return 'Mood Aura';
+        case 'torn-paper-strip': return 'Torn Paper Strip';
+        case 'tape-strip': return 'Tape Strip';
+        case 'receipt-slip': return 'Receipt Slip';
+        case 'gallery-card': return 'Gallery Card';
+        case 'postcard-edge': return 'Postcard Edge';
+        case 'highlight-stroke': return 'Highlight Stroke';
+        case 'minimal-arrow': return 'Minimal Arrow';
         default: return 'Accent';
       }
     }
-    if (item.variant === 'headline') return 'Headline';
-    if (item.variant === 'micro-label') return 'Micro Label';
-    return 'Note Card';
+    switch (item.variant) {
+      case 'editorial-headline': return 'Editorial Headline';
+      case 'serif-quote': return 'Serif Quote';
+      case 'caption-label': return 'Caption Label';
+      case 'handwritten-note': return 'Handwritten Note';
+      case 'luxury-label': return 'Luxury Label';
+      case 'date-stamp': return 'Date Stamp';
+      case 'travel-tag': return 'Travel Tag';
+      case 'cream-note': return 'Cream Note';
+      case 'glass-note': return 'Black Glass Note';
+      case 'quote-card': return 'Quote Card';
+      case 'checklist-card': return 'Checklist Card';
+      default: return 'Note Card';
+    }
   }
 
   function itemSupportCopy(item) {
     if (!item) return 'Select something on the board to edit it with more precision.';
     switch (item.module) {
       case 'photo':
-        return 'Use imagery as atmosphere, proof, or a destination. Resize it generously and let other modules overlap it.';
+        return 'Let photography do the emotional heavy lifting. Use it for atmosphere, proof, memory, or the destination itself.';
       case 'frame':
-        return 'Frames are useful for more intentional storytelling. Swap the image inside without changing the board structure.';
+        return 'Frames give an image more point of view. Use them when you want the board to feel art-directed instead of casually dropped in.';
       case 'goal':
-        return 'Goal blocks work best when they stay short, directional, and easy to scan from a distance.';
+        return 'Goal blocks work best when they read like direction, not pressure. Keep them short, visual, and honest.';
       case 'habit':
-        return 'Keep habit modules compact so they support the board instead of taking it over.';
+        return 'Habit modules are strongest as supporting rhythm, not as the loudest thing on the board.';
       case 'calendar':
-        return 'Planning widgets are strongest when they anchor one area of the board and create order for the rest.';
+        return 'Planning widgets are useful when one part of the board needs structure without flattening the mood everywhere else.';
       case 'affirmation':
-        return 'Words should feel grounded and credible. Write language you actually want to re-read.';
+        return 'The best language sounds believable in your own voice. Write something you would actually pause to read again.';
       case 'decor':
-        return 'Accents are there to create mood, rhythm, and composition without overwhelming the working content.';
+        return 'Use paper objects and accents like an art director. They should guide the eye, not shout over the work.';
       default:
-        return 'Text modules create the editorial voice of the board. Keep them simple and intentional.';
+        return 'Text sets the editorial voice of the board. Let it feel deliberate, restrained, and visually calm.';
     }
   }
 
@@ -415,21 +488,13 @@
   function renderTemplateCards() {
     return `
       <div class="vs-template-grid">
-        <button class="vs-template-card" type="button" data-action="starter-editorial">
-          <span class="vs-template-kicker">Starter</span>
-          <span class="vs-template-title">Editorial Glow</span>
-          <span class="vs-template-copy">Atmosphere first. Images, framing, and space for your own language.</span>
-        </button>
-        <button class="vs-template-card" type="button" data-action="starter-focus-map">
-          <span class="vs-template-kicker">Starter</span>
-          <span class="vs-template-title">Focus Map</span>
-          <span class="vs-template-copy">A sharper mix of goals, planning, and weekly rhythm for active execution.</span>
-        </button>
-        <button class="vs-template-card" type="button" data-action="starter-mood-story">
-          <span class="vs-template-kicker">Starter</span>
-          <span class="vs-template-title">Mood Story</span>
-          <span class="vs-template-copy">A softer composition for inspiration, texture, notes, and emotional direction.</span>
-        </button>
+        ${TEMPLATE_LIBRARY.map(template => `
+          <button class="vs-template-card" type="button" data-template-id="${escapeHtmlAttr(template.id)}">
+            <span class="vs-template-kicker">${escapeHtml(template.kicker)}</span>
+            <span class="vs-template-title">${escapeHtml(template.title)}</span>
+            <span class="vs-template-copy">${escapeHtml(template.copy)}</span>
+          </button>
+        `).join('')}
       </div>
     `;
   }
@@ -455,12 +520,13 @@
         lockAspect: true,
         aspectRatio: clouds.width / clouds.height
       },
-      { module: 'text', variant: 'headline', x: 1040, y: 210, w: 760, h: 230, title: '', body: '' },
-      { module: 'decor', variant: 'glass-panel', x: 980, y: 500, w: 820, h: 320, lockAspect: false },
+      { module: 'text', variant: 'editorial-headline', x: 1000, y: 210, w: 820, h: 250, title: '', body: '' },
+      { module: 'text', variant: 'caption-label', x: 1060, y: 490, w: 250, h: 116, title: '', body: '' },
       { module: 'affirmation', variant: 'affirmation-card', x: 1115, y: 565, w: 520, h: 240, text: '', caption: '' },
-      { module: 'frame', variant: 'glass-frame', x: 1880, y: 210, w: 430, h: 300, title: '', caption: '', src: softPaper.src },
-      { module: 'decor', variant: 'silk-ribbon', x: 1770, y: 690, w: 330, h: 190, lockAspect: true },
-      { module: 'decor', variant: 'mood-aura', x: 1480, y: 1000, w: 360, h: 260, lockAspect: true }
+      { module: 'frame', variant: 'gallery-frame', x: 1880, y: 210, w: 430, h: 300, title: '', caption: '', src: softPaper.src },
+      { module: 'decor', variant: 'torn-paper-strip', x: 1710, y: 690, w: 410, h: 110, lockAspect: false },
+      { module: 'decor', variant: 'highlight-stroke', x: 1480, y: 1000, w: 420, h: 120, lockAspect: false },
+      { module: 'text', variant: 'cream-note', x: 1870, y: 560, w: 360, h: 260, title: '', body: '' }
     ];
     const focus = [
       {
@@ -480,9 +546,10 @@
       { module: 'goal', variant: 'goal-focus', x: 900, y: 220, w: 430, h: 320, title: '', focus: '', steps: ['', '', ''] },
       { module: 'calendar', variant: 'week-planner', x: 1385, y: 220, w: 760, h: 290, title: '', mode: 'week', week: weekNotes() },
       { module: 'habit', variant: 'streak-strip', x: 900, y: 610, w: 560, h: 170, title: '', mode: 'strip', days: [false, false, false, false, false, false, false] },
-      { module: 'text', variant: 'headline', x: 240, y: 760, w: 660, h: 210, title: '', body: '' },
+      { module: 'text', variant: 'editorial-headline', x: 240, y: 760, w: 660, h: 210, title: '', body: '' },
       { module: 'affirmation', variant: 'intention-card', x: 1510, y: 620, w: 440, h: 220, text: '', caption: '' },
-      { module: 'decor', variant: 'spotlight-wash', x: 1790, y: 900, w: 380, h: 260, lockAspect: false }
+      { module: 'decor', variant: 'receipt-slip', x: 1790, y: 900, w: 320, h: 230, lockAspect: false },
+      { module: 'text', variant: 'date-stamp', x: 240, y: 1030, w: 260, h: 110, title: '', body: '' }
     ];
     const moodStory = [
       {
@@ -500,17 +567,65 @@
         aspectRatio: marble.width / marble.height
       },
       { module: 'frame', variant: 'polaroid-frame', x: 320, y: 220, w: 420, h: 520, title: '', caption: '', src: rose.src },
-      { module: 'text', variant: 'note-card', x: 835, y: 250, w: 430, h: 320, title: '', body: '' },
+      { module: 'text', variant: 'glass-note', x: 835, y: 250, w: 430, h: 320, title: '', body: '' },
       { module: 'affirmation', variant: 'affirmation-card', x: 820, y: 640, w: 530, h: 250, text: '', caption: '' },
-      { module: 'text', variant: 'micro-label', x: 345, y: 800, w: 260, h: 118, title: '', body: '' },
-      { module: 'decor', variant: 'petal-spray', x: 1370, y: 920, w: 360, h: 220, lockAspect: true },
-      { module: 'decor', variant: 'bloom', x: 2020, y: 930, w: 240, h: 190, lockAspect: true }
+      { module: 'text', variant: 'travel-tag', x: 345, y: 800, w: 260, h: 118, title: '', body: '' },
+      { module: 'decor', variant: 'postcard-edge', x: 1370, y: 920, w: 360, h: 220, lockAspect: false },
+      { module: 'decor', variant: 'tape-strip', x: 2020, y: 930, w: 240, h: 90, lockAspect: false }
     ];
-    const seed = kind === 'focus-map'
+    const living = [
+      {
+        module: 'photo',
+        variant: 'photo',
+        src: rose.src,
+        title: rose.title,
+        credit: 'Free image',
+        source: rose.source,
+        x: 220,
+        y: 230,
+        w: 620,
+        h: 520,
+        lockAspect: true,
+        aspectRatio: rose.width / rose.height
+      },
+      { module: 'frame', variant: 'torn-edge-frame', x: 960, y: 210, w: 400, h: 460, title: '', caption: '', src: softPaper.src },
+      { module: 'text', variant: 'quote-card', x: 1470, y: 250, w: 560, h: 300, title: '', body: '' },
+      { module: 'text', variant: 'editorial-headline', x: 920, y: 720, w: 820, h: 200, title: '', body: '' },
+      { module: 'decor', variant: 'torn-paper-strip', x: 1510, y: 940, w: 420, h: 110, lockAspect: false },
+      { module: 'text', variant: 'luxury-label', x: 260, y: 820, w: 250, h: 110, title: '', body: '' }
+    ];
+    const travel = [
+      {
+        module: 'photo',
+        variant: 'photo',
+        src: clouds.src,
+        title: clouds.title,
+        credit: 'Free image',
+        source: clouds.source,
+        x: 220,
+        y: 240,
+        w: 720,
+        h: 480,
+        lockAspect: true,
+        aspectRatio: clouds.width / clouds.height
+      },
+      { module: 'frame', variant: 'film-strip-frame', x: 1030, y: 240, w: 470, h: 320, title: '', caption: '', src: plant.src },
+      { module: 'text', variant: 'travel-tag', x: 1030, y: 600, w: 290, h: 130, title: '', body: '' },
+      { module: 'text', variant: 'editorial-headline', x: 1540, y: 260, w: 630, h: 220, title: '', body: '' },
+      { module: 'text', variant: 'cream-note', x: 1520, y: 570, w: 420, h: 290, title: '', body: '' },
+      { module: 'decor', variant: 'postcard-edge', x: 1760, y: 910, w: 360, h: 220, lockAspect: false }
+    ];
+    const seed = ['founder-era', 'wealth-legacy', 'brand-moodboard'].includes(kind)
       ? focus
-      : kind === 'mood-story'
+      : ['soft-life-blueprint', 'wellness-reset', 'luxury-routine'].includes(kind)
         ? moodStory
-        : editorial;
+        : ['dream-apartment', 'main-character-year'].includes(kind)
+          ? living
+          : ['passport-season'].includes(kind)
+            ? travel
+            : ['creative-director'].includes(kind)
+              ? editorial
+              : editorial;
     return seed.map((item, index) => normalizeItem(item, index)).filter(Boolean);
   }
 
@@ -521,6 +636,13 @@
     state.items = incoming;
     state.selectedId = incoming[0]?.id || null;
     state.board.inspectorCollapsed = !state.selectedId;
+    state.board.background = ['wealth-legacy', 'creative-director'].includes(kind)
+      ? 'midnight-glass'
+      : ['dream-apartment', 'soft-life-blueprint', 'wellness-reset'].includes(kind)
+        ? 'linen-stone'
+        : ['passport-season'].includes(kind)
+          ? 'dusk-gradient'
+          : 'gallery-ivory';
     state.board.scrollLeft = DEFAULT_SCROLL.left;
     state.board.scrollTop = DEFAULT_SCROLL.top;
     renderBoard();
@@ -536,9 +658,9 @@
       return `
         <div class="vs-inspector-scroll">
           <section class="vs-inspector-section">
-            <div class="vs-kicker">Studio</div>
-            <h3 class="vs-inspector-title">Keep the canvas in charge.</h3>
-            <p class="vs-inspector-copy">Pull from the library, layer freely across the artboard, and use the inspector only when you want precise control.</p>
+            <div class="vs-kicker">Board Settings</div>
+            <h3 class="vs-inspector-title">Make the board feel like a place.</h3>
+            <p class="vs-inspector-copy">Use the background mood, templates, and canvas controls to shape the emotional tone before you add too much detail.</p>
             <div class="vs-inspector-stats">
               <div class="vs-inspector-stat">
                 <span class="vs-inspector-stat-label">Modules</span>
@@ -557,12 +679,27 @@
                 <strong>${counts.calendar + counts.habits}</strong>
               </div>
             </div>
+            <div class="vs-inspector-chip-row">
+              ${BACKGROUND_PRESETS.map(background => `
+                <button class="vs-inspector-chip${background.id === state.board.background ? ' is-active' : ''}" type="button" data-board-background="${escapeHtmlAttr(background.id)}">${escapeHtml(background.label)}</button>
+              `).join('')}
+            </div>
           </section>
           <section class="vs-inspector-section">
             <div class="vs-kicker">Compositions</div>
             <h3 class="vs-inspector-title">Start with shape, not filler.</h3>
-            <p class="vs-inspector-copy">Each starter sets the board rhythm first, then leaves the meaning to you.</p>
+            <p class="vs-inspector-copy">Every starter is built to feel like a real board, not a demo. Replace the imagery and language with your own world.</p>
             ${renderTemplateCards()}
+          </section>
+          <section class="vs-inspector-section">
+            <div class="vs-kicker">Direction</div>
+            <div class="vs-inspector-chip-row">
+              <span class="vs-inspector-chip">Soft luxury</span>
+              <span class="vs-inspector-chip">Career elevation</span>
+              <span class="vs-inspector-chip">Dream apartment</span>
+              <span class="vs-inspector-chip">Founder era</span>
+              <span class="vs-inspector-chip">Travel season</span>
+            </div>
           </section>
           <section class="vs-inspector-section">
             <div class="vs-kicker">Session</div>
@@ -570,6 +707,7 @@
               <span class="vs-inspector-chip">${zoomLabel()} zoom</span>
               <span class="vs-inspector-chip">${state.snapEnabled ? 'Snap enabled' : 'Free placement'}</span>
               <span class="vs-inspector-chip">${counts.words} text layer${counts.words === 1 ? '' : 's'}</span>
+              <span class="vs-inspector-chip">${state.board.focusMode ? 'Focus mode on' : 'Edit mode on'}</span>
             </div>
           </section>
         </div>
@@ -604,6 +742,13 @@
         </section>
         <section class="vs-inspector-section">
           <label class="vs-inspector-field">
+            <span class="vs-inspector-field-label">Opacity</span>
+            <div class="vs-inspector-range-row">
+              <input type="range" min="0.15" max="1" step="0.01" value="${Number(item.opacity || 1).toFixed(2)}" data-selected-opacity="true" />
+              <span class="vs-inspector-range-value">${Math.round((item.opacity || 1) * 100)}%</span>
+            </div>
+          </label>
+          <label class="vs-inspector-field">
             <span class="vs-inspector-field-label">Rotation</span>
             <div class="vs-inspector-range-row">
               <input type="range" min="-24" max="24" step="1" value="${Math.round(item.rotate || 0)}" data-selected-rotate="true" />
@@ -614,11 +759,16 @@
             <input type="checkbox" data-selected-lock-aspect="true"${item.lockAspect ? ' checked' : ''} />
             <span>Keep proportions while resizing</span>
           </label>
+          <label class="vs-inspector-check">
+            <input type="checkbox" data-selected-locked="true"${item.locked ? ' checked' : ''} />
+            <span>Lock module on the board</span>
+          </label>
           <div class="vs-inspector-actions">
             <button class="vs-inspector-btn" type="button" data-action="center-selection">Center</button>
             <button class="vs-inspector-btn" type="button" data-action="duplicate-selection">Duplicate</button>
             <button class="vs-inspector-btn" type="button" data-action="layer-up-selection">Bring forward</button>
             <button class="vs-inspector-btn" type="button" data-action="layer-down-selection">Send back</button>
+            <button class="vs-inspector-btn" type="button" data-action="toggle-lock-selection">${item.locked ? 'Unlock' : 'Lock'}</button>
             ${(item.module === 'photo' || item.module === 'frame') ? '<button class="vs-inspector-btn" type="button" data-action="replace-selected-image">Replace image</button>' : ''}
             <button class="vs-inspector-btn danger" type="button" data-action="delete-selection">Delete</button>
           </div>
@@ -634,16 +784,16 @@
 
   function mapLegacyAccent(variant) {
     switch (variant) {
-      case 'ribbon': return 'silk-ribbon';
+      case 'ribbon': return 'torn-paper-strip';
       case 'flutter':
-      case 'butterfly': return 'butterfly';
-      case 'crown': return 'crown';
+      case 'butterfly': return 'minimal-arrow';
+      case 'crown': return 'gallery-card';
       case 'bloom':
-      case 'blossom': return 'bloom';
+      case 'blossom': return 'highlight-stroke';
       case 'spark':
       case 'burst':
-      case 'starburst': return 'mood-aura';
-      default: return 'petal-spray';
+      case 'starburst': return 'gallery-card';
+      default: return 'tape-strip';
     }
   }
 
@@ -792,7 +942,9 @@
       z: toNumber(item.z, (index || 0) + 1),
       rotate: toNumber(item.rotate != null ? item.rotate : item.rotation, 0),
       lockAspect: !!item.lockAspect,
-      aspectRatio: toNumber(item.aspectRatio, toNumber(item.w || item.width, 320) / Math.max(toNumber(item.h || item.height, 220), 1))
+      aspectRatio: toNumber(item.aspectRatio, toNumber(item.w || item.width, 320) / Math.max(toNumber(item.h || item.height, 220), 1)),
+      opacity: clamp(toNumber(item.opacity, 1), 0.15, 1),
+      locked: item.locked === true
     };
 
     if (module === 'photo') {
@@ -893,8 +1045,10 @@
         zoom: state.board.zoom,
         title: state.board.title,
         activeCategory: state.activeCategory,
+        background: state.board.background,
         libraryCollapsed: !!state.board.libraryCollapsed,
-        inspectorCollapsed: !!state.board.inspectorCollapsed
+        inspectorCollapsed: !!state.board.inspectorCollapsed,
+        focusMode: !!state.board.focusMode
       },
       items: state.items.map(item => JSON.parse(JSON.stringify(item)))
     };
@@ -902,6 +1056,8 @@
 
   function queueSave() {
     if (state.saveTimer) clearTimeout(state.saveTimer);
+    state.saveState = 'saving';
+    updateChrome();
     state.saveTimer = setTimeout(() => {
       const payload = savePayload();
       try {
@@ -912,7 +1068,82 @@
           window.syncToCloud('vision-board', payload);
         } catch (error) {}
       }
+      commitHistory();
+      state.saveState = 'saved';
+      updateChrome();
     }, SAVE_DELAY);
+  }
+
+  function snapshotString() {
+    return JSON.stringify(savePayload());
+  }
+
+  function initializeHistory() {
+    state.history.past = [];
+    state.history.future = [];
+    state.history.lastSerialized = snapshotString();
+    state.history.restoring = false;
+  }
+
+  function commitHistory() {
+    if (state.history.restoring) return;
+    const next = snapshotString();
+    if (!next || next === state.history.lastSerialized) return;
+    if (state.history.lastSerialized) {
+      state.history.past.push(state.history.lastSerialized);
+      if (state.history.past.length > 40) state.history.past.shift();
+    }
+    state.history.lastSerialized = next;
+    state.history.future = [];
+  }
+
+  function persistSnapshot(raw) {
+    try {
+      localStorage.setItem(STORAGE_KEY, raw);
+    } catch (error) {}
+    if (typeof window.syncToCloud === 'function') {
+      try {
+        window.syncToCloud('vision-board', JSON.parse(raw));
+      } catch (error) {}
+    }
+  }
+
+  function applySnapshotString(raw) {
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      state.history.restoring = true;
+      state.board = normalizeBoard(parsed.board);
+      state.activeCategory = state.board.activeCategory || 'uploads';
+      state.items = Array.isArray(parsed.items) ? parsed.items.map(normalizeItem).filter(Boolean) : [];
+      state.selectedId = null;
+      rerenderShell();
+      state.history.restoring = false;
+    } catch (error) {
+      state.history.restoring = false;
+    }
+  }
+
+  function undoHistory() {
+    const previous = state.history.past.pop();
+    if (!previous) return;
+    state.history.future.push(snapshotString());
+    applySnapshotString(previous);
+    state.history.lastSerialized = previous;
+    persistSnapshot(previous);
+    state.saveState = 'saved';
+    updateChrome();
+  }
+
+  function redoHistory() {
+    const next = state.history.future.pop();
+    if (!next) return;
+    state.history.past.push(snapshotString());
+    applySnapshotString(next);
+    state.history.lastSerialized = next;
+    persistSnapshot(next);
+    state.saveState = 'saved';
+    updateChrome();
   }
 
   function viewportPlacement(size) {
@@ -963,40 +1194,64 @@
     }
 
     switch (libraryId) {
-      case 'glass-panel':
-        return normalizeItem({ module: 'decor', variant: 'glass-panel', x: basePoint.x, y: basePoint.y, w: 360, h: 220, lockAspect: false }, state.items.length);
-      case 'spotlight-wash':
-        return normalizeItem({ module: 'decor', variant: 'spotlight-wash', x: basePoint.x, y: basePoint.y, w: 320, h: 220, lockAspect: false }, state.items.length);
-      case 'soft-divider':
-        return normalizeItem({ module: 'decor', variant: 'soft-divider', x: basePoint.x, y: basePoint.y, w: 440, h: 86, lockAspect: false }, state.items.length);
-      case 'headline':
-        return normalizeItem({ module: 'text', variant: 'headline', x: basePoint.x, y: basePoint.y, w: 460, h: 200, title: '', body: '' }, state.items.length);
-      case 'note-card':
-        return normalizeItem({ module: 'text', variant: 'note-card', x: basePoint.x, y: basePoint.y, w: 340, h: 260, title: '', body: '' }, state.items.length);
-      case 'micro-label':
-        return normalizeItem({ module: 'text', variant: 'micro-label', x: basePoint.x, y: basePoint.y, w: 260, h: 118, title: '', body: '' }, state.items.length);
-      case 'arch-frame':
-        return normalizeItem({ module: 'frame', variant: 'arch-frame', x: basePoint.x, y: basePoint.y, w: 340, h: 430, title: '', caption: '' }, state.items.length);
+      case 'editorial-headline':
+        return normalizeItem({ module: 'text', variant: 'editorial-headline', x: basePoint.x, y: basePoint.y, w: 560, h: 220, title: '', body: '' }, state.items.length);
+      case 'serif-quote':
+        return normalizeItem({ module: 'text', variant: 'serif-quote', x: basePoint.x, y: basePoint.y, w: 420, h: 250, title: '', body: '' }, state.items.length);
+      case 'caption-label':
+        return normalizeItem({ module: 'text', variant: 'caption-label', x: basePoint.x, y: basePoint.y, w: 250, h: 110, title: '', body: '' }, state.items.length);
+      case 'handwritten-note':
+        return normalizeItem({ module: 'text', variant: 'handwritten-note', x: basePoint.x, y: basePoint.y, w: 340, h: 220, title: '', body: '' }, state.items.length);
+      case 'cream-note':
+        return normalizeItem({ module: 'text', variant: 'cream-note', x: basePoint.x, y: basePoint.y, w: 360, h: 280, title: '', body: '' }, state.items.length);
+      case 'glass-note':
+        return normalizeItem({ module: 'text', variant: 'glass-note', x: basePoint.x, y: basePoint.y, w: 360, h: 280, title: '', body: '' }, state.items.length);
+      case 'quote-card':
+        return normalizeItem({ module: 'text', variant: 'quote-card', x: basePoint.x, y: basePoint.y, w: 420, h: 260, title: '', body: '' }, state.items.length);
+      case 'checklist-card':
+        return normalizeItem({ module: 'text', variant: 'checklist-card', x: basePoint.x, y: basePoint.y, w: 340, h: 250, title: '', body: '' }, state.items.length);
+      case 'luxury-label':
+        return normalizeItem({ module: 'text', variant: 'luxury-label', x: basePoint.x, y: basePoint.y, w: 260, h: 118, title: '', body: '' }, state.items.length);
+      case 'date-stamp':
+        return normalizeItem({ module: 'text', variant: 'date-stamp', x: basePoint.x, y: basePoint.y, w: 260, h: 118, title: '', body: '' }, state.items.length);
+      case 'travel-tag':
+        return normalizeItem({ module: 'text', variant: 'travel-tag', x: basePoint.x, y: basePoint.y, w: 280, h: 130, title: '', body: '' }, state.items.length);
+      case 'gallery-frame':
+        return normalizeItem({ module: 'frame', variant: 'gallery-frame', x: basePoint.x, y: basePoint.y, w: 360, h: 300, title: '', caption: '' }, state.items.length);
       case 'polaroid-frame':
         return normalizeItem({ module: 'frame', variant: 'polaroid-frame', x: basePoint.x, y: basePoint.y, w: 320, h: 400, title: '', caption: '' }, state.items.length);
       case 'glass-frame':
         return normalizeItem({ module: 'frame', variant: 'glass-frame', x: basePoint.x, y: basePoint.y, w: 360, h: 280, title: '', caption: '' }, state.items.length);
+      case 'torn-edge-frame':
+        return normalizeItem({ module: 'frame', variant: 'torn-edge-frame', x: basePoint.x, y: basePoint.y, w: 360, h: 420, title: '', caption: '' }, state.items.length);
+      case 'film-strip-frame':
+        return normalizeItem({ module: 'frame', variant: 'film-strip-frame', x: basePoint.x, y: basePoint.y, w: 520, h: 300, title: '', caption: '' }, state.items.length);
+      case 'phone-frame':
+        return normalizeItem({ module: 'frame', variant: 'phone-frame', x: basePoint.x, y: basePoint.y, w: 270, h: 540, title: '', caption: '' }, state.items.length);
       case 'goal-focus':
         return normalizeItem({ module: 'goal', variant: 'goal-focus', x: basePoint.x, y: basePoint.y, w: 360, h: 308, title: '', focus: '', steps: ['', '', ''] }, state.items.length);
       case 'milestone-map':
         return normalizeItem({ module: 'goal', variant: 'milestone-map', x: basePoint.x, y: basePoint.y, w: 390, h: 320, title: '', focus: '', steps: ['', '', ''] }, state.items.length);
-      case 'weekly-habit':
-        return normalizeItem({ module: 'habit', variant: 'weekly-habit', x: basePoint.x, y: basePoint.y, w: 360, h: 220, title: '', mode: 'weekly', days: [false, false, false, false, false, false, false] }, state.items.length);
       case 'streak-strip':
         return normalizeItem({ module: 'habit', variant: 'streak-strip', x: basePoint.x, y: basePoint.y, w: 420, h: 150, title: '', mode: 'strip', days: [false, false, false, false, false, false, false] }, state.items.length);
       case 'week-planner':
         return normalizeItem({ module: 'calendar', variant: 'week-planner', x: basePoint.x, y: basePoint.y, w: 540, h: 260, title: '', mode: 'week', week: weekNotes() }, state.items.length);
-      case 'month-snapshot':
-        return normalizeItem({ module: 'calendar', variant: 'month-snapshot', x: basePoint.x, y: basePoint.y, w: 420, h: 340, title: '', mode: 'month', cells: monthCells(), footer: '' }, state.items.length);
       case 'affirmation-card':
         return normalizeItem({ module: 'affirmation', variant: 'affirmation-card', x: basePoint.x, y: basePoint.y, w: 420, h: 250, text: '', caption: '' }, state.items.length);
-      case 'intention-card':
-        return normalizeItem({ module: 'affirmation', variant: 'intention-card', x: basePoint.x, y: basePoint.y, w: 360, h: 220, text: '', caption: '' }, state.items.length);
+      case 'torn-paper-strip':
+        return normalizeItem({ module: 'decor', variant: 'torn-paper-strip', x: basePoint.x, y: basePoint.y, w: 420, h: 110, lockAspect: false }, state.items.length);
+      case 'tape-strip':
+        return normalizeItem({ module: 'decor', variant: 'tape-strip', x: basePoint.x, y: basePoint.y, w: 240, h: 92, lockAspect: false }, state.items.length);
+      case 'receipt-slip':
+        return normalizeItem({ module: 'decor', variant: 'receipt-slip', x: basePoint.x, y: basePoint.y, w: 240, h: 320, lockAspect: false }, state.items.length);
+      case 'gallery-card':
+        return normalizeItem({ module: 'decor', variant: 'gallery-card', x: basePoint.x, y: basePoint.y, w: 320, h: 180, lockAspect: false }, state.items.length);
+      case 'postcard-edge':
+        return normalizeItem({ module: 'decor', variant: 'postcard-edge', x: basePoint.x, y: basePoint.y, w: 340, h: 220, lockAspect: false }, state.items.length);
+      case 'highlight-stroke':
+        return normalizeItem({ module: 'decor', variant: 'highlight-stroke', x: basePoint.x, y: basePoint.y, w: 340, h: 90, lockAspect: false }, state.items.length);
+      case 'minimal-arrow':
+        return normalizeItem({ module: 'decor', variant: 'minimal-arrow', x: basePoint.x, y: basePoint.y, w: 220, h: 110, lockAspect: false }, state.items.length);
       default:
         return normalizeItem({ module: 'decor', variant: libraryId, x: basePoint.x, y: basePoint.y, w: 230, h: 180, lockAspect: true }, state.items.length);
     }
@@ -1030,13 +1285,100 @@
     });
   }
 
+  function uploadedLibraryItems() {
+    return state.items
+      .filter(item => item.module === 'photo' && item.src && (item.source === 'Upload' || item.credit === 'Your upload'))
+      .slice()
+      .sort((a, b) => (b.z || 0) - (a.z || 0))
+      .slice(0, 12)
+      .map(item => ({
+        id: item.id,
+        title: item.title || 'Upload',
+        src: item.src,
+        copy: 'Reuse this image on the board again.',
+        source: 'Upload'
+      }));
+  }
+
+  function renderUploadsGrid() {
+    const uploads = uploadedLibraryItems();
+    const query = state.search.trim().toLowerCase();
+    const visible = uploads.filter(item => !query || [item.title, item.copy].join(' ').toLowerCase().includes(query));
+    return `
+      <button class="vs-library-card vs-library-upload-card" type="button" data-action="upload-board-photo">
+        <div class="vs-library-preview preview-upload-hero">
+          <span class="vs-mini-label">Bring in media</span>
+        </div>
+        <span class="vs-library-body">
+          <span class="vs-library-overline">Uploads</span>
+          <span class="vs-library-label">Add images from your device</span>
+          <span class="vs-library-copy">Drop in photos, screenshots, interiors, itineraries, and references that make the board feel lived in.</span>
+        </span>
+      </button>
+      ${visible.length ? visible.map(item => `
+        <button class="vs-library-card is-photo" type="button" data-upload-reuse="${escapeHtmlAttr(item.id)}">
+          <div class="vs-library-preview photo">
+            <img src="${escapeHtmlAttr(item.src)}" alt="${escapeHtmlAttr(item.title)}" loading="lazy" />
+            <span class="vs-mini-label">Saved upload</span>
+          </div>
+          <span class="vs-library-body">
+            <span class="vs-library-overline">Uploads</span>
+            <span class="vs-library-label">${escapeHtml(item.title)}</span>
+            <span class="vs-library-copy">${escapeHtml(item.copy)}</span>
+          </span>
+        </button>
+      `).join('') : `
+        <div class="vs-library-empty">
+          <div class="vs-library-empty-title">No uploads yet</div>
+          <div class="vs-library-empty-copy">Start with your own imagery first. It instantly makes the board feel more real.</div>
+        </div>
+      `}
+    `;
+  }
+
+  function renderTemplateLibrary() {
+    const query = state.search.trim().toLowerCase();
+    const visible = TEMPLATE_LIBRARY.filter(item => !query || [item.title, item.copy].join(' ').toLowerCase().includes(query));
+    return `
+      <div class="vs-template-grid">
+        ${visible.map(template => `
+          <button class="vs-template-card" type="button" data-template-id="${escapeHtmlAttr(template.id)}">
+            <span class="vs-template-kicker">${escapeHtml(template.kicker)}</span>
+            <span class="vs-template-title">${escapeHtml(template.title)}</span>
+            <span class="vs-template-copy">${escapeHtml(template.copy)}</span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function renderBackgroundLibrary() {
+    const query = state.search.trim().toLowerCase();
+    const visible = BACKGROUND_PRESETS.filter(item => !query || [item.label, item.copy].join(' ').toLowerCase().includes(query));
+    return visible.map(background => `
+      <button class="vs-library-card vs-background-card${background.id === state.board.background ? ' is-active' : ''}" type="button" data-board-background="${escapeHtmlAttr(background.id)}">
+        <div class="vs-library-preview preview-${escapeHtmlAttr(background.preview)}">
+          <span class="vs-mini-label">Board mood</span>
+        </div>
+        <span class="vs-library-body">
+          <span class="vs-library-overline">Background</span>
+          <span class="vs-library-label">${escapeHtml(background.label)}</span>
+          <span class="vs-library-copy">${escapeHtml(background.copy)}</span>
+        </span>
+      </button>
+    `).join('');
+  }
+
   function renderLibraryGrid() {
+    if (state.activeCategory === 'uploads') return renderUploadsGrid();
+    if (state.activeCategory === 'templates') return renderTemplateLibrary();
+    if (state.activeCategory === 'backgrounds') return renderBackgroundLibrary();
     const items = visibleLibraryItems();
     if (!items.length) {
       return '<div class="vs-empty-copy">No modules match this search yet.</div>';
     }
     return items.map(item => `
-      <button class="vs-library-card${item.category === 'photos' ? ' is-photo' : ' is-module'}" type="button" draggable="true" data-library-id="${escapeHtmlAttr(item.id)}">
+      <button class="vs-library-card${item.preview === 'photo' ? ' is-photo' : ' is-module'}" type="button" draggable="true" data-library-id="${escapeHtmlAttr(item.id)}">
         ${renderLibraryPreview(item)}
         <span class="vs-library-body">
           <span class="vs-library-overline">${escapeHtml(item.category.replace('-', ' '))}</span>
@@ -1047,10 +1389,36 @@
     `).join('');
   }
 
+  function saveStatusLabel() {
+    if (state.saveState === 'saving') return 'Saving…';
+    return 'Saved';
+  }
+
+  function renderSelectionToolbar() {
+    const item = selectedItem();
+    if (!item) return '';
+    return `
+      <div class="vs-floating-toolbar-inner">
+        <div class="vs-floating-meta">
+          <span class="vs-floating-kicker">Selected</span>
+          <strong>${escapeHtml(itemLabel(item))}</strong>
+        </div>
+        <div class="vs-floating-actions">
+          <button class="vs-floating-btn" type="button" data-action="duplicate-selection">Duplicate</button>
+          <button class="vs-floating-btn" type="button" data-action="layer-up-selection">Forward</button>
+          <button class="vs-floating-btn" type="button" data-action="layer-down-selection">Backward</button>
+          <button class="vs-floating-btn" type="button" data-action="toggle-lock-selection">${item.locked ? 'Unlock' : 'Lock'}</button>
+          <button class="vs-floating-btn danger" type="button" data-action="delete-selection">Delete</button>
+        </div>
+      </div>
+    `;
+  }
+
   function boardShell() {
     const category = currentCategory();
     const libraryLabel = state.board.libraryCollapsed ? 'Open Library' : 'Hide Library';
     const inspectorLabel = state.board.inspectorCollapsed ? 'Open Inspector' : 'Hide Inspector';
+    const focusLabel = state.board.focusMode ? 'Exit Focus' : 'Focus Preview';
     return `
       <section class="vs-editor">
         <header class="vs-appbar">
@@ -1058,18 +1426,20 @@
             <div class="vs-brand-mark">P</div>
             <div class="vs-brand-copy">
               <div class="vs-brand-kicker">Command Center</div>
-              <div class="vs-brand-name">Vision Editor</div>
+              <div class="vs-brand-name">Vision Studio</div>
             </div>
           </div>
           <div class="vs-appbar-center">
             <input id="vs-board-title" class="vs-board-title-input" type="text" value="${escapeHtmlAttr(state.board.title || DEFAULT_TITLE)}" placeholder="Untitled vision board" />
-            <div class="vs-board-title-sub">Layer imagery, planning, and direction into one living board.</div>
+            <div class="vs-board-title-sub">Build the world you are moving toward.</div>
           </div>
           <div class="vs-appbar-actions">
+            <div class="vs-save-pill" id="vs-save-pill">${saveStatusLabel()}</div>
+            <button class="vs-top-btn" type="button" data-action="undo-history">Undo</button>
+            <button class="vs-top-btn" type="button" data-action="redo-history">Redo</button>
             <button class="vs-top-btn" type="button" data-action="toggle-library">${libraryLabel}</button>
             <button class="vs-top-btn" type="button" data-action="toggle-inspector">${inspectorLabel}</button>
-            <button class="vs-top-btn" type="button" data-action="quick-headline">Headline</button>
-            <button class="vs-top-btn" type="button" data-action="quick-goal">Goal</button>
+            <button class="vs-top-btn" type="button" data-action="toggle-focus">${focusLabel}</button>
             <button class="vs-top-btn primary" type="button" data-action="upload-board-photo">Upload</button>
             <button class="vs-top-btn" type="button" data-action="toggle-snap">${state.snapEnabled ? 'Snap On' : 'Snap Off'}</button>
             <input id="vs-upload-input" type="file" accept="image/*" multiple hidden />
@@ -1082,47 +1452,49 @@
           <aside class="vs-library-pane">
             <div class="vs-library-pane-head">
               <div>
-                <div class="vs-kicker">Library</div>
+                <div class="vs-kicker">Studio Library</div>
                 <h2 class="vs-title">${escapeHtml(category.label)}</h2>
-                <p class="vs-subtitle">${escapeHtml(category.copy)}. Click to drop, or drag into the exact area you want to build around.</p>
+                <p class="vs-subtitle">${escapeHtml(category.copy)}. Curate first, then place with intention.</p>
               </div>
               <div class="vs-pane-badge">${state.items.length} module${state.items.length === 1 ? '' : 's'}</div>
             </div>
             <label class="vs-search">
               <span class="vs-search-icon" aria-hidden="true"></span>
-              <input id="vs-search" type="text" placeholder="Search elements, photos, text..." value="${escapeHtmlAttr(state.search)}" />
+              <input id="vs-search" type="text" placeholder="Search textures, frames, notes..." value="${escapeHtmlAttr(state.search)}" />
             </label>
             <div class="vs-library-meta">
               <span class="vs-mini-chip">Visual bank</span>
               <span class="vs-mini-chip">Drag to place</span>
-              <span class="vs-mini-chip">Resize live</span>
+              <span class="vs-mini-chip">Layer freely</span>
             </div>
             <div class="vs-library">
               <div class="vs-library-head">
                 <div class="vs-library-title">${escapeHtml(category.label)} Bank</div>
-                <div class="vs-library-caption">Built for real composition, not demo filler.</div>
+                <div class="vs-library-caption">Built for real composition, not toy decoration.</div>
               </div>
               <div class="vs-library-grid" id="vs-library-grid">${renderLibraryGrid()}</div>
             </div>
           </aside>
           <div class="vs-stage-shell">
             <div class="vs-stage-topbar">
-              <div class="vs-stage-pill">Canvas mode</div>
-              <div class="vs-stage-copy">Move fast on the board, then tune selected modules only when you need precision.</div>
+              <div class="vs-stage-pill">Canvas Studio</div>
+              <div class="vs-stage-copy">Start with a photo, a label, a paper object, or a feeling. Let the composition come together in layers.</div>
               <div class="vs-stage-actions">
                 <button class="vs-stage-btn" type="button" data-action="quick-headline">Add Text</button>
+                <button class="vs-stage-btn" type="button" data-action="quick-note">Add Note</button>
                 <button class="vs-stage-btn" type="button" data-action="quick-goal">Add Goal</button>
-                <button class="vs-stage-btn" type="button" data-action="quick-affirmation">Add Card</button>
+                <button class="vs-stage-btn" type="button" data-action="quick-frame">Add Frame</button>
                 <button class="vs-stage-btn" type="button" data-action="reset-view">Reset View</button>
                 <button class="vs-stage-btn danger" type="button" data-action="clear-board">Clear Board</button>
               </div>
             </div>
             <div class="vs-stage">
               <div class="vs-stage-quickdock">
-                <button class="vs-quickdock-btn" type="button" data-action="upload-board-photo">Photo</button>
-                <button class="vs-quickdock-btn" type="button" data-action="quick-headline">Text</button>
-                <button class="vs-quickdock-btn" type="button" data-action="quick-goal">Goal</button>
-                <button class="vs-quickdock-btn" type="button" data-action="quick-affirmation">Affirm</button>
+                <button class="vs-quickdock-btn" type="button" data-action="upload-board-photo">Add Image</button>
+                <button class="vs-quickdock-btn" type="button" data-action="quick-headline">Add Text</button>
+                <button class="vs-quickdock-btn" type="button" data-action="quick-note">Add Note</button>
+                <button class="vs-quickdock-btn" type="button" data-action="quick-goal">Add Goal</button>
+                <button class="vs-quickdock-btn" type="button" data-action="quick-affirmation">Add Card</button>
               </div>
               <div class="vs-viewport-shell">
                 <div class="vs-viewport" id="vs-viewport">
@@ -1131,11 +1503,12 @@
                   </div>
                 </div>
               </div>
+              <div class="vs-floating-toolbar" id="vs-floating-toolbar">${renderSelectionToolbar()}</div>
             </div>
             <div class="vs-stage-footer">
               <div class="vs-stage-footer-copy">
                 <strong>${escapeHtml(state.board.title || DEFAULT_TITLE)}</strong>
-                <span>Drag with the grip, overlap freely, and let the canvas stay in charge.</span>
+                <span>Curate the mood. Frame the vision. Let the canvas stay in charge.</span>
               </div>
               <div class="vs-zoom-wrap">
                 <button class="vs-zoom-btn" type="button" data-action="zoom-out">-</button>
@@ -1156,26 +1529,20 @@
 
   function decorSvg(variant) {
     switch (variant) {
-      case 'butterfly':
-        return '<svg viewBox="0 0 120 90" aria-hidden="true"><path d="M58 45c-14-24-33-34-44-28-11 7-5 28 18 35-16 4-24 17-18 26 8 10 28 5 44-16z" fill="#dbe6ff"/><path d="M62 45c14-24 33-34 44-28 11 7 5 28-18 35 16 4 24 17 18 26-8 10-28 5-44-16z" fill="#ffffff" opacity=".84"/><path d="M60 22v44" stroke="#1a317f" stroke-width="4" stroke-linecap="round"/><path d="M60 23c6-7 12-10 18-10M60 23c-6-7-12-10-18-10" stroke="#1a317f" stroke-width="3" stroke-linecap="round"/></svg>';
-      case 'crown':
-        return '<svg viewBox="0 0 120 90" aria-hidden="true"><path d="M20 62l10-34 23 20 7-24 7 24 23-20 10 34z" fill="#ffe4a8"/><path d="M28 58c10-11 18-18 32-18s22 7 32 18" fill="none" stroke="#fff6db" stroke-width="4" stroke-linecap="round"/><rect x="22" y="62" width="76" height="12" rx="6" fill="#ffd56e"/><circle cx="30" cy="28" r="5" fill="#fff"/><circle cx="60" cy="24" r="5" fill="#fff"/><circle cx="90" cy="28" r="5" fill="#fff"/></svg>';
-      case 'bow':
-        return '<svg viewBox="0 0 120 90" aria-hidden="true"><path d="M60 48C40 30 18 20 10 28c-8 8 4 28 28 34-5 7-3 15 6 18 8 2 14-2 16-11 2 9 8 13 16 11 9-3 11-11 6-18 24-6 36-26 28-34-8-8-30 2-50 20z" fill="#ffc7dc"/><circle cx="60" cy="48" r="10" fill="#fff"/></svg>';
-      case 'bloom':
-        return '<svg viewBox="0 0 120 90" aria-hidden="true"><g fill="#ffdbe8"><ellipse cx="60" cy="24" rx="14" ry="18"/><ellipse cx="86" cy="42" rx="14" ry="18" transform="rotate(70 86 42)"/><ellipse cx="76" cy="70" rx="14" ry="18" transform="rotate(144 76 70)"/><ellipse cx="44" cy="70" rx="14" ry="18" transform="rotate(-144 44 70)"/><ellipse cx="34" cy="42" rx="14" ry="18" transform="rotate(-70 34 42)"/></g><circle cx="60" cy="47" r="10" fill="#fff"/><circle cx="60" cy="47" r="4" fill="#f4a6c1"/></svg>';
-      case 'petal-spray':
-        return '<svg viewBox="0 0 180 120" aria-hidden="true"><ellipse cx="40" cy="40" rx="18" ry="10" fill="#ffe4ef"/><ellipse cx="76" cy="28" rx="14" ry="9" fill="#ffd0e1"/><ellipse cx="100" cy="64" rx="18" ry="11" fill="#fff0f6"/><ellipse cx="134" cy="42" rx="20" ry="12" fill="#ffdce9"/><path d="M28 94c22-12 40-16 59-12 20 5 34 4 53-7" stroke="#d4e5ff" stroke-width="8" stroke-linecap="round" opacity=".72"/></svg>';
-      case 'silk-ribbon':
-        return '<svg viewBox="0 0 220 120" aria-hidden="true"><path d="M16 58c32-34 70-48 112-44 24 2 44 10 58 21-26 2-49 12-66 30 18 6 31 18 36 33-17-10-39-15-66-13-27 2-47 11-64 25 10-16 12-31-10-52z" fill="#ffd4e4"/><path d="M36 66c28-12 58-14 94-7" stroke="#fff" stroke-opacity=".6" stroke-width="6" stroke-linecap="round"/></svg>';
-      case 'spotlight-wash':
-        return '<svg viewBox="0 0 220 160" aria-hidden="true"><defs><radialGradient id="wash" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffffff" stop-opacity=".82"/><stop offset="45%" stop-color="#b8d0ff" stop-opacity=".48"/><stop offset="100%" stop-color="#b8d0ff" stop-opacity="0"/></radialGradient></defs><ellipse cx="110" cy="80" rx="88" ry="54" fill="url(#wash)"/></svg>';
-      case 'mood-aura':
-        return '<svg viewBox="0 0 220 180" aria-hidden="true"><defs><radialGradient id="aura" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffffff" stop-opacity=".95"/><stop offset="38%" stop-color="#c8d8ff" stop-opacity=".55"/><stop offset="100%" stop-color="#c8d8ff" stop-opacity="0"/></radialGradient></defs><circle cx="110" cy="90" r="72" fill="url(#aura)"/></svg>';
-      case 'soft-divider':
-        return '<svg viewBox="0 0 260 56" aria-hidden="true"><path d="M20 28h220" stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity=".92"/><path d="M64 28h132" stroke="#9dbbff" stroke-width="4" stroke-linecap="round" opacity=".85"/></svg>';
-      case 'glass-panel':
-        return '<svg viewBox="0 0 240 160" aria-hidden="true"><rect x="12" y="12" width="216" height="136" rx="26" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.7)" stroke-width="2"/><path d="M24 32c40-18 84-24 140-16" stroke="rgba(255,255,255,0.6)" stroke-width="10" stroke-linecap="round"/></svg>';
+      case 'torn-paper-strip':
+        return '<svg viewBox="0 0 260 90" aria-hidden="true"><path d="M14 27c23 6 42 7 58 4 17-4 34-4 52 0 18 5 38 6 61 2 23-4 41-2 61 8v37c-23-7-42-8-59-3-18 4-38 4-59-1-20-5-39-5-56 1-18 6-36 6-58-1z" fill="#fff9ee"/><path d="M13 27c24 4 43 5 58 2 18-4 36-4 54 0 19 4 39 5 60 1 18-3 38-1 61 8" stroke="#ecdcc0" stroke-width="2" fill="none"/></svg>';
+      case 'tape-strip':
+        return '<svg viewBox="0 0 200 90" aria-hidden="true"><rect x="22" y="22" width="156" height="46" rx="14" fill="rgba(255,244,216,0.86)" stroke="rgba(221,201,156,0.8)" stroke-width="2"/><path d="M38 32h124" stroke="rgba(255,255,255,0.42)" stroke-width="4" stroke-linecap="round"/></svg>';
+      case 'receipt-slip':
+        return '<svg viewBox="0 0 160 280" aria-hidden="true"><path d="M18 18h124v228l-13-9-13 9-13-9-13 9-13-9-13 9-13-9-13 9z" fill="#fffaf1" stroke="#eadcc0" stroke-width="2"/><path d="M40 54h82M40 82h62M40 116h82M40 144h62M40 178h82" stroke="#c9ba98" stroke-width="6" stroke-linecap="round" opacity=".62"/></svg>';
+      case 'gallery-card':
+        return '<svg viewBox="0 0 220 140" aria-hidden="true"><rect x="16" y="18" width="188" height="104" rx="24" fill="#f4efe5"/><path d="M34 42h88" stroke="#1e2d55" stroke-width="8" stroke-linecap="round"/><path d="M34 68h148M34 92h112" stroke="#88795f" stroke-width="4" stroke-linecap="round" opacity=".72"/></svg>';
+      case 'postcard-edge':
+        return '<svg viewBox="0 0 220 150" aria-hidden="true"><rect x="20" y="20" width="180" height="110" rx="20" fill="#f7f1e8"/><path d="M40 44h72M40 66h92" stroke="#65543a" stroke-width="5" stroke-linecap="round"/><rect x="152" y="38" width="24" height="24" rx="6" fill="#d1b899"/><path d="M34 102h150" stroke="#cfb895" stroke-width="3" stroke-linecap="round"/></svg>';
+      case 'highlight-stroke':
+        return '<svg viewBox="0 0 240 70" aria-hidden="true"><path d="M22 35c38-8 66-11 91-11 37 0 73 4 105 10-32 8-68 12-105 12-24 0-55-4-91-11z" fill="rgba(255,225,141,0.64)"/></svg>';
+      case 'minimal-arrow':
+        return '<svg viewBox="0 0 180 80" aria-hidden="true"><path d="M18 40h112" stroke="#283b79" stroke-width="5" stroke-linecap="round"/><path d="M110 24l28 16-28 16" fill="none" stroke="#283b79" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       default:
         return '<svg viewBox="0 0 220 180" aria-hidden="true"><circle cx="110" cy="90" r="70" fill="#d7e7ff"/></svg>';
     }
@@ -1185,13 +1552,14 @@
     return `
       <div class="vs-empty">
         <div class="vs-empty-inner">
-          <div class="vs-empty-mark">Studio</div>
-          <div class="vs-empty-title">Build a board that actually feels like your future.</div>
-          <div class="vs-empty-copy">Start clean, pull from the library, or load a starter composition that gives you structure without fake demo content.</div>
+          <div class="vs-empty-mark">Vision Studio</div>
+          <div class="vs-empty-title">Start building your world.</div>
+          <div class="vs-empty-copy">Drop in images, textures, paper, notes, and language to create a board that feels like your next chapter instead of a blank assignment.</div>
           <div class="vs-empty-actions">
-            <button class="vs-empty-btn primary" type="button" data-action="starter-editorial">Editorial Glow</button>
-            <button class="vs-empty-btn" type="button" data-action="starter-focus-map">Focus Map</button>
-            <button class="vs-empty-btn" type="button" data-action="upload-board-photo">Upload Images</button>
+            <button class="vs-empty-btn primary" type="button" data-template-id="creative-director">Start from Template</button>
+            <button class="vs-empty-btn" type="button" data-action="upload-board-photo">Upload Image</button>
+            <button class="vs-empty-btn" type="button" data-action="quick-headline">Add Text</button>
+            <button class="vs-empty-btn" type="button" data-category="backgrounds">Choose Board Style</button>
           </div>
         </div>
       </div>
@@ -1201,7 +1569,7 @@
   function itemToolbar(item, label) {
     return `
       <div class="vs-item-toolbar">
-        <div class="vs-item-badge">${escapeHtml(label)}</div>
+        <div class="vs-item-badge">${escapeHtml(label)}${item.locked ? ' • Locked' : ''}</div>
         <div class="vs-item-actions">
           <button class="vs-icon-btn vs-drag-handle" type="button" data-drag-handle="${escapeHtmlAttr(item.id)}" aria-label="Move module" title="Move module">${actionSvg('grip')}</button>
           <button class="vs-icon-btn" type="button" data-layer-up="${escapeHtmlAttr(item.id)}" aria-label="Bring module forward" title="Bring forward">${actionSvg('up')}</button>
@@ -1211,6 +1579,10 @@
         </div>
       </div>
     `;
+  }
+
+  function editableFlag(item) {
+    return item.locked ? 'false' : 'true';
   }
 
   function renderPhoto(item) {
@@ -1230,7 +1602,17 @@
   }
 
   function renderFrame(item) {
-    const variantClass = item.variant === 'polaroid-frame' ? 'polaroid' : item.variant === 'glass-frame' ? 'glass' : 'arch';
+    const variantClass = item.variant === 'polaroid-frame'
+      ? 'polaroid'
+      : item.variant === 'glass-frame'
+        ? 'glass'
+        : item.variant === 'torn-edge-frame'
+          ? 'torn'
+          : item.variant === 'film-strip-frame'
+            ? 'film'
+            : item.variant === 'phone-frame'
+              ? 'phone'
+              : 'gallery';
     return `
       <div class="vs-item-shell vs-module-frame">
         ${itemToolbar(item, 'Frame')}
@@ -1239,7 +1621,7 @@
             <div class="vs-frame-inner">
               ${item.src
                 ? `<img class="vs-frame-image" src="${escapeHtmlAttr(item.src)}" alt="${escapeHtmlAttr(item.title || 'Framed image')}" />`
-                : `<button class="vs-frame-placeholder" type="button" data-frame-upload="${escapeHtmlAttr(item.id)}"><span><span class="vs-frame-placeholder-title">Add image</span><span class="vs-frame-placeholder-copy">Upload a photo into this frame.</span></span></button>`
+                : `<button class="vs-frame-placeholder" type="button" data-frame-upload="${escapeHtmlAttr(item.id)}"${item.locked ? ' disabled' : ''}><span><span class="vs-frame-placeholder-title">Add image</span><span class="vs-frame-placeholder-copy">Upload a photo into this frame.</span></span></button>`
               }
             </div>
           </div>
@@ -1250,25 +1632,87 @@
   }
 
   function renderText(item) {
-    if (item.variant === 'headline') {
+    if (item.variant === 'editorial-headline' || item.variant === 'headline') {
       return `
         <div class="vs-item-shell vs-module-headline">
           ${itemToolbar(item, 'Headline')}
           <div class="vs-content">
-            <div class="vs-editable vs-headline-text" contenteditable="true" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="title" data-placeholder="Add a headline">${escapeHtml(item.title || '')}</div>
-            <div class="vs-editable vs-headline-sub" contenteditable="true" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="body" data-placeholder="Optional subline">${escapeHtml(item.body || '')}</div>
+            <div class="vs-editable vs-headline-text" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="title" data-placeholder="Add a headline">${escapeHtml(item.title || '')}</div>
+            <div class="vs-editable vs-headline-sub" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="body" data-placeholder="Optional subline">${escapeHtml(item.body || '')}</div>
           </div>
           <div class="vs-resize-handle" data-resize-handle="${escapeHtmlAttr(item.id)}"></div>
         </div>
       `;
     }
-    if (item.variant === 'micro-label') {
+    if (item.variant === 'serif-quote') {
       return `
-        <div class="vs-item-shell vs-module-text">
+        <div class="vs-item-shell vs-module-affirmation">
+          ${itemToolbar(item, 'Quote')}
+          <div class="vs-content">
+            <div class="vs-affirmation-surface is-quote">
+              <div class="vs-editable vs-affirmation-text" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="title" data-placeholder="Add a quote or statement">${escapeHtml(item.title || '')}</div>
+              <div class="vs-editable vs-affirmation-caption" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="body" data-placeholder="Optional source or note">${escapeHtml(item.body || '')}</div>
+            </div>
+          </div>
+          <div class="vs-resize-handle" data-resize-handle="${escapeHtmlAttr(item.id)}"></div>
+        </div>
+      `;
+    }
+    if (item.variant === 'caption-label' || item.variant === 'micro-label' || item.variant === 'luxury-label' || item.variant === 'date-stamp' || item.variant === 'travel-tag') {
+      const labelClass = item.variant === 'travel-tag'
+        ? 'is-tag'
+        : item.variant === 'date-stamp'
+          ? 'is-stamp'
+          : item.variant === 'luxury-label'
+            ? 'is-luxury'
+            : 'is-caption';
+      return `
+        <div class="vs-item-shell vs-module-text vs-module-label ${labelClass}">
           ${itemToolbar(item, 'Label')}
           <div class="vs-content">
             <div class="vs-note-surface">
-              <div class="vs-editable vs-note-body" contenteditable="true" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="title" data-placeholder="Add label">${escapeHtml(item.title || '')}</div>
+              <div class="vs-editable vs-note-body" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="title" data-placeholder="Add label">${escapeHtml(item.title || '')}</div>
+            </div>
+          </div>
+          <div class="vs-resize-handle" data-resize-handle="${escapeHtmlAttr(item.id)}"></div>
+        </div>
+      `;
+    }
+    if (item.variant === 'checklist-card') {
+      return `
+        <div class="vs-item-shell vs-module-note">
+          ${itemToolbar(item, 'Checklist')}
+          <div class="vs-content">
+            <div class="vs-note-surface is-checklist">
+              <div class="vs-note-title">Action List</div>
+              <div class="vs-editable vs-note-body" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="body" data-placeholder="List the next three things that matter.">${escapeHtml(item.body || '')}</div>
+            </div>
+          </div>
+          <div class="vs-resize-handle" data-resize-handle="${escapeHtmlAttr(item.id)}"></div>
+        </div>
+      `;
+    }
+    if (item.variant === 'quote-card') {
+      return `
+        <div class="vs-item-shell vs-module-note">
+          ${itemToolbar(item, 'Quote Card')}
+          <div class="vs-content">
+            <div class="vs-note-surface is-quote-card">
+              <div class="vs-editable vs-headline-text" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="title" data-placeholder="Add a quote that moves something in you.">${escapeHtml(item.title || '')}</div>
+              <div class="vs-editable vs-headline-sub" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="body" data-placeholder="Optional context">${escapeHtml(item.body || '')}</div>
+            </div>
+          </div>
+          <div class="vs-resize-handle" data-resize-handle="${escapeHtmlAttr(item.id)}"></div>
+        </div>
+      `;
+    }
+    if (item.variant === 'handwritten-note') {
+      return `
+        <div class="vs-item-shell vs-module-note">
+          ${itemToolbar(item, 'Annotation')}
+          <div class="vs-content">
+            <div class="vs-note-surface is-handwritten">
+              <div class="vs-editable vs-note-body" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="body" data-placeholder="Add a handwritten-style thought.">${escapeHtml(item.body || '')}</div>
             </div>
           </div>
           <div class="vs-resize-handle" data-resize-handle="${escapeHtmlAttr(item.id)}"></div>
@@ -1279,9 +1723,9 @@
       <div class="vs-item-shell vs-module-note">
         ${itemToolbar(item, 'Note')}
         <div class="vs-content">
-          <div class="vs-note-surface">
-            <div class="vs-note-title">Notes</div>
-            <div class="vs-editable vs-note-body" contenteditable="true" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="body" data-placeholder="Write something real, useful, or motivating.">${escapeHtml(item.body || '')}</div>
+          <div class="vs-note-surface${item.variant === 'glass-note' ? ' is-glass' : item.variant === 'cream-note' ? ' is-cream' : ''}">
+            <div class="vs-note-title">${item.variant === 'glass-note' ? 'Direction' : 'Notes'}</div>
+            <div class="vs-editable vs-note-body" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="body" data-placeholder="Write something real, useful, or motivating.">${escapeHtml(item.body || '')}</div>
           </div>
         </div>
         <div class="vs-resize-handle" data-resize-handle="${escapeHtmlAttr(item.id)}"></div>
@@ -1295,13 +1739,13 @@
         ${itemToolbar(item, item.variant === 'milestone-map' ? 'Milestones' : 'Goal')}
         <div class="vs-content">
           <div class="vs-goal-card">
-            <div class="vs-editable vs-goal-title" contenteditable="true" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="title" data-placeholder="Goal title">${escapeHtml(item.title || '')}</div>
-            <div class="vs-editable vs-goal-focus" contenteditable="true" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="focus" data-placeholder="What are you moving toward?">${escapeHtml(item.focus || '')}</div>
+            <div class="vs-editable vs-goal-title" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="title" data-placeholder="Goal title">${escapeHtml(item.title || '')}</div>
+            <div class="vs-editable vs-goal-focus" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="focus" data-placeholder="What are you moving toward?">${escapeHtml(item.focus || '')}</div>
             <div class="vs-goal-list">
               ${item.steps.map((step, index) => `
                 <div class="vs-goal-row">
                   <span class="vs-goal-dot"></span>
-                  <div class="vs-editable vs-goal-step" contenteditable="true" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="steps" data-index="${index}" data-placeholder="Milestone ${index + 1}">${escapeHtml(step || '')}</div>
+                  <div class="vs-editable vs-goal-step" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="steps" data-index="${index}" data-placeholder="Milestone ${index + 1}">${escapeHtml(step || '')}</div>
                 </div>
               `).join('')}
             </div>
@@ -1318,12 +1762,12 @@
         ${itemToolbar(item, 'Habit')}
         <div class="vs-content">
           <div class="vs-habit-card">
-            <div class="vs-editable vs-habit-title" contenteditable="true" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="title" data-placeholder="Habit title">${escapeHtml(item.title || '')}</div>
+            <div class="vs-editable vs-habit-title" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="title" data-placeholder="Habit title">${escapeHtml(item.title || '')}</div>
             <div class="vs-habit-track">
               ${item.days.map((done, index) => `
                 <div class="vs-habit-day">
                   <span class="vs-habit-day-label">${['M','T','W','T','F','S','S'][index]}</span>
-                  <button class="vs-habit-toggle${done ? ' is-done' : ''}" type="button" data-toggle-day="${escapeHtmlAttr(item.id)}" data-index="${index}"></button>
+                  <button class="vs-habit-toggle${done ? ' is-done' : ''}" type="button" data-toggle-day="${escapeHtmlAttr(item.id)}" data-index="${index}"${item.locked ? ' disabled' : ''}></button>
                 </div>
               `).join('')}
             </div>
@@ -1341,7 +1785,7 @@
           ${itemToolbar(item, 'Calendar')}
           <div class="vs-content">
             <div class="vs-calendar-card">
-              <div class="vs-editable vs-calendar-title" contenteditable="true" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="title" data-placeholder="Month snapshot">${escapeHtml(item.title || '')}</div>
+              <div class="vs-editable vs-calendar-title" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="title" data-placeholder="Month snapshot">${escapeHtml(item.title || '')}</div>
               <div class="vs-calendar-grid">
                 ${['S','M','T','W','T','F','S'].map(day => `<div class="vs-calendar-head">${day}</div>`).join('')}
                 ${item.cells.map(cell => `
@@ -1351,7 +1795,7 @@
                   </div>
                 `).join('')}
               </div>
-              <div class="vs-editable vs-goal-focus" contenteditable="true" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="footer" data-placeholder="Add one focus for this month.">${escapeHtml(item.footer || '')}</div>
+              <div class="vs-editable vs-goal-focus" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="footer" data-placeholder="Add one focus for this month.">${escapeHtml(item.footer || '')}</div>
             </div>
           </div>
           <div class="vs-resize-handle" data-resize-handle="${escapeHtmlAttr(item.id)}"></div>
@@ -1363,12 +1807,12 @@
         ${itemToolbar(item, 'Calendar')}
         <div class="vs-content">
           <div class="vs-calendar-card">
-            <div class="vs-editable vs-calendar-title" contenteditable="true" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="title" data-placeholder="Week planner">${escapeHtml(item.title || '')}</div>
+            <div class="vs-editable vs-calendar-title" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="title" data-placeholder="Week planner">${escapeHtml(item.title || '')}</div>
             <div class="vs-calendar-grid">
               ${item.week.map((day, index) => `
                 <div class="vs-calendar-cell">
                   <div class="vs-calendar-head">${escapeHtml(day.label || ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][index])}</div>
-                  <div class="vs-editable vs-calendar-note" contenteditable="true" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="week" data-index="${index}" data-placeholder="Plan">${escapeHtml(day.note || '')}</div>
+                  <div class="vs-editable vs-calendar-note" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="week" data-index="${index}" data-placeholder="Plan">${escapeHtml(day.note || '')}</div>
                 </div>
               `).join('')}
             </div>
@@ -1385,8 +1829,8 @@
         ${itemToolbar(item, 'Affirmation')}
         <div class="vs-content">
           <div class="vs-affirmation-surface">
-            <div class="vs-editable vs-affirmation-text" contenteditable="true" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="text" data-placeholder="Write an affirmation that feels true when you read it.">${escapeHtml(item.text || '')}</div>
-            <div class="vs-editable vs-affirmation-caption" contenteditable="true" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="caption" data-placeholder="Optional caption">${escapeHtml(item.caption || '')}</div>
+            <div class="vs-editable vs-affirmation-text" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="text" data-placeholder="Write an affirmation that feels true when you read it.">${escapeHtml(item.text || '')}</div>
+            <div class="vs-editable vs-affirmation-caption" contenteditable="${editableFlag(item)}" spellcheck="true" data-edit-item="${escapeHtmlAttr(item.id)}" data-field="caption" data-placeholder="Optional caption">${escapeHtml(item.caption || '')}</div>
           </div>
         </div>
         <div class="vs-resize-handle" data-resize-handle="${escapeHtmlAttr(item.id)}"></div>
@@ -1397,7 +1841,7 @@
   function renderDecor(item) {
     return `
       <div class="vs-item-shell vs-module-decor">
-        ${itemToolbar(item, 'Accent')}
+        ${itemToolbar(item, itemLabel(item))}
         <div class="vs-content">
           <div class="vs-decor-surface">${decorSvg(item.variant)}</div>
         </div>
@@ -1409,7 +1853,8 @@
   function renderItem(item) {
     const classes = ['vs-item'];
     if (state.selectedId === item.id) classes.push('is-selected');
-    const style = `left:${item.x}px;top:${item.y}px;width:${item.w}px;height:${item.h}px;z-index:${item.z};--vs-rotation:${item.rotate}deg;`;
+    if (item.locked) classes.push('is-locked');
+    const style = `left:${item.x}px;top:${item.y}px;width:${item.w}px;height:${item.h}px;z-index:${item.z};--vs-rotation:${item.rotate}deg;opacity:${item.opacity || 1};`;
     let inner = '';
     if (item.module === 'photo') inner = renderPhoto(item);
     else if (item.module === 'frame') inner = renderFrame(item);
@@ -1462,6 +1907,7 @@
     node.style.width = item.w + 'px';
     node.style.height = item.h + 'px';
     node.style.zIndex = String(item.z);
+    node.style.opacity = String(item.opacity || 1);
     node.style.setProperty('--vs-rotation', (item.rotate || 0) + 'deg');
   }
 
@@ -1480,10 +1926,14 @@
     state.root.dataset.libraryCollapsed = state.board.libraryCollapsed ? 'true' : 'false';
     state.root.dataset.inspectorCollapsed = state.board.inspectorCollapsed ? 'true' : 'false';
     state.root.dataset.hasSelection = state.selectedId ? 'true' : 'false';
+    state.root.dataset.boardBackground = state.board.background || 'gallery-ivory';
+    state.root.dataset.focusMode = state.board.focusMode ? 'true' : 'false';
     const libraryToggle = state.root.querySelector('[data-action="toggle-library"]');
     const inspectorToggle = state.root.querySelector('[data-action="toggle-inspector"]');
+    const focusToggle = state.root.querySelector('[data-action="toggle-focus"]');
     if (libraryToggle) libraryToggle.textContent = state.board.libraryCollapsed ? 'Open Library' : 'Hide Library';
     if (inspectorToggle) inspectorToggle.textContent = state.board.inspectorCollapsed ? 'Open Inspector' : 'Hide Inspector';
+    if (focusToggle) focusToggle.textContent = state.board.focusMode ? 'Exit Focus' : 'Focus Preview';
   }
 
   function fitZoomValue() {
@@ -1516,6 +1966,8 @@
       state.refs.paneBadge.textContent = state.items.length + ' module' + (state.items.length === 1 ? '' : 's');
     }
     if (state.refs.footerTitle) state.refs.footerTitle.textContent = state.board.title || DEFAULT_TITLE;
+    if (state.refs.savePill) state.refs.savePill.textContent = saveStatusLabel();
+    if (state.refs.floatingToolbar) state.refs.floatingToolbar.innerHTML = renderSelectionToolbar();
     syncEditorLayoutState();
     renderInspector();
   }
@@ -1570,7 +2022,9 @@
       paneBadge: state.root.querySelector('.vs-pane-badge'),
       footerTitle: state.root.querySelector('.vs-stage-footer-copy strong'),
       inspector: state.root.querySelector('#vs-inspector'),
-      guideLayer: state.root.querySelector('.vs-guides')
+      guideLayer: state.root.querySelector('.vs-guides'),
+      savePill: state.root.querySelector('#vs-save-pill'),
+      floatingToolbar: state.root.querySelector('#vs-floating-toolbar')
     };
   }
 
@@ -1667,7 +2121,7 @@
 
   function toggleHabitDay(itemId, index) {
     const item = state.items.find(entry => entry.id === itemId);
-    if (!item || item.module !== 'habit') return;
+    if (!item || item.locked || item.module !== 'habit') return;
     item.days[index] = !item.days[index];
     renderBoard();
     queueSave();
@@ -1737,7 +2191,7 @@
 
   function startDrag(event, itemId) {
     const item = state.items.find(entry => entry.id === itemId);
-    if (!item || event.button !== 0) return;
+    if (!item || item.locked || event.button !== 0) return;
     bringToFront(item.id);
     state.selectedId = item.id;
     renderBoard();
@@ -1760,7 +2214,7 @@
 
   function startResize(event, itemId) {
     const item = state.items.find(entry => entry.id === itemId);
-    if (!item || event.button !== 0) return;
+    if (!item || item.locked || event.button !== 0) return;
     bringToFront(item.id);
     state.selectedId = item.id;
     renderBoard();
@@ -1859,6 +2313,43 @@
   }
 
   function handleRootClick(event) {
+    const backgroundBtn = event.target.closest('[data-board-background]');
+    if (backgroundBtn) {
+      state.board.background = backgroundBtn.dataset.boardBackground;
+      updateChrome();
+      queueSave();
+      return;
+    }
+
+    const templateBtn = event.target.closest('[data-template-id]');
+    if (templateBtn) {
+      applyStarterLayout(templateBtn.dataset.templateId);
+      return;
+    }
+
+    const uploadReuseBtn = event.target.closest('[data-upload-reuse]');
+    if (uploadReuseBtn) {
+      const source = state.items.find(item => item.id === uploadReuseBtn.dataset.uploadReuse && item.module === 'photo' && item.src);
+      if (source) {
+        addItem(normalizeItem({
+          module: 'photo',
+          variant: 'photo',
+          src: source.src,
+          title: source.title || 'Upload',
+          credit: source.credit || 'Your upload',
+          source: source.source || 'Upload',
+          x: clamp(source.x + 36, BOARD_PADDING, BOARD_WIDTH - source.w - BOARD_PADDING),
+          y: clamp(source.y + 36, BOARD_PADDING, BOARD_HEIGHT - source.h - BOARD_PADDING),
+          w: source.w,
+          h: source.h,
+          lockAspect: true,
+          aspectRatio: source.aspectRatio || (source.w / Math.max(source.h, 1)),
+          opacity: source.opacity || 1
+        }, state.items.length));
+      }
+      return;
+    }
+
     const categoryBtn = event.target.closest('[data-category]');
     if (categoryBtn) {
       state.activeCategory = categoryBtn.dataset.category;
@@ -1885,6 +2376,12 @@
           state.pendingUploadTarget = null;
           openUpload();
           return;
+        case 'undo-history':
+          undoHistory();
+          return;
+        case 'redo-history':
+          redoHistory();
+          return;
         case 'toggle-library':
           state.board.libraryCollapsed = !state.board.libraryCollapsed;
           syncEditorLayoutState();
@@ -1895,20 +2392,22 @@
           syncEditorLayoutState();
           queueSave();
           return;
-        case 'starter-editorial':
-          applyStarterLayout('editorial');
-          return;
-        case 'starter-focus-map':
-          applyStarterLayout('focus-map');
-          return;
-        case 'starter-mood-story':
-          applyStarterLayout('mood-story');
+        case 'toggle-focus':
+          state.board.focusMode = !state.board.focusMode;
+          syncEditorLayoutState();
+          queueSave();
           return;
         case 'quick-headline':
-          addItem(spawnFromLibrary('headline'));
+          addItem(spawnFromLibrary('editorial-headline'));
+          return;
+        case 'quick-note':
+          addItem(spawnFromLibrary('cream-note'));
           return;
         case 'quick-goal':
           addItem(spawnFromLibrary('goal-focus'));
+          return;
+        case 'quick-frame':
+          addItem(spawnFromLibrary('gallery-frame'));
           return;
         case 'quick-affirmation':
           addItem(spawnFromLibrary('affirmation-card'));
@@ -1964,6 +2463,16 @@
             sendBackward(state.selectedId);
             renderBoard();
             queueSave();
+          }
+          return;
+        case 'toggle-lock-selection':
+          if (state.selectedId) {
+            const selected = selectedItem();
+            if (selected) {
+              selected.locked = !selected.locked;
+              renderBoard();
+              queueSave();
+            }
           }
           return;
         case 'delete-selection':
@@ -2055,10 +2564,29 @@
       queueSave();
       return;
     }
+    if (event.target.matches('[data-selected-opacity]')) {
+      const item = selectedItem();
+      if (!item) return;
+      item.opacity = clamp(toNumber(event.target.value, 1), 0.15, 1);
+      const itemNode = state.refs.board ? state.refs.board.querySelector(`[data-item-id="${item.id}"]`) : null;
+      if (itemNode) itemNode.style.opacity = String(item.opacity);
+      const valueNode = event.target.parentElement?.querySelector('.vs-inspector-range-value');
+      if (valueNode) valueNode.textContent = Math.round(item.opacity * 100) + '%';
+      queueSave();
+      return;
+    }
     if (event.target.matches('[data-selected-lock-aspect]')) {
       const item = selectedItem();
       if (!item) return;
       item.lockAspect = !!event.target.checked;
+      queueSave();
+      return;
+    }
+    if (event.target.matches('[data-selected-locked]')) {
+      const item = selectedItem();
+      if (!item) return;
+      item.locked = !!event.target.checked;
+      renderBoard();
       queueSave();
       return;
     }
@@ -2293,9 +2821,11 @@
     state.root = root;
     const incoming = readState();
     state.board = normalizeBoard(incoming.board);
-    state.activeCategory = state.board.activeCategory || 'photos';
+    state.activeCategory = state.board.activeCategory || 'uploads';
     state.items = incoming.items || [];
     rerenderShell();
+    initializeHistory();
+    state.saveState = 'saved';
     state.mounted = true;
     bindRootEvents();
     bindGlobalEvents();
