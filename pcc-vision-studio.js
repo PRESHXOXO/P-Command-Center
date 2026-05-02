@@ -2851,6 +2851,12 @@
   window.initVisionBoard = mount;
 
   document.addEventListener('DOMContentLoaded', mount);
+  document.addEventListener('pcc:pagecontentloaded', function (event) {
+    if (event?.detail?.pageId === 'vision') mount();
+  });
+  document.addEventListener('pcc:pagechange', function (event) {
+    if (event?.detail?.targetId === 'vision') mount();
+  });
   if (document.readyState !== 'loading') {
     setTimeout(mount, 180);
   }

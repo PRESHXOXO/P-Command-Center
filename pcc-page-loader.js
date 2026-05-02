@@ -195,6 +195,9 @@
     try {
       const page = await ensurePageMarkup(pageId);
       await ensurePageAssets(pageId);
+      if (pageId === 'vision' && window.VisionStudio && typeof window.VisionStudio.mount === 'function') {
+        window.VisionStudio.mount();
+      }
       return page;
     } catch (error) {
       renderPageError(pageId, error);
