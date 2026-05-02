@@ -179,10 +179,35 @@ body[data-vision-standalone="true"] .vision-studio-root .vs-board-title-sub{
 
 body[data-vision-standalone="true"] .vision-studio-root .vs-editor-body{
   min-height:calc(100vh - 108px);
+  grid-template-columns:420px minmax(0,1fr) 320px;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root .vs-rail{
+  display:none;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root[data-library-collapsed="true"] .vs-editor-body{
+  grid-template-columns:0 minmax(0,1fr) 320px;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root[data-inspector-collapsed="true"] .vs-editor-body{
+  grid-template-columns:420px minmax(0,1fr) 0;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root[data-library-collapsed="true"][data-inspector-collapsed="true"] .vs-editor-body{
+  grid-template-columns:minmax(0,1fr);
 }
 
 body[data-vision-standalone="true"] .vision-studio-root .vs-stage-shell{
   border-right:none;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root .vs-stage-topbar{
+  display:none;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root .vs-library-categories{
+  grid-template-columns:1fr 1fr;
 }
 
 body[data-vision-standalone="true"] .vision-studio-root .vs-viewport-shell{
@@ -220,5 +245,28 @@ body[data-vision-standalone="true"] .vision-studio-root .vs-viewport-shell{
 
   body[data-vision-standalone="true"] .vision-studio-root .vs-editor-body{
     min-height:calc(100vh - 220px);
+    grid-template-columns:360px minmax(0,1fr);
+  }
+
+  body[data-vision-standalone="true"] .vision-studio-root .vs-inspector-pane{
+    grid-column:1 / -1;
+    border-top:1px solid rgba(255,255,255,0.08);
+  }
+
+  body[data-vision-standalone="true"] .vision-studio-root[data-inspector-collapsed="true"] .vs-editor-body{
+    grid-template-columns:360px minmax(0,1fr);
+  }
+}
+
+@media (max-width:980px){
+  body[data-vision-standalone="true"] .vision-studio-root .vs-editor-body,
+  body[data-vision-standalone="true"] .vision-studio-root[data-library-collapsed="true"] .vs-editor-body,
+  body[data-vision-standalone="true"] .vision-studio-root[data-inspector-collapsed="true"] .vs-editor-body,
+  body[data-vision-standalone="true"] .vision-studio-root[data-library-collapsed="true"][data-inspector-collapsed="true"] .vs-editor-body{
+    grid-template-columns:minmax(0,1fr);
+  }
+
+  body[data-vision-standalone="true"] .vision-studio-root .vs-library-categories{
+    grid-template-columns:1fr;
   }
 }

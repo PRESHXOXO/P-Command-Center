@@ -2039,6 +2039,12 @@
   max-width:none;
 }
 
+.vision-studio-root .vs-library-categories{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:.45rem;
+}
+
 .vision-studio-root .vs-pane-badge{
   flex:none;
   display:inline-flex;

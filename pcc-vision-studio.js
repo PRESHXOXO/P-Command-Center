@@ -385,6 +385,9 @@
         </div>
         <div class="vs-pane-badge">${state.items.length} module${state.items.length === 1 ? '' : 's'}</div>
       </div>
+      <div class="vs-library-categories" aria-label="Studio categories">
+        ${renderCategoryButtons()}
+      </div>
       <label class="vs-search">
         <span class="vs-search-icon" aria-hidden="true"></span>
         <input id="vs-search" type="text" placeholder="Search textures, frames, notes..." value="${escapeHtmlAttr(state.search)}" />
