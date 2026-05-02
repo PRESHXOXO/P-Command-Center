@@ -1,0 +1,200 @@
+:root{
+  --vision-shell-bg:#07101f;
+  --vision-shell-bg-soft:#0d1730;
+  --vision-shell-surface:rgba(255,255,255,0.1);
+  --vision-shell-border:rgba(255,255,255,0.14);
+  --vision-shell-text:#eef4ff;
+  --vision-shell-muted:rgba(230,238,255,0.72);
+  --vision-shell-accent:#7aa1ff;
+  --vision-shell-accent-soft:rgba(122,161,255,0.18);
+  --vision-shell-shadow:0 24px 60px rgba(3,8,24,0.34);
+}
+
+html,
+body{
+  min-height:100%;
+}
+
+html[data-theme="light"]{
+  --vision-shell-bg:#edf3ff;
+  --vision-shell-bg-soft:#dbe5ff;
+  --vision-shell-surface:rgba(255,255,255,0.72);
+  --vision-shell-border:rgba(46,82,177,0.1);
+  --vision-shell-text:#13214b;
+  --vision-shell-muted:rgba(32,49,95,0.68);
+  --vision-shell-accent:#315ccf;
+  --vision-shell-accent-soft:rgba(49,92,207,0.12);
+  --vision-shell-shadow:0 28px 70px rgba(42,64,130,0.16);
+}
+
+body[data-vision-standalone="true"]{
+  margin:0;
+  color:var(--vision-shell-text);
+  font-family:var(--font-ui, 'DM Sans', sans-serif);
+  background:
+    radial-gradient(circle at top left, rgba(133,165,255,0.16), transparent 24%),
+    radial-gradient(circle at 86% 10%, rgba(212,184,255,0.16), transparent 18%),
+    linear-gradient(180deg, var(--vision-shell-bg-soft), var(--vision-shell-bg));
+}
+
+.vision-standalone-shell{
+  min-height:100vh;
+  padding:1rem;
+  box-sizing:border-box;
+}
+
+.vision-standalone-utility-bar{
+  position:fixed;
+  top:1rem;
+  left:1rem;
+  right:1rem;
+  z-index:20;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  pointer-events:none;
+}
+
+.vision-standalone-link,
+.vision-standalone-btn,
+.vision-standalone-user{
+  pointer-events:auto;
+}
+
+.vision-standalone-link,
+.vision-standalone-btn{
+  appearance:none;
+  border:none;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  padding:.72rem .92rem;
+  border-radius:999px;
+  background:var(--vision-shell-surface);
+  border:1px solid var(--vision-shell-border);
+  box-shadow:var(--vision-shell-shadow);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  color:var(--vision-shell-text);
+  font:inherit;
+  font-size:.76rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  transition:transform .18s ease, background .18s ease, border-color .18s ease;
+}
+
+.vision-standalone-link:hover,
+.vision-standalone-btn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,0.14);
+}
+
+html[data-theme="light"] .vision-standalone-link:hover,
+html[data-theme="light"] .vision-standalone-btn:hover{
+  background:rgba(255,255,255,0.88);
+}
+
+.vision-standalone-link::before{
+  content:"<-";
+  margin-right:.5rem;
+  font-size:.78rem;
+}
+
+.vision-standalone-meta{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:.7rem;
+  flex-wrap:wrap;
+}
+
+.vision-standalone-user{
+  display:inline-flex;
+  align-items:center;
+  min-height:42px;
+  padding:.72rem .92rem;
+  border-radius:999px;
+  background:var(--vision-shell-surface);
+  border:1px solid var(--vision-shell-border);
+  box-shadow:var(--vision-shell-shadow);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  color:var(--vision-shell-muted);
+  font-size:.74rem;
+  font-weight:600;
+}
+
+.vision-standalone-btn.danger{
+  color:#ffdbe5;
+}
+
+html[data-theme="light"] .vision-standalone-btn.danger{
+  color:#8d2949;
+}
+
+.vision-standalone-stage{
+  min-height:100vh;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root{
+  margin:0;
+  min-height:100vh;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root .vs-editor{
+  min-height:100vh;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root .vs-appbar{
+  padding-top:5.2rem;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root .vs-editor-body{
+  min-height:calc(100vh - 132px);
+}
+
+body[data-vision-standalone="true"] .vision-studio-root .vs-stage-shell{
+  border-right:none;
+}
+
+body[data-vision-standalone="true"] .vision-studio-root .vs-viewport-shell{
+  min-height:calc(100vh - 236px);
+}
+
+@media (max-width:1080px){
+  .vision-standalone-shell{
+    padding:.82rem;
+  }
+
+  .vision-standalone-utility-bar{
+    position:sticky;
+    top:.82rem;
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .vision-standalone-link{
+    justify-content:flex-start;
+  }
+
+  .vision-standalone-meta{
+    justify-content:stretch;
+  }
+
+  .vision-standalone-user,
+  .vision-standalone-btn{
+    flex:1 1 auto;
+  }
+
+  body[data-vision-standalone="true"] .vision-studio-root .vs-appbar{
+    padding-top:1rem;
+  }
+
+  body[data-vision-standalone="true"] .vision-studio-root .vs-editor-body{
+    min-height:calc(100vh - 220px);
+  }
+}

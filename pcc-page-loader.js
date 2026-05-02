@@ -209,6 +209,7 @@
   }
 
   function prefetchPageMarkup(pageId) {
+    if (pageId === 'vision' && typeof window.openVisionStudioPage === 'function') return;
     if (!canLazyLoad(pageId)) return;
     const page = getPageNode(pageId);
     if (!page || page.dataset.pageLoaded === 'true' || fragmentPromises[pageId]) return;
@@ -227,7 +228,7 @@
   }
 
   function warmKnownPages() {
-    const warm = () => ['calendar', 'vision', 'community'].forEach(prefetchPageMarkup);
+    const warm = () => ['calendar', 'community'].forEach(prefetchPageMarkup);
     if (typeof window.requestIdleCallback === 'function') {
       window.requestIdleCallback(warm, { timeout: 1800 });
     } else {

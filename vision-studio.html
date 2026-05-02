@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" data-vision-standalone="true">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>P's Vision Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./pcc-vision-studio.css" />
+  <link rel="stylesheet" href="./pcc-vision-standalone.css" />
+</head>
+<body data-vision-standalone="true">
+  <div class="vision-standalone-shell">
+    <div class="vision-standalone-utility-bar">
+      <a class="vision-standalone-link" href="./index.html" id="vision-return-link">Command Center</a>
+      <div class="vision-standalone-meta">
+        <div class="vision-standalone-user" id="vision-standalone-user">Vision Studio</div>
+        <button class="vision-standalone-btn" type="button" id="vision-theme-toggle" onclick="toggleVisionStandaloneTheme()">Theme</button>
+        <button class="vision-standalone-btn" type="button" onclick="returnToCommandCenter()">Dashboard</button>
+        <button class="vision-standalone-btn danger" type="button" onclick="logoutVisionStudio()">Log Out</button>
+      </div>
+    </div>
+
+    <main class="vision-standalone-stage">
+      <div id="vision-studio-root" class="vision-studio-root" aria-live="polite">
+        <div class="vs-fragment-fallback" role="status" aria-live="polite">
+          <div class="vs-fragment-kicker">Vision Studio</div>
+          <h1 class="vs-fragment-title">Loading your creative workspace...</h1>
+          <p class="vs-fragment-copy">Preparing your standalone studio, session, and saved board.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="./pcc-vision-standalone.js"></script>
+  <script src="./pcc-vision-studio.js"></script>
+</body>
+</html>

@@ -199,7 +199,7 @@
     root: null,
     mounted: false,
     initialized: false,
-    activeCategory: 'uploads',
+    activeCategory: 'photos',
     search: '',
     snapEnabled: true,
     selectedId: null,
@@ -1114,7 +1114,7 @@
       const parsed = JSON.parse(raw);
       state.history.restoring = true;
       state.board = normalizeBoard(parsed.board);
-      state.activeCategory = state.board.activeCategory || 'uploads';
+      state.activeCategory = state.board.activeCategory || 'photos';
       state.items = Array.isArray(parsed.items) ? parsed.items.map(normalizeItem).filter(Boolean) : [];
       state.selectedId = null;
       rerenderShell();
@@ -2794,8 +2794,11 @@
   }
 
   async function handlePaste(event) {
-    const page = document.getElementById('page-vision');
-    if (!page || !page.classList.contains('active')) return;
+    const isStandalone = window.__PCC_VISION_STANDALONE_PAGE__ === true;
+    if (!isStandalone) {
+      const page = document.getElementById('page-vision');
+      if (!page || !page.classList.contains('active')) return;
+    }
     const target = event.target;
     if (target && target.closest('[contenteditable="true"],input,textarea') && !target.closest('.vs-editable')) return;
     const files = Array.from(event.clipboardData?.items || [])
@@ -2842,12 +2845,22 @@
   }
 
   function mount() {
+    if (window.__PCC_VISION_PREFLIGHT__ && window.__PCC_VISION_PREFLIGHT_DONE__ !== true) {
+      if (!state.waitingForPreflight) {
+        state.waitingForPreflight = true;
+        Promise.resolve(window.__PCC_VISION_PREFLIGHT__).finally(() => {
+          state.waitingForPreflight = false;
+          mount();
+        });
+      }
+      return;
+    }
     const root = document.getElementById('vision-studio-root');
     if (!root) return;
     state.root = root;
     const incoming = readState();
     state.board = normalizeBoard(incoming.board);
-    state.activeCategory = state.board.activeCategory || 'uploads';
+    state.activeCategory = state.board.activeCategory || 'photos';
     state.items = incoming.items || [];
     rerenderShell();
     initializeHistory();

@@ -7163,6 +7163,15 @@ function emitPageChange(pageId, page, trigger) {
   } catch (e) {}
 }
 
+const STANDALONE_VISION_PATH = './vision-studio.html';
+
+function openVisionStudioPage(sourcePageId) {
+  try {
+    if (sourcePageId) sessionStorage.setItem('pcc-last-page', String(sourcePageId));
+  } catch (e) {}
+  window.location.href = STANDALONE_VISION_PATH;
+}
+
 function isPageMarkupReady(pageId) {
   const page = document.getElementById('page-' + pageId);
   return !page || page.dataset.pageLazy !== 'true' || page.dataset.pageLoaded === 'true';
@@ -7197,6 +7206,10 @@ function showPage(id, btn) {
   const targetBtn = canAccessPage(id)
     ? btn
     : (document.querySelector('.nav-tab[data-page="dashboard"]') || btn);
+  if (targetId === 'vision') {
+    openVisionStudioPage('vision');
+    return targetId;
+  }
   ensureLateHubPagesTopLevel();
   const page = document.getElementById('page-' + targetId);
 
@@ -9117,6 +9130,11 @@ function closeMobileNav() {
 }
 
 function mobileNavGo(pageId, btn) {
+  if (pageId === 'vision' && typeof openVisionStudioPage === 'function') {
+    closeMobileNav();
+    openVisionStudioPage('vision');
+    return;
+  }
   // Navigate
   const resolvedPageId = showPage(pageId, btn);
   // Update active state in drawer

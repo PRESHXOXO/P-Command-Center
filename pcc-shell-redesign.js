@@ -20,6 +20,10 @@
   }
 
   async function goToPage(pageId) {
+    if (pageId === 'vision' && typeof window.openVisionStudioPage === 'function') {
+      window.openVisionStudioPage('dashboard');
+      return;
+    }
     const tab = document.querySelector('.nav-tab[data-page="' + pageId + '"]');
     const page = document.getElementById('page-' + pageId);
     if (
